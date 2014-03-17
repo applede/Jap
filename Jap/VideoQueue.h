@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <libavformat/avformat.h>
 
 #define FRAME_COUNT		5
 
@@ -28,9 +29,11 @@
 @property int height;
 
 - (BOOL)isFull;
+- (void)add:(double)t;
 - (void)remove;
 - (double)time;
 - (GLubyte*)frontData;
+- (GLubyte*)backData;
 - (void)generateDebugData;
 
 @end

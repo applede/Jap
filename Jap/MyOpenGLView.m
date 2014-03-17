@@ -313,10 +313,10 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
   GLfloat h = _decoder.videoQ.height;
 	// Rectangle textures require non-normalized texture coordinates
 	const GLfloat texcoords[] = {
-		0, 0,
 		0, h,
-		w, h,
+		0, 0,
 		w, 0,
+		w, h,
 	};
 	
 	// We draw on a secondary thread through the display link
