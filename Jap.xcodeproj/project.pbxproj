@@ -18,6 +18,8 @@
 		1816DF9218D5D84200FCE287 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1816DF7118D5D84200FCE287 /* Cocoa.framework */; };
 		1816DF9A18D5D84200FCE287 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1816DF9818D5D84200FCE287 /* InfoPlist.strings */; };
 		1816DF9C18D5D84200FCE287 /* JapTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 1816DF9B18D5D84200FCE287 /* JapTests.m */; };
+		1816DFA718D5D91100FCE287 /* MyOpenGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1816DFA618D5D91100FCE287 /* MyOpenGLView.m */; };
+		1816DFAA18D5EA0500FCE287 /* FrameBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1816DFA918D5EA0500FCE287 /* FrameBuffer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +52,10 @@
 		1816DF9718D5D84200FCE287 /* JapTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "JapTests-Info.plist"; sourceTree = "<group>"; };
 		1816DF9918D5D84200FCE287 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1816DF9B18D5D84200FCE287 /* JapTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JapTests.m; sourceTree = "<group>"; };
+		1816DFA518D5D91100FCE287 /* MyOpenGLView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyOpenGLView.h; sourceTree = "<group>"; };
+		1816DFA618D5D91100FCE287 /* MyOpenGLView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyOpenGLView.m; sourceTree = "<group>"; };
+		1816DFA818D5EA0500FCE287 /* FrameBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FrameBuffer.h; sourceTree = "<group>"; };
+		1816DFA918D5EA0500FCE287 /* FrameBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FrameBuffer.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,11 +121,15 @@
 		1816DF7718D5D84200FCE287 /* Jap */ = {
 			isa = PBXGroup;
 			children = (
+				1816DFA518D5D91100FCE287 /* MyOpenGLView.h */,
+				1816DFA618D5D91100FCE287 /* MyOpenGLView.m */,
 				1816DF8318D5D84200FCE287 /* AppDelegate.h */,
 				1816DF8418D5D84200FCE287 /* AppDelegate.m */,
 				1816DF8618D5D84200FCE287 /* MainMenu.xib */,
 				1816DF8918D5D84200FCE287 /* Images.xcassets */,
 				1816DF7818D5D84200FCE287 /* Supporting Files */,
+				1816DFA818D5EA0500FCE287 /* FrameBuffer.h */,
+				1816DFA918D5EA0500FCE287 /* FrameBuffer.m */,
 			);
 			path = Jap;
 			sourceTree = "<group>";
@@ -254,6 +264,8 @@
 			files = (
 				1816DF8518D5D84200FCE287 /* AppDelegate.m in Sources */,
 				1816DF7E18D5D84200FCE287 /* main.m in Sources */,
+				1816DFA718D5D91100FCE287 /* MyOpenGLView.m in Sources */,
+				1816DFAA18D5EA0500FCE287 /* FrameBuffer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
