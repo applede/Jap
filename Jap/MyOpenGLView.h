@@ -51,7 +51,9 @@
 
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/CVDisplayLink.h>
-#import "FrameBuffer.h"
+#import "Decoder.h"
+
+#define TEXTURE_COUNT 5
 
 @interface MyOpenGLView : NSOpenGLView {
 
@@ -61,7 +63,7 @@
   double _freq;
   double _lastTime;
   int _currentTexture;
-  FrameBuffer* _buffer;
+  Decoder* _decoder;
 }
 
 @end

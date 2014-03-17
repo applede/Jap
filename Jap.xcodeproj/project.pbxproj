@@ -19,7 +19,11 @@
 		1816DF9A18D5D84200FCE287 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1816DF9818D5D84200FCE287 /* InfoPlist.strings */; };
 		1816DF9C18D5D84200FCE287 /* JapTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 1816DF9B18D5D84200FCE287 /* JapTests.m */; };
 		1816DFA718D5D91100FCE287 /* MyOpenGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1816DFA618D5D91100FCE287 /* MyOpenGLView.m */; };
-		1816DFAA18D5EA0500FCE287 /* FrameBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1816DFA918D5EA0500FCE287 /* FrameBuffer.m */; };
+		1816DFAA18D5EA0500FCE287 /* Decoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 1816DFA918D5EA0500FCE287 /* Decoder.m */; };
+		1816DFAC18D6E6B500FCE287 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1816DFAB18D6E6B500FCE287 /* libavcodec.a */; };
+		1816DFAE18D6E73F00FCE287 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1816DFAD18D6E73F00FCE287 /* libavutil.a */; };
+		1816DFB018D6E76900FCE287 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1816DFAF18D6E76900FCE287 /* libiconv.dylib */; };
+		1816DFB318D6E7CA00FCE287 /* VideoQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 1816DFB218D6E7CA00FCE287 /* VideoQueue.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,8 +58,13 @@
 		1816DF9B18D5D84200FCE287 /* JapTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JapTests.m; sourceTree = "<group>"; };
 		1816DFA518D5D91100FCE287 /* MyOpenGLView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyOpenGLView.h; sourceTree = "<group>"; };
 		1816DFA618D5D91100FCE287 /* MyOpenGLView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyOpenGLView.m; sourceTree = "<group>"; };
-		1816DFA818D5EA0500FCE287 /* FrameBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FrameBuffer.h; sourceTree = "<group>"; };
-		1816DFA918D5EA0500FCE287 /* FrameBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FrameBuffer.m; sourceTree = "<group>"; };
+		1816DFA818D5EA0500FCE287 /* Decoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Decoder.h; sourceTree = "<group>"; };
+		1816DFA918D5EA0500FCE287 /* Decoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Decoder.m; sourceTree = "<group>"; };
+		1816DFAB18D6E6B500FCE287 /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = ../../../../usr/local/lib/libavcodec.a; sourceTree = "<group>"; };
+		1816DFAD18D6E73F00FCE287 /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = ../../../../usr/local/lib/libavutil.a; sourceTree = "<group>"; };
+		1816DFAF18D6E76900FCE287 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
+		1816DFB118D6E7CA00FCE287 /* VideoQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoQueue.h; sourceTree = "<group>"; };
+		1816DFB218D6E7CA00FCE287 /* VideoQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoQueue.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +72,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1816DFB018D6E76900FCE287 /* libiconv.dylib in Frameworks */,
+				1816DFAE18D6E73F00FCE287 /* libavutil.a in Frameworks */,
+				1816DFAC18D6E6B500FCE287 /* libavcodec.a in Frameworks */,
 				1816DF7218D5D84200FCE287 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -101,6 +113,9 @@
 		1816DF7018D5D84200FCE287 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1816DFAF18D6E76900FCE287 /* libiconv.dylib */,
+				1816DFAD18D6E73F00FCE287 /* libavutil.a */,
+				1816DFAB18D6E6B500FCE287 /* libavcodec.a */,
 				1816DF7118D5D84200FCE287 /* Cocoa.framework */,
 				1816DF9018D5D84200FCE287 /* XCTest.framework */,
 				1816DF7318D5D84200FCE287 /* Other Frameworks */,
@@ -128,8 +143,10 @@
 				1816DF8618D5D84200FCE287 /* MainMenu.xib */,
 				1816DF8918D5D84200FCE287 /* Images.xcassets */,
 				1816DF7818D5D84200FCE287 /* Supporting Files */,
-				1816DFA818D5EA0500FCE287 /* FrameBuffer.h */,
-				1816DFA918D5EA0500FCE287 /* FrameBuffer.m */,
+				1816DFA818D5EA0500FCE287 /* Decoder.h */,
+				1816DFA918D5EA0500FCE287 /* Decoder.m */,
+				1816DFB118D6E7CA00FCE287 /* VideoQueue.h */,
+				1816DFB218D6E7CA00FCE287 /* VideoQueue.m */,
 			);
 			path = Jap;
 			sourceTree = "<group>";
@@ -263,9 +280,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				1816DF8518D5D84200FCE287 /* AppDelegate.m in Sources */,
+				1816DFB318D6E7CA00FCE287 /* VideoQueue.m in Sources */,
 				1816DF7E18D5D84200FCE287 /* main.m in Sources */,
 				1816DFA718D5D91100FCE287 /* MyOpenGLView.m in Sources */,
-				1816DFAA18D5EA0500FCE287 /* FrameBuffer.m in Sources */,
+				1816DFAA18D5EA0500FCE287 /* Decoder.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -400,7 +418,13 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Jap/Jap-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/usr/local/include,
+				);
 				INFOPLIST_FILE = "Jap/Jap-Info.plist";
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -413,7 +437,13 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Jap/Jap-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/usr/local/include,
+				);
 				INFOPLIST_FILE = "Jap/Jap-Info.plist";
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
