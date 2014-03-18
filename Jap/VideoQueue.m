@@ -18,7 +18,7 @@
 {
   self = [super init];
   if (self) {
-    _size = FRAME_SIZE * FRAME_COUNT;
+    _size = FRAME_SIZE * TEXTURE_COUNT;
     _data = (GLubyte*)calloc(_size, sizeof(GLubyte));
     _width = TEXTURE_WIDTH;
     _height = TEXTURE_HEIGHT;

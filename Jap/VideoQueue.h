@@ -9,11 +9,11 @@
 #import <Foundation/Foundation.h>
 #import <libavformat/avformat.h>
 
-#define FRAME_COUNT		5
+#define TEXTURE_COUNT		5
 
 @interface VideoQueue : NSObject
 {
-  double _time[FRAME_COUNT];
+  double _time[TEXTURE_COUNT];
   GLubyte* _data;
 }
 

@@ -53,8 +53,6 @@
 #import <QuartzCore/CVDisplayLink.h>
 #import "Decoder.h"
 
-#define TEXTURE_COUNT 5
-
 @interface MyOpenGLView : NSOpenGLView {
 
 	GLuint texIds[TEXTURE_COUNT];

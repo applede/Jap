@@ -81,22 +81,20 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 
 - (id) initWithFrame:(NSRect)frameRect
 {
-    NSOpenGLPixelFormatAttribute attrs[] =
-    {
+  NSOpenGLPixelFormatAttribute attrs[] = {
 		NSOpenGLPFAAccelerated,
 		NSOpenGLPFANoRecovery,
 		NSOpenGLPFADoubleBuffer,
 		NSOpenGLPFADepthSize, 0,
 		0
-    };
+  };
 	
-    NSOpenGLPixelFormat *pf = [[NSOpenGLPixelFormat alloc] initWithAttributes:attrs];
+  NSOpenGLPixelFormat *pf = [[NSOpenGLPixelFormat alloc] initWithAttributes:attrs];
 	
-    if (!pf)
+  if (!pf)
 		NSLog(@"No OpenGL pixel format");
 	
-    if (self = [super initWithFrame:frameRect pixelFormat:pf])
-	{
+  if (self = [super initWithFrame:frameRect pixelFormat:pf]) {
     _decoder = [[Decoder alloc] init];
 		[self initGL];
 		
@@ -133,8 +131,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	[[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval]; 
 	
 	// Create OpenGL textures
-	if ([self initImageData])
-		[self loadTexturesWithClientStorage];
+  [self initTextures];
 	
 	glDisable(GL_DEPTH_TEST);
 	glEnableClientState(GL_VERTEX_ARRAY);
@@ -179,10 +176,8 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
 
-- (void) loadTexturesWithClientStorage
+- (void) initTextures
 {
-//	int	i;
-	
 	glGenTextures(TEXTURE_COUNT, texIds);
 	
 	// Enable the rectangle texture extenstion
@@ -191,86 +186,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	// Eliminate a data copy by the OpenGL driver using the Apple texture range extension along with the rectangle texture extension
 	// This specifies an area of memory to be mapped for all the textures. It is useful for tiled or multiple textures in contiguous memory.
 	glTextureRangeAPPLE(GL_TEXTURE_RECTANGLE_EXT, _decoder.videoQ.size, [_decoder.videoQ data:0]);
-
-//	for (i = 0; i < TEXTURE_COUNT; i++)
-//	{
-//		// Bind the rectange texture
-//		glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texIds[i]);
-//		
-//		// Set a CACHED or SHARED storage hint for requesting VRAM or AGP texturing respectively
-//		// GL_STORAGE_PRIVATE_APPLE is the default and specifies normal texturing path
-//		glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_STORAGE_HINT_APPLE , GL_STORAGE_CACHED_APPLE);
-//		
-//		// Eliminate a data copy by the OpenGL framework using the Apple client storage extension
-//		glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_TRUE);
-//		
-//		// Rectangle textures has its limitations compared to using POT textures, for example,
-//		// Rectangle textures can't use mipmap filtering
-//		glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//		glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//		
-//		// Rectangle textures can't use the GL_REPEAT warp mode
-//		glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-//		glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//			
-//		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-//			
-//		// OpenGL likes the GL_BGRA + GL_UNSIGNED_INT_8_8_8_8_REV combination
-//		glTexImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, _buffer.width, _buffer.height, 0,
-//					 GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, [_buffer data:i]);
-//	}
-//	
-//	glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
-}
-
-//- (BOOL) getImageData:(GLubyte*)imageData fromPath:(NSString*)path
-//{
-//	NSUInteger				width, height;
-//	NSURL					*url = nil;
-//	CGImageSourceRef		src;
-//	CGImageRef				image;
-//	CGContextRef			context = nil;
-//	CGColorSpaceRef			colorSpace;
-//	
-//	url = [NSURL fileURLWithPath:path];
-//	src = CGImageSourceCreateWithURL((__bridge CFURLRef)url, NULL);
-//	
-//	if (!src) {
-//		NSLog(@"No image");
-//		return NO;
-//	}
-//	
-//	image = CGImageSourceCreateImageAtIndex(src, 0, NULL);
-//	CFRelease(src);
-//	
-//	width = CGImageGetWidth(image);
-//	height = CGImageGetHeight(image);
-//	
-//	colorSpace = CGColorSpaceCreateDeviceRGB();
-//	context = CGBitmapContextCreate(imageData, width, height, 8, 4 * width, colorSpace, kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Host);
-//	CGColorSpaceRelease(colorSpace);
-//	
-//	// Core Graphics referential is upside-down compared to OpenGL referential
-//	// Flip the Core Graphics context here
-//	// An alternative is to use flipped OpenGL texture coordinates when drawing textures
-//	CGContextTranslateCTM(context, 0.0, height);
-//	CGContextScaleCTM(context, 1.0, -1.0);
-//	
-//	// Set the blend mode to copy before drawing since the previous contents of memory aren't used. This avoids unnecessary blending.
-//	CGContextSetBlendMode(context, kCGBlendModeCopy);
-//	
-//	CGContextDrawImage(context, CGRectMake(0, 0, width, height), image);
-//	
-//	CGContextRelease(context);
-//	CGImageRelease(image);
-//	
-//	return YES;
-//}
-
-- (BOOL) initImageData
-{
-//  [_buffer generate];
-	return YES;
 }
 
 - (void) reshape
@@ -294,7 +209,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 - (void) draw:(int)i
 {
   NSRect rect = [self bounds];
-	// Cube data
 	const GLfloat vertices[12] = {
     0,0,0,
     0,rect.size.height,0,
@@ -342,10 +256,8 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 {
 	glDeleteTextures(TEXTURE_COUNT, texIds);
 	
-	
 	// Release the display link
-    CVDisplayLinkRelease(displayLink);
-
+  CVDisplayLinkRelease(displayLink);
 }
 
 @end
