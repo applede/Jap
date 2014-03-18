@@ -62,7 +62,7 @@
   int64_t _startTime;
   double _freq;
   double _lastTime;
-  int _currentTexture;
+  int _current;
   Decoder* _decoder;
 }
 

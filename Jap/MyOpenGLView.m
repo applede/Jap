@@ -52,15 +52,6 @@
 #import "MyOpenGLView.h"
 #import <OpenGL/glu.h>
 
-@interface MyOpenGLView (PrivateMethods)
-
-- (void) initGL;
-- (BOOL) initImageData;
-- (void) loadTexturesWithClientStorage;
-- (void) drawView;
-
-@end
-
 @implementation MyOpenGLView
 
 - (CVReturn) getFrameForTime:(const CVTimeStamp*)outputTime
@@ -70,12 +61,11 @@
   @autoreleasepool {
     double t = (outputTime->hostTime - _startTime) / _freq;
 //    NSLog(@"t %.3f", t);
-    if (t >= [_decoder.videoQ time]) {
-//      _currentTexture = (_currentTexture + 1) % TEXTURE_COUNT;
-      [self loadTexture:0];
-      _lastTime = t;
-      [self drawView:0];
-      [_decoder remove];
+    if ([_decoder.videoQ time:_current] <= t) {
+      [self load:_current];
+      [self draw:_current];
+      [_decoder decodeTask:(_current - 1 + TEXTURE_COUNT) % TEXTURE_COUNT];
+      _current = (_current + 1) % TEXTURE_COUNT;
     }
   }
 	
@@ -122,11 +112,13 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 		CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink, cglContext, cglPixelFormat);
 		
     [_decoder start];
+    for (int i = 0; i < TEXTURE_COUNT - 1; ++i) {
+      [_decoder decodeTask:i];
+    }
 		// Activate the display link
 		CVDisplayLinkStart(displayLink);
     _startTime = CVGetCurrentHostTime();
     _freq = CVGetHostClockFrequency();
-		
 	}
 	
 	return self;
@@ -149,7 +141,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-- (void) loadTexture:(int)i
+- (void) load:(int)i
 {
 	CGLLockContext([[self openGLContext] CGLContextObj]);
 	[[self openGLContext] makeCurrentContext];
@@ -157,30 +149,31 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	glEnable(GL_TEXTURE_RECTANGLE_EXT);
 //	glTextureRangeAPPLE(GL_TEXTURE_RECTANGLE_EXT, _buffer.size, [_buffer frontData]);
 	
-		// Bind the rectange texture
-		glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texIds[i]);
+  // Bind the rectange texture
+  glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texIds[i]);
+  
+  // Set a CACHED or SHARED storage hint for requesting VRAM or AGP texturing respectively
+  // GL_STORAGE_PRIVATE_APPLE is the default and specifies normal texturing path
+  glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_STORAGE_HINT_APPLE , GL_STORAGE_CACHED_APPLE);
+  
+  // Eliminate a data copy by the OpenGL framework using the Apple client storage extension
+  glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_TRUE);
 		
-		// Set a CACHED or SHARED storage hint for requesting VRAM or AGP texturing respectively
-		// GL_STORAGE_PRIVATE_APPLE is the default and specifies normal texturing path
-		glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_STORAGE_HINT_APPLE , GL_STORAGE_CACHED_APPLE);
+  // Rectangle textures has its limitations compared to using POT textures, for example,
+  // Rectangle textures can't use mipmap filtering
+  glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		
-		// Eliminate a data copy by the OpenGL framework using the Apple client storage extension
-		glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_TRUE);
-		
-		// Rectangle textures has its limitations compared to using POT textures, for example,
-		// Rectangle textures can't use mipmap filtering
-		glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		
-		// Rectangle textures can't use the GL_REPEAT warp mode
-		glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  // Rectangle textures can't use the GL_REPEAT warp mode
+  glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 			
-		// OpenGL likes the GL_BGRA + GL_UNSIGNED_INT_8_8_8_8_REV combination
-		glTexImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, _decoder.videoQ.width, _decoder.videoQ.height, 0,
-					 GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, [_decoder.videoQ frontData]);
+  // OpenGL likes the GL_BGRA + GL_UNSIGNED_INT_8_8_8_8_REV combination
+  glTexImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA,
+               _decoder.videoQ.width, _decoder.videoQ.height, 0,
+               GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, [_decoder.videoQ data:i]);
 	
 	glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
 	CGLUnlockContext([[self openGLContext] CGLContextObj]);
@@ -197,7 +190,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	
 	// Eliminate a data copy by the OpenGL driver using the Apple texture range extension along with the rectangle texture extension
 	// This specifies an area of memory to be mapped for all the textures. It is useful for tiled or multiple textures in contiguous memory.
-	glTextureRangeAPPLE(GL_TEXTURE_RECTANGLE_EXT, _decoder.videoQ.size, [_decoder.videoQ frontData]);
+	glTextureRangeAPPLE(GL_TEXTURE_RECTANGLE_EXT, _decoder.videoQ.size, [_decoder.videoQ data:0]);
 
 //	for (i = 0; i < TEXTURE_COUNT; i++)
 //	{
@@ -298,7 +291,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
 
-- (void) drawView:(int)i
+- (void) draw:(int)i
 {
   NSRect rect = [self bounds];
 	// Cube data

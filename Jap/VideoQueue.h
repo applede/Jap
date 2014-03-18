@@ -13,27 +13,16 @@
 
 @interface VideoQueue : NSObject
 {
-  NSLock* _lock;
-  int _front;
-  int _back;
-  int _count;
-  
   double _time[FRAME_COUNT];
   GLubyte* _data;
-  
-  int _frameCount;  // for debugging
 }
 
 @property int size;
 @property int width;
 @property int height;
 
-- (BOOL)isFull;
-- (void)add:(double)t;
-- (void)remove;
-- (double)time;
-- (GLubyte*)frontData;
-- (GLubyte*)backData;
-- (void)generateDebugData;
+- (double)time:(int)i;
+- (void)setTime:(double)t of:(int)i;
+- (GLubyte*)data:(int)i;
 
 @end

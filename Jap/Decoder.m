@@ -11,6 +11,8 @@
 #import <libavutil/opt.h>
 #import "Decoder.h"
 
+#define VIDEO_PACKET_Q_SIZE 300
+
 @implementation Decoder
 
 - (id)init
@@ -18,10 +20,11 @@
   self = [super init];
   if (self) {
     _quit = NO;
-    _videoPacketQ = [[PacketQueue alloc] initWithSize:300];
+    _videoPacketQ = [[PacketQueue alloc] initWithSize:VIDEO_PACKET_Q_SIZE];
     _videoQ = [[VideoQueue alloc] init];
+    _decodeQ = dispatch_queue_create("jap.decode", DISPATCH_QUEUE_SERIAL);
+    _readQ = dispatch_queue_create("jap.read", DISPATCH_QUEUE_SERIAL);
     _readSema = dispatch_semaphore_create(0);
-    _decodeSema = dispatch_semaphore_create(0);
   }
   return self;
 }
@@ -31,12 +34,14 @@
   av_register_all();
   _sws_opts = sws_getContext(16, 16, 0, 16, 16, 0, SWS_BICUBIC, NULL, NULL, NULL);
   [self readThread];
+  while ([_videoPacketQ count] < VIDEO_PACKET_Q_SIZE / 2) {
+    usleep(100000);
+  }
 }
 
 - (void)readThread
 {
-  dispatch_queue_t readQ = dispatch_queue_create("jap.read", DISPATCH_QUEUE_SERIAL);
-  dispatch_async(readQ, ^{
+  dispatch_async(_readQ, ^{
     if (![self open:@"/Users/apple/hobby/test_jamp/movie/5 Centimeters Per Second (2007)/5 Centimeters Per Second.mkv"]) {
       [self close];
     }
@@ -71,7 +76,6 @@
   }
   _ic->streams[_video_stream]->discard = AVDISCARD_DEFAULT;
   _video_st = _ic->streams[_video_stream];
-  [self decodeThread];
   AVPacket pkt1, *pkt = &pkt1;
   while (!_quit) {
     while (![_videoPacketQ isFull]) {
@@ -84,7 +88,6 @@
       else
         av_free_packet(pkt);
     }
-    dispatch_semaphore_signal(_decodeSema);
     dispatch_semaphore_wait(_readSema, DISPATCH_TIME_FOREVER);
   }
   return YES;
@@ -97,19 +100,18 @@
   }
 }
 
-- (void)decodeThread
+- (void)decodeTask:(int)i
 {
-  dispatch_queue_t decodeQ = dispatch_queue_create("jap.decode", DISPATCH_QUEUE_SERIAL);
-  dispatch_async(decodeQ, ^{
-    [self decode];
+  [_videoQ setTime:DBL_MAX of:i];
+  dispatch_async(_decodeQ, ^{
+    @autoreleasepool {
+      [self decode:i];
+    }
   });
 }
 
-- (void)decode
+- (void)decode:(int)i
 {
-#if 0
-  [_videoQ generateDebugData];
-#else
   AVPacket pkt = { 0 };
   AVFrame *frame = av_frame_alloc();
   double pts;
@@ -117,23 +119,23 @@
   AVRational tb = _video_st->time_base;
   AVRational frame_rate = av_guess_frame_rate(_ic, _video_st, NULL);
   
-  while (!_quit) {
-    while (!_quit && ![_videoPacketQ isEmpty] && ![_videoQ isFull]) {
-      av_free_packet(&pkt);
-      if ([self getVideoFrame:frame packet:&pkt]) {
-        duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
-        pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
-        //    queue_picture(is, frame, pts, duration, av_frame_get_pkt_pos(frame), serial);
-        [self put:frame time:pts duration:duration pos:av_frame_get_pkt_pos(frame)];
-        av_frame_unref(frame);
-      }
+  while (!_quit && ![_videoPacketQ isEmpty]) {
+    if ([self getVideoFrame:frame packet:&pkt]) {
+      duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
+      pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
+      //    queue_picture(is, frame, pts, duration, av_frame_get_pkt_pos(frame), serial);
+      [self put:frame time:pts duration:duration pos:av_frame_get_pkt_pos(frame) into:i];
+      av_frame_unref(frame);
+      break;
     }
-    dispatch_semaphore_signal(_readSema);
-    dispatch_semaphore_wait(_decodeSema, DISPATCH_TIME_FOREVER);
+    av_free_packet(&pkt);
   }
+  if ([_videoPacketQ count] < VIDEO_PACKET_Q_SIZE / 3) {
+    dispatch_semaphore_signal(_readSema);
+  }
+
   av_free_packet(&pkt);
   av_frame_free(&frame);
-#endif
 }
 
 - (BOOL)getVideoFrame:(AVFrame*)frame packet:(AVPacket*)pkt
@@ -158,7 +160,7 @@
   return NO;
 }
 
-- (void)put:(AVFrame *)frame time:(double)t duration:(double)d pos:(int64_t)p
+- (void)put:(AVFrame *)frame time:(double)t duration:(double)d pos:(int64_t)p into:(int)i
 {
   static int64_t sws_flags = SWS_BICUBIC;
   
@@ -172,16 +174,10 @@
   if (_img_convert_ctx == NULL) {
     NSLog(@"Cannot initialize the conversion context");
   }
-  GLubyte* data[] = { [_videoQ backData] };
+  GLubyte* data[] = { [_videoQ data:i] };
   int linesize[] = { _videoQ.width * 4 };
   sws_scale(_img_convert_ctx, (const uint8_t* const*)frame->data, frame->linesize, 0, h, data, linesize);
-  [_videoQ add:t];
-}
-
-- (void)remove
-{
-  [_videoQ remove];
-  dispatch_semaphore_signal(_decodeSema);
+  [_videoQ setTime:t of:i];
 }
 
 @end

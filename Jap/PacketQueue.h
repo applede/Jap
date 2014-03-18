@@ -12,12 +12,13 @@
 @interface PacketQueue : NSObject
 {
   int _size;
-  int _count;
   int _front;
   int _back;
   NSLock* _lock;
   AVPacket* _packets;
 }
+
+@property (readonly) int count;
 
 - initWithSize:(int)size;
 - (BOOL)isFull;

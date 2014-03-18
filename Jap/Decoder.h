@@ -14,14 +14,14 @@
 @interface Decoder : NSObject
 {
   BOOL _quit;
-  dispatch_semaphore_t _decodeSema;
+  dispatch_queue_t _decodeQ;
+  dispatch_queue_t _readQ;
   dispatch_semaphore_t _readSema;
 
   struct SwsContext *_sws_opts;
   struct SwsContext *_img_convert_ctx;
   AVStream *_video_st;
   int _video_stream;
-  AVFrame *_frame;
   AVFormatContext *_ic;
   PacketQueue* _videoPacketQ;
 }
@@ -29,6 +29,6 @@
 @property (readonly) VideoQueue* videoQ;
 
 - (void)start;
-- (void)remove;
+- (void)decodeTask:(int)i;
 
 @end

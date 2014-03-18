@@ -22,11 +22,6 @@
     _data = (GLubyte*)calloc(_size, sizeof(GLubyte));
     _width = TEXTURE_WIDTH;
     _height = TEXTURE_HEIGHT;
-    _front = 0;
-    _back = 0;
-    _count = 0;
-    _lock = [[NSLock alloc] init];
-    _frameCount = 0;
   }
   return self;
 }
@@ -40,85 +35,19 @@
 	}
 }
 
-- (BOOL)isFull
+- (GLubyte*)data:(int)i
 {
-  return _count == FRAME_COUNT;
+  return &_data[FRAME_SIZE * i];
 }
 
-- (BOOL)isEmpty
+- (double)time:(int)i
 {
-  return _count == 0;
+  return _time[i];
 }
 
-- (GLubyte*)frontData
+- (void)setTime:(double)t of:(int)i
 {
-  return &_data[FRAME_SIZE * _front];
-}
-
-- (GLubyte*)backData
-{
-  return &_data[FRAME_SIZE * _back];
-}
-
-- (double)time
-{
-  if ([self isEmpty]) {
-    return DBL_MAX;
-  }
-  return _time[_front];
-}
-
-- (void)remove
-{
-  [_lock lock];
-  _front = (_front + 1) % FRAME_COUNT;
-  _count--;
-  [_lock unlock];
-}
-
-- (void)add:(double)t
-{
-  [_lock lock];
-  _time[_back] = t;
-  _back = (_back + 1) % FRAME_COUNT;
-  _count++;
-  [_lock unlock];
-}
-
-- (void)generateImageData:(GLubyte*)imageData color:(int*)color
-{
-  for (int y = 0; y < TEXTURE_HEIGHT; ++y) {
-    for (int x = 0; x < TEXTURE_WIDTH * 4; x += 4) {
-      imageData[y * TEXTURE_WIDTH * 4 + x] = color[0];
-      imageData[y * TEXTURE_WIDTH * 4 + x + 1] = color[1];
-      imageData[y * TEXTURE_WIDTH * 4 + x + 2] = color[2];
-      imageData[y * TEXTURE_WIDTH * 4 + x + 3] = 0xff;
-    }
-  }
-  int h = 32;
-  int y0 = _frameCount % (TEXTURE_HEIGHT - h);
-  for (int y = y0; y < y0 + h; ++y) {
-    for (int x = 0; x < TEXTURE_WIDTH * 4; x += 4) {
-      imageData[y * TEXTURE_WIDTH * 4 + x] = 0;
-      imageData[y * TEXTURE_WIDTH * 4 + x + 1] = 0;
-      imageData[y * TEXTURE_WIDTH * 4 + x + 2] = 0;
-      imageData[y * TEXTURE_WIDTH * 4 + x + 3] = 0xff;
-    }
-  }
-}
-
-- (void)generateDebugData
-{
-  int color[FRAME_COUNT][3] = {
-    { 0xff, 0x00, 0x00 },
-    { 0x00, 0xff, 0x00 },
-    { 0x00, 0x00, 0xff },
-    { 0xff, 0xff, 0x00 },
-    { 0x00, 0xff, 0xff }
-  };
-  [self generateImageData:[self backData] color:color[0]];
-  [self add:_frameCount * 1.0/10.0];
-  _frameCount++;
+  _time[i] = t;
 }
 
 @end
