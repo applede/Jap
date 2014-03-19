@@ -95,6 +95,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 		NSLog(@"No OpenGL pixel format");
 	
   if (self = [super initWithFrame:frameRect pixelFormat:pf]) {
+    [self  setWantsBestResolutionOpenGLSurface:YES];
     _decoder = [[Decoder alloc] init];
 		[self initGL];
 		
@@ -196,7 +197,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	// Add a mutex around to avoid the threads accessing the context simultaneously when resizing
 	CGLLockContext([[self openGLContext] CGLContextObj]);
 	
-	NSRect rect = [self bounds];
+  NSRect rect = [self convertRectToBacking:[self bounds]];
 	glViewport(0, 0, rect.size.width, rect.size.height);
 	
 	glMatrixMode(GL_PROJECTION);
@@ -210,7 +211,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 
 - (void)calcRect
 {
-  NSRect bounds = [self bounds];
+  NSRect bounds = [self convertRectToBacking:[self bounds]];
   
   int srcW = _decoder.videoQ.width;
   int srcH = _decoder.videoQ.height;
