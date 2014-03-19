@@ -32,7 +32,6 @@
 - (void)start
 {
   av_register_all();
-  _sws_opts = sws_getContext(16, 16, 0, 16, 16, 0, SWS_BICUBIC, NULL, NULL, NULL);
   [self readThread];
   while ([_videoPacketQ count] < VIDEO_PACKET_Q_SIZE / 2) {
     usleep(100000);
@@ -162,15 +161,11 @@
 
 - (void)put:(AVFrame *)frame time:(double)t duration:(double)d pos:(int64_t)p into:(int)i
 {
-  static int64_t sws_flags = SWS_BICUBIC;
-  
-  av_opt_get_int(_sws_opts, "sws_flags", 0, &sws_flags);
-  
   int w = _videoQ.width;
   int h = _videoQ.height;
   _img_convert_ctx = sws_getCachedContext(_img_convert_ctx,
                                           frame->width, frame->height, frame->format, w, h,
-                                          AV_PIX_FMT_BGRA, (int)sws_flags, NULL, NULL, NULL);
+                                          AV_PIX_FMT_BGRA, SWS_FAST_BILINEAR, NULL, NULL, NULL);
   if (_img_convert_ctx == NULL) {
     NSLog(@"Cannot initialize the conversion context");
   }

@@ -18,7 +18,6 @@
   dispatch_queue_t _readQ;
   dispatch_semaphore_t _readSema;
 
-  struct SwsContext *_sws_opts;
   struct SwsContext *_img_convert_ctx;
   AVStream *_video_st;
   int _video_stream;
