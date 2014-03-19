@@ -113,6 +113,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     for (int i = 0; i < TEXTURE_COUNT - 1; ++i) {
       [_decoder decodeTask:i];
     }
+    [self calcRect];
 		// Activate the display link
 		CVDisplayLinkStart(displayLink);
     _startTime = CVGetCurrentHostTime();
@@ -199,32 +200,47 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	glViewport(0, 0, rect.size.width, rect.size.height);
 	
 	glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, rect.size.width, 0, rect.size.height, -10.0f, 10.0f);
+  glLoadIdentity();
+  glOrtho(0, rect.size.width, 0, rect.size.height, -10.0f, 10.0f);
 	glMatrixMode(GL_MODELVIEW);
 	
+  [self calcRect];
 	CGLUnlockContext([[self openGLContext] CGLContextObj]);
+}
+
+- (void)calcRect
+{
+  NSRect bounds = [self bounds];
+  
+  int srcW = _decoder.videoQ.width;
+  int srcH = _decoder.videoQ.height;
+  GLfloat viewW = bounds.size.width;
+  GLfloat viewH = bounds.size.height;
+
+  GLfloat dstW = viewH * srcW / srcH;
+  GLfloat dstH;
+
+  if (dstW <= viewW) {
+    dstH = viewH;
+  } else {
+    dstH = viewW * srcH / srcW;
+    dstW = viewW;
+  }
+  
+  _x1 = (viewW - dstW) / 2;
+  _y1 = (viewH - dstH) / 2;
+  _x2 = _x1 + dstW;
+  _y2 = _y1 + dstH;
 }
 
 - (void) draw:(int)i
 {
-  NSRect rect = [self bounds];
-	const GLfloat vertices[12] = {
-    0,0,0,
-    0,rect.size.height,0,
-    rect.size.width,rect.size.height,0,
-    rect.size.width,0,0
-	};
+	const GLfloat vertices[] = { _x1, _y1, _x1, _y2, _x2, _y2, _x2, _y1 };
 	
   GLfloat w = _decoder.videoQ.width;
   GLfloat h = _decoder.videoQ.height;
 	// Rectangle textures require non-normalized texture coordinates
-	const GLfloat texcoords[] = {
-		0, h,
-		0, 0,
-		w, 0,
-		w, h,
-	};
+	const GLfloat texcoords[] = { 0, h, 0, 0, w, 0, w, h };
 	
 	// We draw on a secondary thread through the display link
 	// When resizing the view, -reshape is called automatically on the main thread
@@ -236,14 +252,11 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 //	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 //	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	glPushMatrix();
-	
 	glTexCoordPointer(2, GL_FLOAT, 0, texcoords);
-		glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texIds[i]);
+  glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texIds[i]);
 		
-		glVertexPointer(3, GL_FLOAT, 0, vertices);
-		glDrawArrays(GL_QUADS, 0, 4);
-	glPopMatrix();
+  glVertexPointer(2, GL_FLOAT, 0, vertices);
+  glDrawArrays(GL_QUADS, 0, 4);
 	
 	glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
 	

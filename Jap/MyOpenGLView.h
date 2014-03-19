@@ -62,6 +62,7 @@
   double _lastTime;
   int _current;
   Decoder* _decoder;
+  GLfloat _x1, _y1, _x2, _y2;
 }
 
 @end
