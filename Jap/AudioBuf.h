@@ -10,7 +10,8 @@
 #import <AudioUnit/AudioUnit.h>
 #import <libavcodec/avcodec.h>
 #import <libavformat/avformat.h>
-#import "PacketQueue.h"
+
+@class Decoder;
 
 typedef struct {
   int freq;
@@ -21,10 +22,13 @@ typedef struct {
   int bytes_per_sec;
 } AudioParams;
 
-@interface AudioQueue : NSObject
+@interface AudioBuf : NSObject
 {
+  Decoder* _decoder;
+  
   AudioComponentInstance _audioC;
   
+  AVStream* _stream;
   AVPacket _audio_pkt_temp;
   AVPacket _audio_pkt;
   int _audio_buf_frames_pending;
@@ -45,8 +49,7 @@ typedef struct {
   int _audio_buf_size;
 }
 
-@property AVStream* stream;
-@property PacketQueue* packetQ;
+- (void)setDecoder:(Decoder*)decoder stream:(AVStream *)stream;
 
 - (void)start;
 - (void)stop;

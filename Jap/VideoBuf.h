@@ -9,10 +9,17 @@
 #import <Foundation/Foundation.h>
 #import <libavformat/avformat.h>
 
+@class Decoder;
+
 #define TEXTURE_COUNT		5
 
-@interface VideoQueue : NSObject
+@interface VideoBuf : NSObject
 {
+  BOOL _quit;
+  Decoder* _decoder;
+  AVStream* _stream;
+  
+  struct SwsContext *_img_convert_ctx;
   double _time[TEXTURE_COUNT];
   GLubyte* _data;
 }
@@ -21,8 +28,12 @@
 @property int width;
 @property int height;
 
+- (void)setDecoder:(Decoder*)decoder stream:(AVStream*)stream;
+
 - (double)time:(int)i;
 - (void)setTime:(double)t of:(int)i;
 - (GLubyte*)data:(int)i;
+
+- (void)decode:(int)i;
 
 @end

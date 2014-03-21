@@ -61,10 +61,10 @@
   @autoreleasepool {
     double t = (outputTime->hostTime - _startTime) / _freq;
 //    NSLog(@"t %.3f", t);
-    if ([_decoder.videoQ time:_current] <= t) {
+    if ([_decoder timeOfVideoBuffer:_current] <= t) {
       [self load:_current];
       [self draw:_current];
-      [_decoder decodeTask:(_current - 1 + TEXTURE_COUNT) % TEXTURE_COUNT];
+      [_decoder decodeVideoBuffer:(_current - 1 + TEXTURE_COUNT) % TEXTURE_COUNT];
       _current = (_current + 1) % TEXTURE_COUNT;
     }
   }
@@ -112,7 +112,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 		
     [_decoder start];
     for (int i = 0; i < TEXTURE_COUNT - 1; ++i) {
-      [_decoder decodeTask:i];
+      [_decoder decodeVideoBuffer:i];
     }
     [self calcRect];
 		// Activate the display link
@@ -171,8 +171,8 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 			
   // OpenGL likes the GL_BGRA + GL_UNSIGNED_INT_8_8_8_8_REV combination
   glTexImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA,
-               _decoder.videoQ.width, _decoder.videoQ.height, 0,
-               GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, [_decoder.videoQ data:i]);
+               [_decoder width], [_decoder height], 0,
+               GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, [_decoder dataOfVideoBuffer:i]);
 	
 	glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
 	CGLUnlockContext([[self openGLContext] CGLContextObj]);
@@ -187,7 +187,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	
 	// Eliminate a data copy by the OpenGL driver using the Apple texture range extension along with the rectangle texture extension
 	// This specifies an area of memory to be mapped for all the textures. It is useful for tiled or multiple textures in contiguous memory.
-	glTextureRangeAPPLE(GL_TEXTURE_RECTANGLE_EXT, _decoder.videoQ.size, [_decoder.videoQ data:0]);
+	glTextureRangeAPPLE(GL_TEXTURE_RECTANGLE_EXT, [_decoder videoBufferSize], [_decoder dataOfVideoBuffer:0]);
 }
 
 - (void) reshape
@@ -213,8 +213,8 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 {
   NSRect bounds = [self convertRectToBacking:[self bounds]];
   
-  int srcW = _decoder.videoQ.width;
-  int srcH = _decoder.videoQ.height;
+  int srcW = [_decoder width];
+  int srcH = [_decoder height];
   GLfloat viewW = bounds.size.width;
   GLfloat viewH = bounds.size.height;
 
@@ -238,8 +238,8 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 {
 	const GLfloat vertices[] = { _x1, _y1, _x1, _y2, _x2, _y2, _x2, _y1 };
 	
-  GLfloat w = _decoder.videoQ.width;
-  GLfloat h = _decoder.videoQ.height;
+  GLfloat w = [_decoder width];
+  GLfloat h = [_decoder height];
 	// Rectangle textures require non-normalized texture coordinates
 	const GLfloat texcoords[] = { 0, h, 0, 0, w, 0, w, h };
 	

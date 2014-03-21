@@ -7,7 +7,6 @@
 //
 
 #import <libavcodec/avcodec.h>
-#import <libswscale/swscale.h>
 #import <libavutil/opt.h>
 #import "Decoder.h"
 
@@ -20,10 +19,10 @@
   self = [super init];
   if (self) {
     _quit = NO;
-    _videoPacketQ = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
-    _audioPacketQ = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
-    _videoQ = [[VideoQueue alloc] init];
-    _audioQ = [[AudioQueue alloc] init];
+    _videoQ = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
+    _audioQ = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
+    _videoBuf = [[VideoBuf alloc] init];
+    _audioBuf = [[AudioBuf alloc] init];
     _decodeQ = dispatch_queue_create("jap.decode", DISPATCH_QUEUE_SERIAL);
     _readQ = dispatch_queue_create("jap.read", DISPATCH_QUEUE_SERIAL);
     _readSema = dispatch_semaphore_create(0);
@@ -36,19 +35,19 @@
 {
   _quit = NO;
   [self readThread];
-  while ([_videoPacketQ count] < 16) {  // 16 packets are enough?
+  while ([_videoQ count] < 16) {  // 16 packets are enough?
     usleep(100000);
   }
-  while ([_audioPacketQ count] < 16) {
+  while ([_audioQ count] < 16) {
     usleep(100000);
   }
-  [_audioQ start];
+  [_audioBuf start];
 }
 
 - (void)stop
 {
   _quit = YES;
-  [_audioQ stop];
+  [_audioBuf stop];
 }
 
 - (void)readThread
@@ -93,24 +92,23 @@
     return NO;
   }
   _video_stream = av_find_best_stream(_ic, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
-  _video_st = [self openStream:_video_stream];
+  [_videoBuf setDecoder:self stream:[self openStream:_video_stream]];
   
   _audio_stream = av_find_best_stream(_ic, AVMEDIA_TYPE_AUDIO, -1, _video_stream, NULL, 0);
-  _audioQ.stream = [self openStream:_audio_stream];
-  _audioQ.packetQ = _audioPacketQ;
-  [_audioQ prepare];
+  [_audioBuf setDecoder:self stream:[self openStream:_audio_stream]];
+  [_audioBuf prepare];
   
   AVPacket pkt1, *pkt = &pkt1;
   while (!_quit) {
-    while (![_videoPacketQ isFull] && ![_audioPacketQ isFull]) {
+    while (![_videoQ isFull] && ![_audioQ isFull]) {
       int ret = av_read_frame(_ic, pkt);
       if (ret < 0) {
         NSLog(@"av_read_frame %d", ret);
       }
       if (pkt->stream_index == _video_stream)
-        [_videoPacketQ put:pkt];
+        [_videoQ put:pkt];
       else if (pkt->stream_index == _audio_stream)
-        [_audioPacketQ put:pkt];
+        [_audioQ put:pkt];
       else
         av_free_packet(pkt);
     }
@@ -124,82 +122,49 @@
   if (_ic) {
     avformat_close_input(&_ic);
   }
-  [_audioQ close];
+  [_audioBuf close];
 }
 
-- (void)decodeTask:(int)i
+- (void)decodeVideoBuffer:(int)i
 {
-  [_videoQ setTime:DBL_MAX of:i];
+  [_videoBuf setTime:DBL_MAX of:i];
   dispatch_async(_decodeQ, ^{
     @autoreleasepool {
-      [self decode:i];
+      [_videoBuf decode:i];
     }
   });
 }
 
-- (void)decode:(int)i
+- (double)timeOfVideoBuffer:(int)i
 {
-  AVPacket pkt = { 0 };
-  AVFrame *frame = av_frame_alloc();
-  double pts;
-  double duration;
-  AVRational tb = _video_st->time_base;
-  AVRational frame_rate = av_guess_frame_rate(_ic, _video_st, NULL);
-  
-  while (!_quit && ![_videoPacketQ isEmpty]) {
-    if ([self getVideoFrame:frame packet:&pkt]) {
-      duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
-      pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
-      [self put:frame time:pts duration:duration pos:av_frame_get_pkt_pos(frame) into:i];
-      av_frame_unref(frame);
-      break;
-    }
-    av_free_packet(&pkt);
-  }
-  if ([_videoPacketQ count] < PACKET_Q_SIZE / 3 || [_audioPacketQ count] < PACKET_Q_SIZE / 3) {
+  return [_videoBuf time:i];
+}
+
+- (void)checkQueue
+{
+  if ([_videoQ count] < PACKET_Q_SIZE / 3 || [_audioQ count] < PACKET_Q_SIZE / 3) {
     dispatch_semaphore_signal(_readSema);
   }
-
-  av_free_packet(&pkt);
-  av_frame_free(&frame);
 }
 
-- (BOOL)getVideoFrame:(AVFrame*)frame packet:(AVPacket*)pkt
+- (int)width
 {
-  [_videoPacketQ get:pkt];
-  int got_picture = NO;
-  if (avcodec_decode_video2(_video_st->codec, frame, &got_picture, pkt) < 0) {
-    NSLog(@"avcodec_decode_video2");
-    return NO;
-  }
-  if (got_picture) {
-    double dpts = NAN;
-    
-    frame->pts = av_frame_get_best_effort_timestamp(frame);
-    
-    if (frame->pts != AV_NOPTS_VALUE)
-      dpts = av_q2d(_video_st->time_base) * frame->pts;
-    
-    frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(_ic, _video_st, frame);
-    return YES;
-  }
-  return NO;
+  return _videoBuf.width;
 }
 
-- (void)put:(AVFrame *)frame time:(double)t duration:(double)d pos:(int64_t)p into:(int)i
+- (int)height
 {
-  int w = _videoQ.width;
-  int h = _videoQ.height;
-  _img_convert_ctx = sws_getCachedContext(_img_convert_ctx,
-                                          frame->width, frame->height, frame->format, w, h,
-                                          AV_PIX_FMT_BGRA, SWS_FAST_BILINEAR, NULL, NULL, NULL);
-  if (_img_convert_ctx == NULL) {
-    NSLog(@"Cannot initialize the conversion context");
-  }
-  GLubyte* data[] = { [_videoQ data:i] };
-  int linesize[] = { _videoQ.width * 4 };
-  sws_scale(_img_convert_ctx, (const uint8_t* const*)frame->data, frame->linesize, 0, h, data, linesize);
-  [_videoQ setTime:t of:i];
+  return _videoBuf.height;
+}
+
+- (int)videoBufferSize
+{
+  return [_videoBuf size];
+}
+
+- (GLubyte*)dataOfVideoBuffer:(int)i
+{
+  return [_videoBuf data:i];
 }
 
 @end

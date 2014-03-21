@@ -7,11 +7,18 @@
 //
 
 #import <libswresample/swresample.h>
-#import "AudioQueue.h"
+#import "AudioBuf.h"
+#import "Decoder.h"
 
 #define SAMPLE_SIZE sizeof(float)
 
-@implementation AudioQueue
+@implementation AudioBuf
+
+- (void)setDecoder:(Decoder *)decoder stream:(AVStream *)stream
+{
+  _decoder = decoder;
+  _stream = stream;
+}
 
 - (void)start
 {
@@ -30,7 +37,7 @@ static OSStatus audioCallback(void *inRefCon,
                               UInt32 inNumberFrames,
                               AudioBufferList *ioData)
 {
-  [(__bridge AudioQueue*)inRefCon nextAudio:inTimeStamp busNumber:inBusNumber
+  [(__bridge AudioBuf*)inRefCon nextAudio:inTimeStamp busNumber:inBusNumber
                       frameNumber:inNumberFrames audioData:ioData];
   return noErr;
 }
@@ -322,10 +329,10 @@ static OSStatus audioCallback(void *inRefCon,
     /* read next packet */
 //    if ((packet_queue_get(&_audioq, pkt, 1, &_audio_pkt_temp_serial)) < 0)
 //      return -1;
-    if ([_packetQ isEmpty]) {
+    if ([_decoder.audioQ isEmpty]) {
       return -1;
     }
-    [_packetQ get:pkt];
+    [_decoder.audioQ get:pkt];
     
 //    if (pkt->data == flush_pkt.data) {
 //      avcodec_flush_buffers(dec);

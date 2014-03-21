@@ -8,31 +8,38 @@
 
 #import <Foundation/Foundation.h>
 #import <libavformat/avformat.h>
-#import "VideoQueue.h"
-#import "AudioQueue.h"
+#import "VideoBuf.h"
+#import "AudioBuf.h"
 #import "PacketQueue.h"
 
 @interface Decoder : NSObject
 {
   BOOL _quit;
   dispatch_queue_t _decodeQ;
+  
   dispatch_queue_t _readQ;
   dispatch_semaphore_t _readSema;
 
-  struct SwsContext *_img_convert_ctx;
-  AVStream *_video_st;
+  AVFormatContext *_ic;
   int _video_stream;
   int _audio_stream;
-  AVFormatContext *_ic;
-  PacketQueue* _videoPacketQ;
-  PacketQueue* _audioPacketQ;
   
-  AudioQueue* _audioQ;
+  VideoBuf* _videoBuf;
+  AudioBuf* _audioBuf;
 }
 
-@property (readonly) VideoQueue* videoQ;
+@property PacketQueue* videoQ;
+@property PacketQueue* audioQ;
 
 - (void)start;
-- (void)decodeTask:(int)i;
+- (void)checkQueue;
+
+// video
+- (int)width;
+- (int)height;
+- (int)videoBufferSize;
+- (void)decodeVideoBuffer:(int)i;
+- (GLubyte*)dataOfVideoBuffer:(int)i;
+- (double)timeOfVideoBuffer:(int)i;
 
 @end
