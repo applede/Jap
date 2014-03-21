@@ -24,6 +24,8 @@
 		1816DFAE18D6E73F00FCE287 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1816DFAD18D6E73F00FCE287 /* libavutil.a */; };
 		1816DFB018D6E76900FCE287 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1816DFAF18D6E76900FCE287 /* libiconv.dylib */; };
 		1816DFB318D6E7CA00FCE287 /* VideoQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 1816DFB218D6E7CA00FCE287 /* VideoQueue.m */; };
+		181DF7EE18DB164000FF7739 /* AudioQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 181DF7ED18DB164000FF7739 /* AudioQueue.m */; };
+		181DF7F018DB431700FF7739 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 181DF7EF18DB431700FF7739 /* libswresample.a */; };
 		18E183DF18D7142300A35231 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E183DE18D7142300A35231 /* libavformat.a */; };
 		18E183E118D7144A00A35231 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E183E018D7144A00A35231 /* libz.dylib */; };
 		18E183E318D714C700A35231 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E183E218D714C700A35231 /* libbz2.dylib */; };
@@ -70,6 +72,9 @@
 		1816DFAF18D6E76900FCE287 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
 		1816DFB118D6E7CA00FCE287 /* VideoQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoQueue.h; sourceTree = "<group>"; };
 		1816DFB218D6E7CA00FCE287 /* VideoQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoQueue.m; sourceTree = "<group>"; };
+		181DF7EC18DB164000FF7739 /* AudioQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioQueue.h; sourceTree = "<group>"; };
+		181DF7ED18DB164000FF7739 /* AudioQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioQueue.m; sourceTree = "<group>"; };
+		181DF7EF18DB431700FF7739 /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswresample.a; path = ../../../../usr/local/lib/libswresample.a; sourceTree = "<group>"; };
 		18E183DE18D7142300A35231 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = ../../../../usr/local/lib/libavformat.a; sourceTree = "<group>"; };
 		18E183E018D7144A00A35231 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		18E183E218D714C700A35231 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
@@ -86,6 +91,7 @@
 				18E183E318D714C700A35231 /* libbz2.dylib in Frameworks */,
 				18E183E118D7144A00A35231 /* libz.dylib in Frameworks */,
 				1816DFB018D6E76900FCE287 /* libiconv.dylib in Frameworks */,
+				181DF7F018DB431700FF7739 /* libswresample.a in Frameworks */,
 				18E183E818D743FE00A35231 /* libswscale.a in Frameworks */,
 				1816DFAE18D6E73F00FCE287 /* libavutil.a in Frameworks */,
 				1816DFAC18D6E6B500FCE287 /* libavcodec.a in Frameworks */,
@@ -131,6 +137,7 @@
 				18E183E218D714C700A35231 /* libbz2.dylib */,
 				18E183E018D7144A00A35231 /* libz.dylib */,
 				1816DFAF18D6E76900FCE287 /* libiconv.dylib */,
+				181DF7EF18DB431700FF7739 /* libswresample.a */,
 				18E183E718D743FE00A35231 /* libswscale.a */,
 				1816DFAD18D6E73F00FCE287 /* libavutil.a */,
 				1816DFAB18D6E6B500FCE287 /* libavcodec.a */,
@@ -164,6 +171,8 @@
 				1816DF7818D5D84200FCE287 /* Supporting Files */,
 				1816DFA818D5EA0500FCE287 /* Decoder.h */,
 				1816DFA918D5EA0500FCE287 /* Decoder.m */,
+				181DF7EC18DB164000FF7739 /* AudioQueue.h */,
+				181DF7ED18DB164000FF7739 /* AudioQueue.m */,
 				1816DFB118D6E7CA00FCE287 /* VideoQueue.h */,
 				1816DFB218D6E7CA00FCE287 /* VideoQueue.m */,
 				18E183E418D7238B00A35231 /* PacketQueue.h */,
@@ -304,6 +313,7 @@
 				1816DFB318D6E7CA00FCE287 /* VideoQueue.m in Sources */,
 				1816DF7E18D5D84200FCE287 /* main.m in Sources */,
 				1816DFA718D5D91100FCE287 /* MyOpenGLView.m in Sources */,
+				181DF7EE18DB164000FF7739 /* AudioQueue.m in Sources */,
 				1816DFAA18D5EA0500FCE287 /* Decoder.m in Sources */,
 				18E183E618D7238B00A35231 /* PacketQueue.m in Sources */,
 			);

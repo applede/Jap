@@ -47,6 +47,7 @@
   _packets[_back] = *pkt;
   _back = (_back + 1) % _size;
   _count++;
+  assert(_count <= _size);
   [_lock unlock];
 }
 
@@ -56,6 +57,7 @@
   *pkt = _packets[_front];
   _front = (_front + 1) % _size;
   _count--;
+  assert(_count >= 0);
   [_lock unlock];
 }
 
