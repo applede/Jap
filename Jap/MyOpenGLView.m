@@ -69,8 +69,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
     [self calcRect];
 		// Activate the display link
 		CVDisplayLinkStart(displayLink);
-    _startTime = CVGetCurrentHostTime();
-    _freq = CVGetHostClockFrequency();
 	}
 	
 	return self;
