@@ -183,7 +183,6 @@ static OSStatus audioCallback(void *inRefCon,
   int len1, data_size, resampled_data_size;
   int64_t dec_channel_layout;
   int got_frame;
-  av_unused double audio_clock0;
   int wanted_nb_samples;
   AVRational tb;
 //  int ret;
@@ -304,7 +303,6 @@ static OSStatus audioCallback(void *inRefCon,
         resampled_data_size = data_size;
       }
       
-      audio_clock0 = _audio_clock;
       /* update the audio clock with the pts */
       if (_frame->pts != AV_NOPTS_VALUE)
         _audio_clock = _frame->pts * av_q2d(tb) + (double) _frame->nb_samples / _frame->sample_rate;
