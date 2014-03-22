@@ -19,8 +19,8 @@
   self = [super init];
   if (self) {
     _quit = NO;
-    _videoQ = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
-    _audioQ = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
+    _videoQue = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
+    _audioQue = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
     _videoBuf = [[VideoBuf alloc] init];
     _audioBuf = [[AudioBuf alloc] init];
     _decodeQ = dispatch_queue_create("jap.decode", DISPATCH_QUEUE_SERIAL);
@@ -35,10 +35,10 @@
 {
   _quit = NO;
   [self readThread];
-  while ([_videoQ count] < 16) {  // 16 packets are enough?
+  while ([_videoQue count] < 16) {  // 16 packets are enough?
     usleep(100000);
   }
-  while ([_audioQ count] < 16) {
+  while ([_audioQue count] < 16) {
     usleep(100000);
   }
   [_audioBuf start];
@@ -48,6 +48,11 @@
 {
   _quit = YES;
   [_audioBuf stop];
+}
+
+- (double)masterClock
+{
+  return [_audioBuf clock];
 }
 
 - (void)readThread
@@ -100,15 +105,15 @@
   
   AVPacket pkt1, *pkt = &pkt1;
   while (!_quit) {
-    while (![_videoQ isFull] && ![_audioQ isFull]) {
+    while (![_videoQue isFull] && ![_audioQue isFull]) {
       int ret = av_read_frame(_ic, pkt);
       if (ret < 0) {
         NSLog(@"av_read_frame %d", ret);
       }
       if (pkt->stream_index == _video_stream)
-        [_videoQ put:pkt];
+        [_videoQue put:pkt];
       else if (pkt->stream_index == _audio_stream)
-        [_audioQ put:pkt];
+        [_audioQue put:pkt];
       else
         av_free_packet(pkt);
     }
@@ -135,36 +140,11 @@
   });
 }
 
-- (double)timeOfVideoBuffer:(int)i
-{
-  return [_videoBuf time:i];
-}
-
 - (void)checkQueue
 {
-  if ([_videoQ count] < PACKET_Q_SIZE / 3 || [_audioQ count] < PACKET_Q_SIZE / 3) {
+  if ([_videoQue count] < PACKET_Q_SIZE / 3 || [_audioQue count] < PACKET_Q_SIZE / 3) {
     dispatch_semaphore_signal(_readSema);
   }
-}
-
-- (int)width
-{
-  return _videoBuf.width;
-}
-
-- (int)height
-{
-  return _videoBuf.height;
-}
-
-- (int)videoBufferSize
-{
-  return [_videoBuf size];
-}
-
-- (GLubyte*)dataOfVideoBuffer:(int)i
-{
-  return [_videoBuf data:i];
 }
 
 @end

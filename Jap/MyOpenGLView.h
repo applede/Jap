@@ -61,6 +61,7 @@
   double _freq;
   double _lastTime;
   int _current;
+  int _toDecode;
   Decoder* _decoder;
   GLfloat _x1, _y1, _x2, _y2;
 }

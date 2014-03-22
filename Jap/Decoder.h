@@ -24,22 +24,16 @@
   int _video_stream;
   int _audio_stream;
   
-  VideoBuf* _videoBuf;
   AudioBuf* _audioBuf;
 }
 
-@property PacketQueue* videoQ;
-@property PacketQueue* audioQ;
+@property (readonly) PacketQueue* videoQue;
+@property (readonly) PacketQueue* audioQue;
+@property (readonly) VideoBuf* videoBuf;
 
 - (void)start;
 - (void)checkQueue;
-
-// video
-- (int)width;
-- (int)height;
-- (int)videoBufferSize;
+- (double)masterClock;
 - (void)decodeVideoBuffer:(int)i;
-- (GLubyte*)dataOfVideoBuffer:(int)i;
-- (double)timeOfVideoBuffer:(int)i;
 
 @end

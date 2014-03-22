@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Jake Song. All rights reserved.
 //
 
+#import <CoreAudio/HostTime.h>
 #import <libswresample/swresample.h>
 #import "AudioBuf.h"
 #import "Decoder.h"
@@ -329,10 +330,10 @@ static OSStatus audioCallback(void *inRefCon,
     /* read next packet */
 //    if ((packet_queue_get(&_audioq, pkt, 1, &_audio_pkt_temp_serial)) < 0)
 //      return -1;
-    if ([_decoder.audioQ isEmpty]) {
+    if ([_decoder.audioQue isEmpty]) {
       return -1;
     }
-    [_decoder.audioQ get:pkt];
+    [_decoder.audioQue get:pkt];
     
 //    if (pkt->data == flush_pkt.data) {
 //      avcodec_flush_buffers(dec);
@@ -344,6 +345,11 @@ static OSStatus audioCallback(void *inRefCon,
     
     *pkt_temp = *pkt;
   }
+}
+
+- (double)clock
+{
+  return _audio_clock;
 }
 
 @end

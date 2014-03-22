@@ -56,4 +56,6 @@ typedef struct {
 - (BOOL)prepare;
 - (void)close;
 
+- (double)clock;
+
 @end

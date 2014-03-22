@@ -14,6 +14,11 @@
 #define TEXTURE_HEIGHT	1080
 #define FRAME_SIZE  (TEXTURE_WIDTH * 4 * TEXTURE_HEIGHT)
 
+static inline int mod(int x)
+{
+  return x % TEXTURE_COUNT;
+}
+
 @implementation VideoBuf
 
 - init
@@ -45,17 +50,17 @@
 
 - (GLubyte*)data:(int)i
 {
-  return &_data[FRAME_SIZE * i];
+  return &_data[FRAME_SIZE * mod(i)];
 }
 
 - (double)time:(int)i
 {
-  return _time[i];
+  return _time[mod(i)];
 }
 
 - (void)setTime:(double)t of:(int)i
 {
-  _time[i] = t;
+  _time[mod(i)] = t;
 }
 
 - (void)decode:(int)i
@@ -65,7 +70,7 @@
   double pts;
   AVRational tb = _stream->time_base;
   
-  while (!_quit && ![_decoder.videoQ isEmpty]) {
+  while (!_quit && ![_decoder.videoQue isEmpty]) {
     if ([self getVideoFrame:frame packet:&pkt]) {
       pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
       [self put:frame time:pts pos:av_frame_get_pkt_pos(frame) into:i];
@@ -82,7 +87,7 @@
 
 - (BOOL)getVideoFrame:(AVFrame*)frame packet:(AVPacket*)pkt
 {
-  [_decoder.videoQ get:pkt];
+  [_decoder.videoQue get:pkt];
   int got_picture = NO;
   if (avcodec_decode_video2(_stream->codec, frame, &got_picture, pkt) < 0) {
     NSLog(@"avcodec_decode_video2");
