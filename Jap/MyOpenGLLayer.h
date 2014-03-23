@@ -11,13 +11,12 @@
 
 @interface MyOpenGLLayer : NSOpenGLLayer
 {
-  Decoder* _decoder;
 	GLuint texIds[TEXTURE_COUNT];
   int _current;
-  int _clear;
   NSString* _path;
 }
 
+@property (readonly) Decoder* decoder;
 @property (readonly) CGRect movieRect;
 
 - (void)open:(NSString*)path;

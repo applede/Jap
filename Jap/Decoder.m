@@ -21,8 +21,10 @@
     _quit = NO;
     _videoQue = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
     _audioQue = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
+    _subtitleQue = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
     _videoBuf = [[VideoBuf alloc] init];
     _audioBuf = [[AudioBuf alloc] init];
+    _subtitleBuf = [[SubtitleBuf alloc] init];
     _decodeQ = dispatch_queue_create("jap.decode", DISPATCH_QUEUE_SERIAL);
     _readQ = dispatch_queue_create("jap.read", DISPATCH_QUEUE_SERIAL);
     _readSema = dispatch_semaphore_create(0);
@@ -43,6 +45,7 @@
     usleep(100000);
   }
   [_audioBuf start];
+  [_subtitleBuf start];
 }
 
 - (void)stop
@@ -74,6 +77,7 @@
   av_codec_set_lowres(avctx, 0);
   avctx->error_concealment = 3;
   AVDictionary *opts = NULL;
+  av_dict_set(&opts, "threads", "auto", 0);
   if (avctx->codec_type == AVMEDIA_TYPE_VIDEO || avctx->codec_type == AVMEDIA_TYPE_AUDIO)
     av_dict_set(&opts, "refcounted_frames", "1", 0);
   if (avcodec_open2(avctx, codec, &opts) < 0) {
@@ -104,6 +108,11 @@
   [_audioBuf setDecoder:self stream:[self openStream:_audio_stream]];
   [_audioBuf prepare];
   
+  _subtitle_stream = av_find_best_stream(_ic, AVMEDIA_TYPE_SUBTITLE, -1,
+                                         (_audio_stream >= 0 ? _audio_stream : _video_stream),
+                                         NULL, 0);
+  [_subtitleBuf setDecoder:self stream:[self openStream:_subtitle_stream]];
+  
   AVPacket pkt1, *pkt = &pkt1;
   while (!_quit) {
     while (![_videoQue isFull] && ![_audioQue isFull]) {
@@ -115,6 +124,8 @@
         [_videoQue put:pkt];
       else if (pkt->stream_index == _audio_stream)
         [_audioQue put:pkt];
+      else if (pkt->stream_index == _subtitle_stream)
+        [_subtitleQue put:pkt];
       else
         av_free_packet(pkt);
     }
@@ -143,9 +154,16 @@
 
 - (void)checkQueue
 {
-  if ([_videoQue count] < PACKET_Q_SIZE / 3 || [_audioQue count] < PACKET_Q_SIZE / 3) {
+  if ([_videoQue count] < PACKET_Q_SIZE / 3 ||
+      [_audioQue count] < PACKET_Q_SIZE / 3 ||
+      [_subtitleQue count] < PACKET_Q_SIZE / 3) {
     dispatch_semaphore_signal(_readSema);
   }
+}
+
+- (void)setSubtitleLayer:(CATextLayer *)l
+{
+  _subtitleBuf.layer = l;
 }
 
 @end

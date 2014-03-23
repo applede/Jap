@@ -10,6 +10,7 @@
 #import <libavformat/avformat.h>
 #import "VideoBuf.h"
 #import "AudioBuf.h"
+#import "SubtitleBuf.h"
 #import "PacketQueue.h"
 
 @interface Decoder : NSObject
@@ -24,17 +25,21 @@
   AVFormatContext *_ic;
   int _video_stream;
   int _audio_stream;
+  int _subtitle_stream;
   
   AudioBuf* _audioBuf;
+  SubtitleBuf* _subtitleBuf;
 }
 
 @property (readonly) PacketQueue* videoQue;
 @property (readonly) PacketQueue* audioQue;
+@property (readonly) PacketQueue* subtitleQue;
 @property (readonly) VideoBuf* videoBuf;
 
 - (void)open:(NSString*)path;
 - (void)checkQueue;
 - (double)masterClock;
 - (void)decodeVideoBuffer:(int)i;
+- (void)setSubtitleLayer:(CATextLayer*)l;
 
 @end

@@ -116,11 +116,8 @@
 	// Rectangle textures require non-normalized texture coordinates
 	const GLfloat texcoords[] = { 0, h, 0, 0, w, 0, w, h };
 	
-  if (_clear > 0) {
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    _clear--;
-  }
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
 	
   glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texIds[i % TEXTURE_COUNT]);
 	glTexCoordPointer(2, GL_FLOAT, 0, texcoords);
@@ -135,7 +132,6 @@
   if (context) {
     [self.openGLContext makeCurrentContext];
     [self reshape];
-    _clear = 2;
   }
 }
 

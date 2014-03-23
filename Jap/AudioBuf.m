@@ -18,7 +18,7 @@
 - (void)setDecoder:(Decoder *)decoder stream:(AVStream *)stream
 {
   _decoder = decoder;
-  _stream = stream;
+	_stream = stream;
 }
 
 - (void)start
