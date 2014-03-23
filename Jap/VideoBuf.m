@@ -16,6 +16,7 @@
 
 static inline int mod(int x)
 {
+  assert(x >= 0);
   return x % TEXTURE_COUNT;
 }
 
@@ -29,6 +30,9 @@ static inline int mod(int x)
     _data = (GLubyte*)calloc(_size, sizeof(GLubyte));
     _width = TEXTURE_WIDTH;
     _height = TEXTURE_HEIGHT;
+    for (int i = 0; i < TEXTURE_COUNT; i++) {
+      _time[i] = DBL_MAX;
+    }
   }
   return self;
 }
@@ -120,6 +124,7 @@ static inline int mod(int x)
   sws_scale(_img_convert_ctx, (const uint8_t* const*)frame->data, frame->linesize, 0, _height,
             data, linesize);
   [self setTime:t of:i];
+//  NSLog(@"decoded %d", i);
 }
 
 @end

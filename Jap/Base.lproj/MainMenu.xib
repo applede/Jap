@@ -676,7 +676,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="480" height="360"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="d9m-pC-URy" customClass="MyOpenGLView">
+                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="d9m-pC-URy" customClass="MyView">
                         <rect key="frame" x="0.0" y="0.0" width="480" height="360"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     </customView>
