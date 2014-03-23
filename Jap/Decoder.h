@@ -14,9 +14,10 @@
 
 @interface Decoder : NSObject
 {
+  NSString* _path;
+  
   BOOL _quit;
   dispatch_queue_t _decodeQ;
-  
   dispatch_queue_t _readQ;
   dispatch_semaphore_t _readSema;
 
@@ -31,7 +32,7 @@
 @property (readonly) PacketQueue* audioQue;
 @property (readonly) VideoBuf* videoBuf;
 
-- (void)start;
+- (void)open:(NSString*)path;
 - (void)checkQueue;
 - (double)masterClock;
 - (void)decodeVideoBuffer:(int)i;

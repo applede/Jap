@@ -14,4 +14,6 @@
   CATextLayer* _text;
 }
 
+- (void)open:(NSString*)path;
+
 @end

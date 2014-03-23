@@ -14,6 +14,7 @@
 {
   // Insert code here to initialize your application
 //  [_window toggleFullScreen:self];
+  [_view open:@"/Users/apple/hobby/test_jamp/movie/5 Centimeters Per Second (2007)/5 Centimeters Per Second.mkv"];
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender

@@ -31,8 +31,9 @@
   return self;
 }
 
-- (void)start
+- (void)open:(NSString *)path
 {
+  _path = path;
   _quit = NO;
   [self readThread];
   while ([_videoQue count] < 16) {  // 16 packets are enough?
@@ -58,7 +59,7 @@
 - (void)readThread
 {
   dispatch_async(_readQ, ^{
-    if (![self open:@"/Users/apple/hobby/test_jamp/movie/5 Centimeters Per Second (2007)/5 Centimeters Per Second.mkv"]) {
+    if (![self internalOpen:_path]) {
       [self close];
     }
   });
@@ -83,7 +84,7 @@
   return _ic->streams[i];
 }
 
-- (BOOL)open:(NSString*)filename
+- (BOOL)internalOpen:(NSString*)filename
 {
   _ic = avformat_alloc_context();
   int err = avformat_open_input(&_ic, [filename UTF8String], NULL, NULL);

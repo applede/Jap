@@ -18,13 +18,8 @@
   NSOpenGLContext* ctx = [super openGLContextForPixelFormat:pixelFormat];
   if (!_decoder) {
     _decoder = [[Decoder alloc] init];
-    [_decoder start];
-    for (int i = 0; i < ADVANCE; ++i) {
-      [_decoder decodeVideoBuffer:_current + i];
-    }
   }
   [self initGL:ctx];
-  self.asynchronous = YES;
   self.needsDisplayOnBoundsChange = YES;
   self.backgroundColor = [[NSColor blackColor] CGColor];
   return ctx;
@@ -109,7 +104,12 @@
 
 - (void) draw:(int)i
 {
-	const GLfloat vertices[] = { _x1, _y1, _x1, _y2, _x2, _y2, _x2, _y1 };
+	const GLfloat vertices[] = {
+    _movieRect.origin.x, _movieRect.origin.y,
+    _movieRect.origin.x, _movieRect.origin.y + _movieRect.size.height,
+    _movieRect.origin.x + _movieRect.size.width, _movieRect.origin.y + _movieRect.size.height,
+    _movieRect.origin.x + _movieRect.size.width, _movieRect.origin.y
+  };
 	
   GLfloat w = _decoder.videoBuf.width;
   GLfloat h = _decoder.videoBuf.height;
@@ -177,10 +177,19 @@
     dstW = viewW;
   }
   
-  _x1 = (viewW - dstW) / 2;
-  _y1 = (viewH - dstH) / 2;
-  _x2 = _x1 + dstW;
-  _y2 = _y1 + dstH;
+  _movieRect.origin.x = (viewW - dstW) / 2;
+  _movieRect.origin.y = (viewH - dstH) / 2;
+  _movieRect.size.width = dstW;
+  _movieRect.size.height = dstH;
+}
+
+- (void)open:(NSString *)path
+{
+  [_decoder open:path];
+  for (int i = 0; i < ADVANCE; ++i) {
+    [_decoder decodeVideoBuffer:_current + i];
+  }
+  self.asynchronous = YES;
 }
 
 @end

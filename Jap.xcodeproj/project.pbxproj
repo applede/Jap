@@ -18,7 +18,6 @@
 		1816DF9218D5D84200FCE287 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1816DF7118D5D84200FCE287 /* Cocoa.framework */; };
 		1816DF9A18D5D84200FCE287 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1816DF9818D5D84200FCE287 /* InfoPlist.strings */; };
 		1816DF9C18D5D84200FCE287 /* JapTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 1816DF9B18D5D84200FCE287 /* JapTests.m */; };
-		1816DFA718D5D91100FCE287 /* MyOpenGLView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1816DFA618D5D91100FCE287 /* MyOpenGLView.m */; };
 		1816DFAA18D5EA0500FCE287 /* Decoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 1816DFA918D5EA0500FCE287 /* Decoder.m */; };
 		1816DFAC18D6E6B500FCE287 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1816DFAB18D6E6B500FCE287 /* libavcodec.a */; };
 		1816DFAE18D6E73F00FCE287 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1816DFAD18D6E73F00FCE287 /* libavutil.a */; };
@@ -65,8 +64,6 @@
 		1816DF9718D5D84200FCE287 /* JapTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "JapTests-Info.plist"; sourceTree = "<group>"; };
 		1816DF9918D5D84200FCE287 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1816DF9B18D5D84200FCE287 /* JapTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JapTests.m; sourceTree = "<group>"; };
-		1816DFA518D5D91100FCE287 /* MyOpenGLView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyOpenGLView.h; sourceTree = "<group>"; };
-		1816DFA618D5D91100FCE287 /* MyOpenGLView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyOpenGLView.m; sourceTree = "<group>"; };
 		1816DFA818D5EA0500FCE287 /* Decoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Decoder.h; sourceTree = "<group>"; };
 		1816DFA918D5EA0500FCE287 /* Decoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Decoder.m; sourceTree = "<group>"; };
 		1816DFAB18D6E6B500FCE287 /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = ../../../../usr/local/lib/libavcodec.a; sourceTree = "<group>"; };
@@ -214,8 +211,6 @@
 		1897644918DE75E500673BD3 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				1816DFA518D5D91100FCE287 /* MyOpenGLView.h */,
-				1816DFA618D5D91100FCE287 /* MyOpenGLView.m */,
 				1897644B18DE764900673BD3 /* MyOpenGLLayer.h */,
 				1897644C18DE764900673BD3 /* MyOpenGLLayer.m */,
 				1897644E18DE8DC800673BD3 /* MyView.h */,
@@ -342,7 +337,6 @@
 				1897645018DE8DC800673BD3 /* MyView.m in Sources */,
 				1897644D18DE764900673BD3 /* MyOpenGLLayer.m in Sources */,
 				1816DF7E18D5D84200FCE287 /* main.m in Sources */,
-				1816DFA718D5D91100FCE287 /* MyOpenGLView.m in Sources */,
 				181DF7EE18DB164000FF7739 /* AudioBuf.m in Sources */,
 				1816DFAA18D5EA0500FCE287 /* Decoder.m in Sources */,
 				18E183E618D7238B00A35231 /* PacketQueue.m in Sources */,
