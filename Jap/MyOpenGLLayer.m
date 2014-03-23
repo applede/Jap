@@ -32,14 +32,18 @@
 - (NSOpenGLContext *)openGLContextForPixelFormat:(NSOpenGLPixelFormat *)pixelFormat
 {
   NSOpenGLContext* ctx = [super openGLContextForPixelFormat:pixelFormat];
-  _decoder = [[Decoder alloc] init];
-  [self initGL:ctx];
-  [_decoder start];
-  for (int i = 0; i < ADVANCE; ++i) {
-    [_decoder decodeVideoBuffer:_current + i];
+//  self.contentsScale = [self.view.window backingScaleFactor];
+  if (!_decoder) {
+    _decoder = [[Decoder alloc] init];
+    [_decoder start];
+    for (int i = 0; i < ADVANCE; ++i) {
+      [_decoder decodeVideoBuffer:_current + i];
+    }
   }
+  [self initGL:ctx];
   self.asynchronous = YES;
-//  self.needsDisplayOnBoundsChange = YES;
+  self.needsDisplayOnBoundsChange = YES;
+  self.backgroundColor = [[NSColor blackColor] CGColor];
   return ctx;
 }
 
@@ -170,8 +174,11 @@
 	
 //	[[self openGLContext] makeCurrentContext];
 	
-//    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  if (_clear > 0) {
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    _clear--;
+  }
 	
 //	glEnable(GL_TEXTURE_RECTANGLE_EXT);
   glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texIds[i % TEXTURE_COUNT]);
@@ -187,12 +194,25 @@
 //	CGLUnlockContext([[self openGLContext] CGLContextObj]);
 }
 
+- (void)frameChanged
+{
+  NSOpenGLContext* context = self.openGLContext;
+  if (context) {
+    [self.openGLContext makeCurrentContext];
+    [self reshape];
+    _clear = 2;
+  }
+}
+
 - (void) reshape
 {
 	// We draw on a secondary thread through the display link
 	// When resizing the view, -reshape is called automatically on the main thread
 	// Add a mutex around to avoid the threads accessing the context simultaneously when resizing
   NSRect rect = self.bounds;
+  CGFloat s = self.contentsScale;
+  rect.size.width *= s;
+  rect.size.height *= s;
 	glViewport(0, 0, rect.size.width, rect.size.height);
 	
 	glMatrixMode(GL_PROJECTION);
@@ -206,6 +226,9 @@
 - (void)calcRect
 {
   CGRect bounds = self.bounds;
+  CGFloat s = self.contentsScale;
+  bounds.size.width *= s;
+  bounds.size.height *= s;
   
   int srcW = _decoder.videoBuf.width;
   int srcH = _decoder.videoBuf.height;

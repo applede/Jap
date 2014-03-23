@@ -7,7 +7,11 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import <QuartzCore/QuartzCore.h>
 
 @interface MyView : NSView
+{
+  CATextLayer* _text;
+}
 
 @end

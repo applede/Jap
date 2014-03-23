@@ -15,6 +15,9 @@
 	GLuint texIds[TEXTURE_COUNT];
   int _current;
   GLfloat _x1, _y1, _x2, _y2; // coordinates to draw video
+  int _clear;
 }
+
+- (void)frameChanged;
 
 @end
