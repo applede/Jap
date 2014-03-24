@@ -35,11 +35,12 @@
 @property (readonly) PacketQueue* audioQue;
 @property (readonly) PacketQueue* subtitleQue;
 @property (readonly) VideoBuf* videoBuf;
+@property (weak) CATextLayer* subtitle;
 
 - (void)open:(NSString*)path;
 - (void)checkQueue;
 - (double)masterClock;
 - (void)decodeVideoBuffer:(int)i;
-- (void)setSubtitleLayer:(CATextLayer*)l;
+- (void)displaySubtitle;
 
 @end

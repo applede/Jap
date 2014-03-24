@@ -67,6 +67,7 @@
   @autoreleasepool {
     [self load:_current];
     [self draw:_current];
+    [_decoder displaySubtitle];
     [_decoder decodeVideoBuffer:_current + ADVANCE];
     _current++;
   }

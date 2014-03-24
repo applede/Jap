@@ -161,9 +161,9 @@
   }
 }
 
-- (void)setSubtitleLayer:(CATextLayer *)l
+- (void)displaySubtitle
 {
-  _subtitleBuf.layer = l;
+  [_subtitleBuf display:_subtitle time:[self masterClock]];
 }
 
 @end

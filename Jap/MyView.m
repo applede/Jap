@@ -51,17 +51,17 @@
   CGFloat w = layer.movieRect.size.width / s;
   CGFloat h = layer.movieRect.size.height / s;
   CGFloat y = layer.movieRect.origin.y / s;
-  h = h * 0.10;
+  h = h * 0.20;
   y = h;
   _text.frame = CGRectMake(0, y, w, h);
-  _text.fontSize = h * 0.8;
-  _text.string = @"Hello World 초속 5cm yg";
+  _text.fontSize = h * 0.4;
+  _text.string = @"";
 }
 
 - (void)open:(NSString *)path
 {
   MyOpenGLLayer* layer = (MyOpenGLLayer*)self.layer;
-  layer.decoder.subtitleLayer = _text;
+  layer.decoder.subtitle = _text;
   [layer open:path];
   [self frameChanged:nil];
 }
