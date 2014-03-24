@@ -19,9 +19,7 @@
       [self setWantsBestResolutionOpenGLSurface:YES];
       [self setLayer:[MyOpenGLLayer layer]];
       [self setWantsLayer:YES];
-      _text = [CATextLayer layer];
-      [self setSubtitleLayer];
-      [self.layer addSublayer:_text];
+      [self setupSubtitleLayer];
     }
     return self;
 }
@@ -32,18 +30,17 @@
   [super viewDidChangeBackingProperties];
 }
 
-- (void)setSubtitleLayer
+- (void)setupSubtitleLayer
 {
-  self.layer.layoutManager = [CAConstraintLayoutManager layoutManager];
+  _text = [CATextLayer layer];
   _text.delegate = self;
   _text.alignmentMode = kCAAlignmentCenter;
   _text.font = (__bridge CFTypeRef)@"HelveticaNeue-Light";
   _text.shadowOpacity = 1.0;
   _text.shadowOffset = CGSizeMake(1.0, -2.0);
   _text.shadowRadius = 2.0;
-  [_text addConstraint:[CAConstraint constraintWithAttribute:kCAConstraintMidX
-                                                  relativeTo:@"superlayer"
-                                                   attribute:kCAConstraintMidX]];
+  self.layer.layoutManager = [CAConstraintLayoutManager layoutManager];
+  [self.layer addSublayer:_text];
 }
 
 - (id<CAAction>)actionForLayer:(CALayer *)layer forKey:(NSString *)event
@@ -60,9 +57,12 @@
     CGFloat y = layer.movieRect.origin.y / s;
     
     _text.fontSize = h * 0.08;
-    [_text addConstraint:[CAConstraint constraintWithAttribute:kCAConstraintMinY
+    [_text setConstraints:@[[CAConstraint constraintWithAttribute:kCAConstraintMidX
+                                                  relativeTo:@"superlayer"
+                                                   attribute:kCAConstraintMidX],
+                            [CAConstraint constraintWithAttribute:kCAConstraintMinY
                                                     relativeTo:@"superlayer"
-                                                     attribute:kCAConstraintMinY offset:y]];
+                                                     attribute:kCAConstraintMinY offset:y]]];
     [self.layer setNeedsLayout];
   }
 }

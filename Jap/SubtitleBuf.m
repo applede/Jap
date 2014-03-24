@@ -164,11 +164,8 @@ static int convert(const char* src, char* dst)
       [self remove];
     } else {
       char buf[2048];
-      int n = convert(findSub(sub->rects[0]->ass), buf);
+      convert(findSub(sub->rects[0]->ass), buf);
       layer.string = [NSString stringWithUTF8String:buf];
-      CGRect frame = layer.frame;
-      frame.size.height = layer.fontSize / 0.08 * 0.10 * n;
-      layer.frame = frame;
     }
   }
   if (_count < _size / 3) {
