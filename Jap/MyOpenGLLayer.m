@@ -127,13 +127,15 @@
   glDrawArrays(GL_QUADS, 0, 4);
 }
 
-- (void)frameChanged
+- (BOOL)frameChanged
 {
   NSOpenGLContext* context = self.openGLContext;
   if (context) {
     [self.openGLContext makeCurrentContext];
     [self reshape];
+    return YES;
   }
+  return NO;
 }
 
 - (void) reshape
@@ -146,7 +148,7 @@
 	
 	glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0, rect.size.width, 0, rect.size.height, -10.0f, 10.0f);
+  glOrtho(0, rect.size.width, 0, rect.size.height, -1.0f, 1.0f);
 	glMatrixMode(GL_MODELVIEW);
 	
   [self calcRect];

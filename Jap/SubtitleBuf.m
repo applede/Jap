@@ -134,17 +134,21 @@ static const char* findSub(const char* str)
   return str;
 }
 
-static void convert(const char* src, char* dst)
+// returns number of lines
+static int convert(const char* src, char* dst)
 {
+  int n = 1;
   while (*src) {
     if (*src == '\\' && src[1] == 'N') {
       *dst++ = '\n';
       src += 2;
+      n++;
     } else {
       *dst++ = *src++;
     }
   }
   *dst = 0;
+  return n;
 }
 
 - (void)display:(CATextLayer *)layer time:(double)t
@@ -160,8 +164,11 @@ static void convert(const char* src, char* dst)
       [self remove];
     } else {
       char buf[2048];
-      convert(findSub(sub->rects[0]->ass), buf);
+      int n = convert(findSub(sub->rects[0]->ass), buf);
       layer.string = [NSString stringWithUTF8String:buf];
+      CGRect frame = layer.frame;
+      frame.size.height = layer.fontSize / 0.08 * 0.10 * n;
+      layer.frame = frame;
     }
   }
   if (_count < _size / 3) {

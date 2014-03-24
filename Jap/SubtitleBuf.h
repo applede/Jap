@@ -29,8 +29,6 @@
   AVSubtitle *_sub;
 }
 
-@property (weak) CATextLayer* layer;
-
 - (void)setDecoder:(Decoder*)decoder stream:(AVStream *)stream;
 - (void)start;
 - (void)display:(CATextLayer*)layer time:(double)t;

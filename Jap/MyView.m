@@ -17,24 +17,13 @@
     if (self) {
         // Initialization code here.
       [self setWantsBestResolutionOpenGLSurface:YES];
+      [self setLayer:[MyOpenGLLayer layer]];
       [self setWantsLayer:YES];
       _text = [CATextLayer layer];
-      _text.frame = CGRectMake(0, 0, frame.size.width, 50);
-      _text.alignmentMode = kCAAlignmentCenter;
-      _text.font = (__bridge CFTypeRef)@"HelveticaNeue-Light";
-      _text.shadowOpacity = 1.0;
-      _text.shadowOffset = CGSizeMake(1.0, -2.0);
-      _text.shadowRadius = 2.0;
+      [self setSubtitleLayer];
       [self.layer addSublayer:_text];
-      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(frameChanged:) name:NSViewFrameDidChangeNotification object:nil];
-      [self setPostsFrameChangedNotifications:YES];
     }
     return self;
-}
-
-- (CALayer *)makeBackingLayer
-{
-  return [MyOpenGLLayer layer];
 }
 
 - (void)viewDidChangeBackingProperties
@@ -43,19 +32,39 @@
   [super viewDidChangeBackingProperties];
 }
 
-- (void)frameChanged:(NSNotification*)notification
+- (void)setSubtitleLayer
+{
+  self.layer.layoutManager = [CAConstraintLayoutManager layoutManager];
+  _text.delegate = self;
+  _text.alignmentMode = kCAAlignmentCenter;
+  _text.font = (__bridge CFTypeRef)@"HelveticaNeue-Light";
+  _text.shadowOpacity = 1.0;
+  _text.shadowOffset = CGSizeMake(1.0, -2.0);
+  _text.shadowRadius = 2.0;
+  [_text addConstraint:[CAConstraint constraintWithAttribute:kCAConstraintMidX
+                                                  relativeTo:@"superlayer"
+                                                   attribute:kCAConstraintMidX]];
+}
+
+- (id<CAAction>)actionForLayer:(CALayer *)layer forKey:(NSString *)event
+{
+  return (id<CAAction>)[NSNull null];
+}
+
+- (void)frameChanged
 {
   MyOpenGLLayer* layer = (MyOpenGLLayer*)self.layer;
-  [layer frameChanged];
-  CGFloat s = layer.contentsScale;
-  CGFloat w = layer.movieRect.size.width / s;
-  CGFloat h = layer.movieRect.size.height / s;
-  CGFloat y = layer.movieRect.origin.y / s;
-  h = h * 0.20;
-  y = h;
-  _text.frame = CGRectMake(0, y, w, h);
-  _text.fontSize = h * 0.4;
-  _text.string = @"";
+  if ([layer frameChanged]) {
+    CGFloat s = layer.contentsScale;
+    CGFloat h = layer.movieRect.size.height / s;
+    CGFloat y = layer.movieRect.origin.y / s;
+    
+    _text.fontSize = h * 0.08;
+    [_text addConstraint:[CAConstraint constraintWithAttribute:kCAConstraintMinY
+                                                    relativeTo:@"superlayer"
+                                                     attribute:kCAConstraintMinY offset:y]];
+    [self.layer setNeedsLayout];
+  }
 }
 
 - (void)open:(NSString *)path
@@ -63,7 +72,12 @@
   MyOpenGLLayer* layer = (MyOpenGLLayer*)self.layer;
   layer.decoder.subtitle = _text;
   [layer open:path];
-  [self frameChanged:nil];
+  [self frameChanged];
+}
+
+- (void)windowDidResize:(NSNotification*)notification
+{
+  [self frameChanged];
 }
 
 @end

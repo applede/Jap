@@ -20,6 +20,6 @@
 @property (readonly) CGRect movieRect;
 
 - (void)open:(NSString*)path;
-- (void)frameChanged;
+- (BOOL)frameChanged;
 
 @end
