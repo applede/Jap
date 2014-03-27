@@ -11,9 +11,16 @@
 
 @interface MyOpenGLLayer : NSOpenGLLayer
 {
-	GLuint texIds[TEXTURE_COUNT];
+	GLuint texIds[TEXTURE_COUNT][3];
   int _current;
+  GLuint _vertexShader;
+  GLuint _fragmentShader;
+  GLuint _program;
+  GLuint _buffer;
   NSString* _path;
+  CIContext* _ciContext;
+  CVOpenGLTextureCacheRef _textureCache;
+  BOOL _init;
 }
 
 @property (readonly) Decoder* decoder;

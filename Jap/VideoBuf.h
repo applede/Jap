@@ -21,6 +21,8 @@
   
   struct SwsContext *_img_convert_ctx;
   double _time[TEXTURE_COUNT];
+  CVPixelBufferRef _pixelBuf[TEXTURE_COUNT];
+  AVFrame* _frame[TEXTURE_COUNT];
   GLubyte* _data;
 }
 
@@ -33,6 +35,12 @@
 - (double)time:(int)i;
 - (void)setTime:(double)t of:(int)i;
 - (GLubyte*)data:(int)i;
+- (GLubyte*)dataY:(int)i;
+- (GLubyte*)dataU:(int)i;
+- (GLubyte*)dataV:(int)i;
+- (int)strideY:(int)i;
+- (int)strideU:(int)i;
+- (int)strideV:(int)i;
 
 - (void)decode:(int)i;
 

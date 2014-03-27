@@ -57,6 +57,50 @@ static inline int mod(int x)
   return &_data[FRAME_SIZE * mod(i)];
 }
 
+- (GLubyte *)dataY:(int)i
+{
+//  static GLubyte dummy[1920*1080];
+//  memset(dummy, 0, sizeof(dummy));
+//  return dummy;
+  return _frame[mod(i)]->data[0];
+}
+
+- (GLubyte *)dataU:(int)i
+{
+//  static GLubyte dummy[1920*1080];
+//  memset(dummy, 128, sizeof(dummy));
+//  return dummy;
+  return _frame[mod(i)]->data[1];
+}
+
+- (GLubyte *)dataV:(int)i
+{
+//  static GLubyte dummy[1920*1080];
+//  memset(dummy, 255, sizeof(dummy));
+//  return dummy;
+  return _frame[mod(i)]->data[2];
+}
+
+- (int)strideY:(int)i
+{
+  return _frame[mod(i)]->linesize[0];
+}
+
+- (int)strideU:(int)i
+{
+  return _frame[mod(i)]->linesize[1];
+}
+
+- (int)strideV:(int)i
+{
+  return _frame[mod(i)]->linesize[2];
+}
+
+- (CVPixelBufferRef)pixelBuf:(int)i
+{
+  return _pixelBuf[mod(i)];
+}
+
 - (double)time:(int)i
 {
   return _time[mod(i)];
@@ -78,7 +122,7 @@ static inline int mod(int x)
     if ([self getVideoFrame:frame packet:&pkt]) {
       pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
       [self put:frame time:pts pos:av_frame_get_pkt_pos(frame) into:i];
-      av_frame_unref(frame);
+//      av_frame_unref(frame);
       break;
     }
     av_free_packet(&pkt);
@@ -86,7 +130,9 @@ static inline int mod(int x)
   [_decoder checkQueue];
 
   av_free_packet(&pkt);
-  av_frame_free(&frame);
+  if (0) {
+    av_frame_free(&frame);
+  }
 }
 
 - (BOOL)getVideoFrame:(AVFrame*)frame packet:(AVPacket*)pkt
@@ -112,17 +158,25 @@ static inline int mod(int x)
 
 - (void)put:(AVFrame *)frame time:(double)t pos:(int64_t)p into:(int)i
 {
-  _img_convert_ctx = sws_getCachedContext(_img_convert_ctx,
-                                          frame->width, frame->height, frame->format,
-                                          _width, _height,
-                                          AV_PIX_FMT_BGRA, SWS_FAST_BILINEAR, NULL, NULL, NULL);
-  if (_img_convert_ctx == NULL) {
-    NSLog(@"Cannot initialize the conversion context");
+  if (_frame[mod(i)]) {
+    av_frame_free(&_frame[mod(i)]);
   }
-  GLubyte* data[] = { [self data:i] };
-  int linesize[] = { _width * 4 };
-  sws_scale(_img_convert_ctx, (const uint8_t* const*)frame->data, frame->linesize, 0, _height,
-            data, linesize);
+  _frame[mod(i)] = frame;
+  assert(_frame[mod(i)]->data[0]);
+  
+  if (0) {
+    _img_convert_ctx = sws_getCachedContext(_img_convert_ctx,
+                                            frame->width, frame->height, frame->format,
+                                            _width, _height,
+                                            AV_PIX_FMT_BGRA, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+    if (_img_convert_ctx == NULL) {
+      NSLog(@"Cannot initialize the conversion context");
+    }
+    GLubyte* data[] = { [self data:i] };
+    int linesize[] = { _width * 4 };
+    sws_scale(_img_convert_ctx, (const uint8_t* const*)frame->data, frame->linesize, 0, _height,
+              data, linesize);
+  }
   [self setTime:t of:i];
   //  NSLog(@"decoded %d", i);
 }
