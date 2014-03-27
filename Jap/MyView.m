@@ -72,7 +72,7 @@
   MyOpenGLLayer* layer = (MyOpenGLLayer*)self.layer;
   layer.decoder.subtitle = _text;
   [layer open:path];
-//  [self frameChanged];
+  [self frameChanged];
 }
 
 - (void)windowDidResize:(NSNotification*)notification

@@ -18,9 +18,6 @@
   GLuint _program;
   GLuint _buffer;
   NSString* _path;
-  CIContext* _ciContext;
-  CVOpenGLTextureCacheRef _textureCache;
-  BOOL _init;
 }
 
 @property (readonly) Decoder* decoder;

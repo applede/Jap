@@ -19,18 +19,9 @@
   if (!_decoder) {
     _decoder = [[Decoder alloc] init];
   }
-//  [self initGL:ctx];
+  [self initGL:ctx];
   self.needsDisplayOnBoundsChange = YES;
   self.backgroundColor = [[NSColor blackColor] CGColor];
-//  CVReturn r = CVOpenGLTextureCacheCreate(0, 0, [ctx CGLContextObj], [pixelFormat CGLPixelFormatObj],
-//                                          0, &_textureCache);
-//  if (r != kCVReturnSuccess) {
-//    NSLog(@"CVOpenGLTextureCacheCreate");
-//  }
-//  CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-//  _ciContext = [CIContext contextWithCGLContext:[ctx CGLContextObj] pixelFormat:[pixelFormat CGLPixelFormatObj]
-//                                     colorSpace:colorSpace options:0];
-//  CGColorSpaceRelease(colorSpace);
   return ctx;
 }
 
@@ -97,7 +88,6 @@ GLuint createTexture(GLenum unit, GLsizei width, GLsizei height)
   // This is necessary for non-power-of-two textures
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
   
   glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
   return texture;
@@ -118,12 +108,6 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
 	GLint swapInt = 1;
 	[ctx setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
 	
-//  if (texIds[0]) {
-//    glDeleteTextures(TEXTURE_COUNT, texIds);
-//  }
-	// Create OpenGL textures
-//	glGenTextures(TEXTURE_COUNT, texIds);
-	
 	// Enable the rectangle texture extenstion
 	glEnable(GL_TEXTURE_2D);
 	
@@ -131,8 +115,6 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
 	// This specifies an area of memory to be mapped for all the textures. It is useful for tiled or multiple textures in contiguous memory.
 //	glTextureRangeAPPLE(GL_TEXTURE_RECTANGLE_EXT, _decoder.videoBuf.size, [_decoder.videoBuf data:0]);
 	glDisable(GL_DEPTH_TEST);
-//	glEnableClientState(GL_VERTEX_ARRAY);
-//	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 //  glEnable(GL_UNPACK_CLIENT_STORAGE_APPLE);
   
   //: Y Texture
@@ -148,12 +130,8 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   texIds[0][2] = createTexture(GL_TEXTURE2, _decoder.videoBuf.width / 2, _decoder.videoBuf.height / 2);
   
   glGenBuffers(1, &_buffer);
-//  glBindBuffer(GL_ARRAY_BUFFER, _buffer);
-//  glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
-//  glEnableClientState(GL_VERTEX_ARRAY);
-//  glVertexPointer(2, GL_FLOAT, 0, 0);
-//  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-//  glTexCoordPointer(2, GL_FLOAT, 0, (char*)0 + 8 * sizeof(GLfloat));
+  glBindBuffer(GL_ARRAY_BUFFER, _buffer);
+  glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
   
   const char* vertexSrc =
   "#version 120\n"
@@ -197,7 +175,6 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   }
   glAttachShader(_program, _fragmentShader);
   glLinkProgram(_program);
-  
   glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &logLen);
   if (logLen > 0) {
     char log[2048];
@@ -206,13 +183,7 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   }
   
   glUseProgram(_program);
-  glValidateProgram(_program);
-  glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &logLen);
-  if (logLen > 0) {
-    char log[2048];
-    glGetProgramInfoLog(_program, sizeof(log), &logLen, log);
-    NSLog(@"%s", log);
-  }
+  
   GLint sampler0 = glGetUniformLocation(_program, "sampler0");
   assert(sampler0 >= 0);
   glUniform1i(sampler0, 0);
@@ -222,6 +193,16 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   GLint sampler2 = glGetUniformLocation(_program, "sampler2");
   assert(sampler2 >= 0);
   glUniform1i(sampler2, 2);
+  
+  GLint position = glGetAttribLocation(_program, "Position");
+  assert(position >= 0);
+  glVertexAttribPointer(position, 2, GL_FLOAT, GL_FALSE, 0, 0);
+  glEnableVertexAttribArray(position);
+  
+  GLint texcoord = glGetAttribLocation(_program, "TexCoordIn");
+  assert(texcoord >= 0);
+  glVertexAttribPointer(texcoord, 2, GL_FLOAT, GL_FALSE, 0, (char*)0 + 8 * sizeof(GLfloat));
+  glEnableVertexAttribArray(texcoord);
   
   [self reshape];
 }
@@ -239,10 +220,6 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
                forLayerTime:(CFTimeInterval)t displayTime:(const CVTimeStamp *)ts;
 {
   @autoreleasepool {
-    if (!_init) {
-      [self initGL:[self openGLContext]];
-      _init = YES;
-    }
     [self load:_current];
     [self draw:_current];
     [_decoder displaySubtitle];
@@ -292,31 +269,8 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
 
 - (void) draw:(int)i
 {
-//  const GLfloat vertices[] = {
-//    _movieRect.origin.x, _movieRect.origin.y,
-//    _movieRect.origin.x, _movieRect.origin.y + _movieRect.size.height,
-//    _movieRect.origin.x + _movieRect.size.width, _movieRect.origin.y + _movieRect.size.height,
-//    _movieRect.origin.x + _movieRect.size.width, _movieRect.origin.y
-//  };
-  
-//  GLfloat w = _decoder.videoBuf.width;
-//  GLfloat h = _decoder.videoBuf.height;
-  // Rectangle textures require non-normalized texture coordinates
-//  const GLfloat texcoords[] = { 0, h, 0, 0, w, 0, w, h };
-  
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
-//
-////  glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texIds[i % TEXTURE_COUNT][0]);
-////  glTexCoordPointer(2, GL_FLOAT, 0, texcoords);
-//  
-//  glVertexPointer(2, GL_FLOAT, 0, vertices);
-//  glDrawArrays(GL_QUADS, 0, 4);
-  //draw RECT
-//  glVertexAttribPointer(ATTRIB_VERTEX, 3, GL_FLOAT, 0, 0, vertices);
-  
-  //ATTRIB_TEXTUREPOSITON
-//  glVertexAttribPointer(ATTRIB_TEXTUREPOSITON, 2, GL_FLOAT, 0, 0, textureCoords);
   
   glUseProgram(_program);
   glActiveTexture(GL_TEXTURE0);
@@ -345,7 +299,6 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   CGFloat s = self.contentsScale;
   GLfloat vw = rect.size.width * s;
   GLfloat vh = rect.size.height * s;
-//	glViewport(0, 0, rect.size.width, rect.size.height);
 	
   glUseProgram(_program);
   GLint ortho = glGetUniformLocation(_program, "Ortho");
@@ -353,42 +306,19 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   GLfloat orthoMat[16];
   makeOrtho(vw, vh, orthoMat);
   glUniformMatrix4fv(ortho, 1, NO, orthoMat);
-//	glMatrixMode(GL_PROJECTION);
-//  glLoadIdentity();
-//  glOrtho(0, rect.size.width, 0, rect.size.height, -1.0f, 1.0f);
-//	glMatrixMode(GL_MODELVIEW);
 	
   [self calcRect];
   
   GLfloat x0 = _movieRect.origin.x;
   GLfloat y0 = _movieRect.origin.y;
-  GLfloat w = _decoder.videoBuf.width;
-  GLfloat h = _decoder.videoBuf.height;
+  GLfloat x1 = _movieRect.origin.x + _movieRect.size.width;
+  GLfloat y1 = _movieRect.origin.y + _movieRect.size.height;
   GLfloat vertices[16] = {
-    x0, y0,
-    x0, y0 + _movieRect.size.height,
-    x0 + _movieRect.size.width, y0 + _movieRect.size.height,
-    x0 + _movieRect.size.width, y0,
-//    0, h, 0, 0, w, 0, w, h
-    0, 1, 0, 0, 1, 0, 1, 1
+    x0, y0,   x0, y1,   x1, y1,   x1, y0,
+    0, 1,     0, 0,     1, 0,     1, 1
   };
   glBindBuffer(GL_ARRAY_BUFFER, _buffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-//  glEnableClientState(GL_VERTEX_ARRAY);
-//  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-//  GLfloat* data = (GLfloat*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-//  memcpy(data, vertices, sizeof(vertices));
-//  glUnmapBuffer(GL_ARRAY_BUFFER);
-  
-  GLint position = glGetAttribLocation(_program, "Position");
-  assert(position >= 0);
-  glVertexAttribPointer(position, 2, GL_FLOAT, GL_FALSE, 0, 0);
-  glEnableVertexAttribArray(position);
-  
-  GLint texcoord = glGetAttribLocation(_program, "TexCoordIn");
-  assert(texcoord >= 0);
-  glVertexAttribPointer(texcoord, 2, GL_FLOAT, GL_FALSE, 0, (char*)0 + 8 * sizeof(GLfloat));
-  glEnableVertexAttribArray(texcoord);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 }
 
 - (void)calcRect
