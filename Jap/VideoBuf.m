@@ -12,7 +12,6 @@
 
 #define TEXTURE_WIDTH		1920
 #define TEXTURE_HEIGHT	1080
-#define FRAME_SIZE  (TEXTURE_WIDTH * 4 * TEXTURE_HEIGHT)
 
 static inline int mod(int x)
 {
@@ -26,12 +25,15 @@ static inline int mod(int x)
 {
   self = [super init];
   if (self) {
-    _size = FRAME_SIZE * TEXTURE_COUNT;
-    _data = (GLubyte*)calloc(_size, sizeof(GLubyte));
     _width = TEXTURE_WIDTH;
     _height = TEXTURE_HEIGHT;
+    _frameSize = avpicture_get_size(AV_PIX_FMT_YUV420P, _width, _height);
+    _size = _frameSize * TEXTURE_COUNT;
+    _data = calloc(TEXTURE_COUNT, _frameSize);
     for (int i = 0; i < TEXTURE_COUNT; i++) {
       _time[i] = DBL_MAX;
+      _frame[i] = av_frame_alloc();
+      avpicture_fill((AVPicture*)_frame[i], &_data[_frameSize * i], AV_PIX_FMT_YUV420P, _width, _height);
     }
   }
   return self;
@@ -39,11 +41,10 @@ static inline int mod(int x)
 
 - (void)dealloc
 {
-	// When using client storage, we should keep the data around until the textures are deleted
-	if (_data) {
-		free(_data);
-		_data = nil;
-	}
+  for (int i = 0; i < TEXTURE_COUNT; i++) {
+    av_frame_free(&_frame[i]);
+  }
+  free(_data);
 }
 
 - (void)setDecoder:(Decoder *)decoder stream:(AVStream *)stream
@@ -52,32 +53,18 @@ static inline int mod(int x)
   _stream = stream;
 }
 
-- (GLubyte*)data:(int)i
-{
-  return &_data[FRAME_SIZE * mod(i)];
-}
-
 - (GLubyte *)dataY:(int)i
 {
-//  static GLubyte dummy[1920*1080];
-//  memset(dummy, 0, sizeof(dummy));
-//  return dummy;
   return _frame[mod(i)]->data[0];
 }
 
 - (GLubyte *)dataU:(int)i
 {
-//  static GLubyte dummy[1920*1080];
-//  memset(dummy, 128, sizeof(dummy));
-//  return dummy;
   return _frame[mod(i)]->data[1];
 }
 
 - (GLubyte *)dataV:(int)i
 {
-//  static GLubyte dummy[1920*1080];
-//  memset(dummy, 255, sizeof(dummy));
-//  return dummy;
   return _frame[mod(i)]->data[2];
 }
 
@@ -96,11 +83,6 @@ static inline int mod(int x)
   return _frame[mod(i)]->linesize[2];
 }
 
-- (CVPixelBufferRef)pixelBuf:(int)i
-{
-  return _pixelBuf[mod(i)];
-}
-
 - (double)time:(int)i
 {
   return _time[mod(i)];
@@ -114,14 +96,14 @@ static inline int mod(int x)
 - (void)decode:(int)i
 {
   AVPacket pkt = { 0 };
-  AVFrame *frame = av_frame_alloc();
+  AVFrame *frame = _frame[mod(i)];
   double pts;
   AVRational tb = _stream->time_base;
   
   while (!_quit && ![_decoder.videoQue isEmpty]) {
     if ([self getVideoFrame:frame packet:&pkt]) {
       pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
-      [self put:frame time:pts pos:av_frame_get_pkt_pos(frame) into:i];
+      [self putTime:pts pos:av_frame_get_pkt_pos(frame) into:i];
 //      av_frame_unref(frame);
       break;
     }
@@ -130,9 +112,6 @@ static inline int mod(int x)
   [_decoder checkQueue];
 
   av_free_packet(&pkt);
-  if (0) {
-    av_frame_free(&frame);
-  }
 }
 
 - (BOOL)getVideoFrame:(AVFrame*)frame packet:(AVPacket*)pkt
@@ -156,27 +135,19 @@ static inline int mod(int x)
   return NO;
 }
 
-- (void)put:(AVFrame *)frame time:(double)t pos:(int64_t)p into:(int)i
+- (void)putTime:(double)t pos:(int64_t)p into:(int)i
 {
-  if (_frame[mod(i)]) {
-    av_frame_free(&_frame[mod(i)]);
-  }
-  _frame[mod(i)] = frame;
-  assert(_frame[mod(i)]->data[0]);
-  
-  if (0) {
-    _img_convert_ctx = sws_getCachedContext(_img_convert_ctx,
-                                            frame->width, frame->height, frame->format,
-                                            _width, _height,
-                                            AV_PIX_FMT_BGRA, SWS_FAST_BILINEAR, NULL, NULL, NULL);
-    if (_img_convert_ctx == NULL) {
-      NSLog(@"Cannot initialize the conversion context");
-    }
-    GLubyte* data[] = { [self data:i] };
-    int linesize[] = { _width * 4 };
-    sws_scale(_img_convert_ctx, (const uint8_t* const*)frame->data, frame->linesize, 0, _height,
-              data, linesize);
-  }
+//    _img_convert_ctx = sws_getCachedContext(_img_convert_ctx,
+//                                            frame->width, frame->height, frame->format,
+//                                            _width, _height,
+//                                            AV_PIX_FMT_BGRA, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+//    if (_img_convert_ctx == NULL) {
+//      NSLog(@"Cannot initialize the conversion context");
+//    }
+//    GLubyte* data[] = { [self data:i] };
+//    int linesize[] = { _width * 4 };
+//    sws_scale(_img_convert_ctx, (const uint8_t* const*)frame->data, frame->linesize, 0, _height,
+//              data, linesize);
   [self setTime:t of:i];
   //  NSLog(@"decoded %d", i);
 }

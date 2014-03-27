@@ -10,6 +10,7 @@
 #import "MyOpenGLLayer.h"
 
 #define ADVANCE (TEXTURE_COUNT - 1)
+#define MOD(i)  (i % TEXTURE_COUNT)
 
 @implementation MyOpenGLLayer
 
@@ -74,22 +75,22 @@ void makeOrtho(GLfloat width, GLfloat height, GLfloat* mat)
   mat[15] = 1.0;
 }
 
-GLuint createTexture(GLenum unit, GLsizei width, GLsizei height)
+GLuint createTexture(GLenum unit, GLsizei width, GLsizei height, GLubyte* data)
 {
   GLuint texture = 0;
   
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
   
-//  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_STORAGE_HINT_APPLE, GL_STORAGE_CACHED_APPLE);
-//  glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_TRUE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_STORAGE_HINT_APPLE, GL_STORAGE_CACHED_APPLE);
+  glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_TRUE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   // This is necessary for non-power-of-two textures
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
   return texture;
 }
 
@@ -97,7 +98,7 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
 {
   glBindTexture(GL_TEXTURE_2D, texture);
   glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
-  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RED, GL_UNSIGNED_BYTE, data);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
 }
 
 - (void)initGL:(NSOpenGLContext*)ctx
@@ -108,26 +109,27 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
 	GLint swapInt = 1;
 	[ctx setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
 	
-	// Enable the rectangle texture extenstion
+	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 	
 	// Eliminate a data copy by the OpenGL driver using the Apple texture range extension along with the rectangle texture extension
 	// This specifies an area of memory to be mapped for all the textures. It is useful for tiled or multiple textures in contiguous memory.
-//	glTextureRangeAPPLE(GL_TEXTURE_RECTANGLE_EXT, _decoder.videoBuf.size, [_decoder.videoBuf data:0]);
-	glDisable(GL_DEPTH_TEST);
-//  glEnable(GL_UNPACK_CLIENT_STORAGE_APPLE);
+	glTextureRangeAPPLE(GL_TEXTURE_RECTANGLE_EXT, _decoder.videoBuf.size, _decoder.videoBuf.data);
+  glEnable(GL_UNPACK_CLIENT_STORAGE_APPLE);
   
-  //: Y Texture
-  if (texIds[0][0]) glDeleteTextures(1, &texIds[0][0]);
-  texIds[0][0] = createTexture(GL_TEXTURE0, _decoder.videoBuf.width, _decoder.videoBuf.height);
-  
-  //: U Texture
-  if (texIds[0][1]) glDeleteTextures(1, &texIds[0][1]);
-  texIds[0][1] = createTexture(GL_TEXTURE1, _decoder.videoBuf.width / 2, _decoder.videoBuf.height / 2);
-  
-  //: V Texture
-  if (texIds[0][2]) glDeleteTextures(1, &texIds[0][2]);
-  texIds[0][2] = createTexture(GL_TEXTURE2, _decoder.videoBuf.width / 2, _decoder.videoBuf.height / 2);
+  for (int i = 0; i < TEXTURE_COUNT; i++) {
+    //: Y Texture
+    assert(texIds[i][0] == 0);
+    texIds[i][0] = createTexture(GL_TEXTURE0, _decoder.videoBuf.width, _decoder.videoBuf.height, [_decoder.videoBuf dataY:i]);
+    
+    //: U Texture
+    assert(texIds[i][1] == 0);
+    texIds[i][1] = createTexture(GL_TEXTURE1, _decoder.videoBuf.width / 2, _decoder.videoBuf.height / 2, [_decoder.videoBuf dataU:i]);
+    
+    //: V Texture
+    assert(texIds[i][2] == 0);
+    texIds[i][2] = createTexture(GL_TEXTURE2, _decoder.videoBuf.width / 2, _decoder.videoBuf.height / 2, [_decoder.videoBuf dataV:i]);
+  }
   
   glGenBuffers(1, &_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, _buffer);
@@ -166,15 +168,9 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   
   _program = glCreateProgram();
   glAttachShader(_program, _vertexShader);
-  int logLen;
-  glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &logLen);
-  if (logLen > 0) {
-    char log[2048];
-    glGetProgramInfoLog(_program, sizeof(log), &logLen, log);
-    NSLog(@"%s", log);
-  }
   glAttachShader(_program, _fragmentShader);
   glLinkProgram(_program);
+  int logLen;
   glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &logLen);
   if (logLen > 0) {
     char log[2048];
@@ -233,38 +229,36 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   int width = _decoder.videoBuf.width;
   int height = _decoder.videoBuf.height;
   
-  loadTexture(texIds[0][0], width, height, [_decoder.videoBuf dataY:i], [_decoder.videoBuf strideY:i]);
-  loadTexture(texIds[0][1], width/2, height/2, [_decoder.videoBuf dataU:i], [_decoder.videoBuf strideU:i]);
-  loadTexture(texIds[0][2], width/2, height/2, [_decoder.videoBuf dataV:i], [_decoder.videoBuf strideV:i]);
+  loadTexture(texIds[MOD(i)][0], width, height, [_decoder.videoBuf dataY:i], [_decoder.videoBuf strideY:i]);
+  loadTexture(texIds[MOD(i)][1], width/2, height/2, [_decoder.videoBuf dataU:i], [_decoder.videoBuf strideU:i]);
+  loadTexture(texIds[MOD(i)][2], width/2, height/2, [_decoder.videoBuf dataV:i], [_decoder.videoBuf strideV:i]);
   
-  if (0) {
-    // Bind the rectange texture
-    glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texIds[i % TEXTURE_COUNT][0]);
-    glTexParameterf(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_PRIORITY, 1.0 );
-    
-    // Set a CACHED or SHARED storage hint for requesting VRAM or AGP texturing respectively
-    // GL_STORAGE_PRIVATE_APPLE is the default and specifies normal texturing path
-    glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_STORAGE_HINT_APPLE , GL_STORAGE_CACHED_APPLE);
-    
-    // Eliminate a data copy by the OpenGL framework using the Apple client storage extension
-    glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_TRUE);
-		
-    // Rectangle textures has its limitations compared to using POT textures, for example,
-    // Rectangle textures can't use mipmap filtering
-    glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		
-    // Rectangle textures can't use the GL_REPEAT warp mode
-    glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    
-    // OpenGL likes the GL_BGRA + GL_UNSIGNED_INT_8_8_8_8_REV combination
-    glTexImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA,
-                 _decoder.videoBuf.width, _decoder.videoBuf.height, 0,
-                 GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, [_decoder.videoBuf data:i]);
-  }
+//  // Bind the rectange texture
+//  glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texIds[i % TEXTURE_COUNT][0]);
+//  glTexParameterf(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_PRIORITY, 1.0 );
+//  
+//  // Set a CACHED or SHARED storage hint for requesting VRAM or AGP texturing respectively
+//  // GL_STORAGE_PRIVATE_APPLE is the default and specifies normal texturing path
+//  glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_STORAGE_HINT_APPLE , GL_STORAGE_CACHED_APPLE);
+//  
+//  // Eliminate a data copy by the OpenGL framework using the Apple client storage extension
+//  glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_TRUE);
+//  
+//  // Rectangle textures has its limitations compared to using POT textures, for example,
+//  // Rectangle textures can't use mipmap filtering
+//  glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//  glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//  
+//  // Rectangle textures can't use the GL_REPEAT warp mode
+//  glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//  glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//  
+//  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+//  
+//  // OpenGL likes the GL_BGRA + GL_UNSIGNED_INT_8_8_8_8_REV combination
+//  glTexImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA,
+//               _decoder.videoBuf.width, _decoder.videoBuf.height, 0,
+//               GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, [_decoder.videoBuf data:i]);
 }
 
 - (void) draw:(int)i
@@ -274,11 +268,11 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   
   glUseProgram(_program);
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, texIds[0][0]);
+  glBindTexture(GL_TEXTURE_2D, texIds[MOD(i)][0]);
   glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, texIds[0][1]);
+  glBindTexture(GL_TEXTURE_2D, texIds[MOD(i)][1]);
   glActiveTexture(GL_TEXTURE2);
-  glBindTexture(GL_TEXTURE_2D, texIds[0][2]);
+  glBindTexture(GL_TEXTURE_2D, texIds[MOD(i)][2]);
   glDrawArrays(GL_QUADS, 0, 4);
 }
 

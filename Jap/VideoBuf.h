@@ -21,20 +21,19 @@
   
   struct SwsContext *_img_convert_ctx;
   double _time[TEXTURE_COUNT];
-  CVPixelBufferRef _pixelBuf[TEXTURE_COUNT];
   AVFrame* _frame[TEXTURE_COUNT];
-  GLubyte* _data;
+  int _frameSize;
 }
 
-@property int size;
-@property int width;
-@property int height;
+@property (readonly) int size;
+@property (readonly) GLubyte* data;
+@property (readonly) int width;
+@property (readonly) int height;
 
 - (void)setDecoder:(Decoder*)decoder stream:(AVStream*)stream;
 
 - (double)time:(int)i;
 - (void)setTime:(double)t of:(int)i;
-- (GLubyte*)data:(int)i;
 - (GLubyte*)dataY:(int)i;
 - (GLubyte*)dataU:(int)i;
 - (GLubyte*)dataV:(int)i;

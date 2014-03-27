@@ -72,6 +72,7 @@
 {
   AVCodecContext *avctx = _ic->streams[i]->codec;
   AVCodec *codec = avcodec_find_decoder(avctx->codec_id);
+  
   avctx->codec_id = codec->id;
   avctx->workaround_bugs = 1;
   av_codec_set_lowres(avctx, 0);
