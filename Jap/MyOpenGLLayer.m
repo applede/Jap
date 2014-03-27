@@ -98,6 +98,7 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
 {
   glBindTexture(GL_TEXTURE_2D, texture);
   glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
+  // glTexSubImage2D does memmove
   glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
 }
 
@@ -157,9 +158,14 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   "  float y = texture2D(sampler0, TexCoordOut).r;"
   "  float u = texture2D(sampler1, TexCoordOut).r - 0.5;"
   "  float v = texture2D(sampler2, TexCoordOut).r - 0.5;"
-  "  float r = y + 1.13983 * v;"
-  "  float g = y - 0.39465 * u - 0.58060 * v;"
-  "  float b = y + 2.03211 * u;"
+  // sdtv (BT.601)
+  //  "  float r = y + 1.13983 * v;"
+  //  "  float g = y - 0.39465 * u - 0.58060 * v;"
+  //  "  float b = y + 2.03211 * u;"
+  // hdtv (BT.709)
+  "  float r = y + 1.28033 * v;"
+  "  float g = y - 0.21482 * u - 0.38059 * v;"
+  "  float b = y + 2.12798 * u;"
   "  gl_FragColor = vec4(r, g, b, 1.0);"
   "}";
   

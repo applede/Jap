@@ -11,7 +11,7 @@
 
 @class Decoder;
 
-#define TEXTURE_COUNT		5
+#define TEXTURE_COUNT		2
 
 @interface VideoBuf : NSObject
 {
