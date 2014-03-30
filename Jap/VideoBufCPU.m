@@ -10,6 +10,7 @@
 #import "VideoBufCPU.h"
 #import "Decoder.h"
 #import "Packet.h"
+#import "VideoFrameCPU.h"
 
 #define TEXTURE_WIDTH		1920
 #define TEXTURE_HEIGHT	1080
@@ -28,23 +29,16 @@
     _frameSize = avpicture_get_size(AV_PIX_FMT_YUV420P, _width, _height);
     _size = _frameSize * TEXTURE_COUNT;
     _data = calloc(TEXTURE_COUNT, _frameSize);
+    _frameQue = [[CircularQueue alloc] initSize:TEXTURE_COUNT];
     for (int i = 0; i < TEXTURE_COUNT; i++) {
-      _frame[i] = av_frame_alloc();
-      avpicture_fill((AVPicture*)_frame[i], &_data[_frameSize * i], AV_PIX_FMT_YUV420P, _width, _height);
+      _frameQue[i] = [[VideoFrameCPU alloc] initData:&_data[_frameSize * i] width:_width height:_height];
     }
-    _front = 0;
-    _back = 0;
-    _count = 0;
-    _lock = [[NSLock alloc] init];
   }
   return self;
 }
 
 - (void)dealloc
 {
-  for (int i = 0; i < TEXTURE_COUNT; i++) {
-    av_frame_free(&_frame[i]);
-  }
   free(_data);
 }
 
@@ -85,17 +79,10 @@ GLuint createTexture(GLenum unit, GLsizei width, GLsizei height, GLubyte* data)
   glEnable(GL_UNPACK_CLIENT_STORAGE_APPLE);
   
   for (int i = 0; i < TEXTURE_COUNT; i++) {
-    //: Y Texture
-    assert(_texIds[i][0] == 0);
-    _texIds[i][0] = createTexture(GL_TEXTURE0, _width, _height, [self dataY:i]);
-    
-    //: U Texture
-    assert(_texIds[i][1] == 0);
-    _texIds[i][1] = createTexture(GL_TEXTURE1, _width / 2, _height / 2, [self dataU:i]);
-    
-    //: V Texture
-    assert(_texIds[i][2] == 0);
-    _texIds[i][2] = createTexture(GL_TEXTURE2, _width / 2, _height / 2, [self dataV:i]);
+    VideoFrameCPU* v = _frameQue[i];
+    v.textureY = createTexture(GL_TEXTURE0, _width, _height, v.dataY);
+    v.textureU = createTexture(GL_TEXTURE1, _width / 2, _height / 2, v.dataU);
+    v.textureV = createTexture(GL_TEXTURE2, _width / 2, _height / 2, v.dataV);
   }
 
   [self compileVertex:
@@ -165,117 +152,73 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
 
 - (double)frontTime
 {
-  double t = DBL_MAX;
-  [_lock lock];
-  if (_count > 0) {
-    t = _time[_front];
+  if ([_frameQue isEmpty]) {
+    return DBL_MAX;
   }
-  [_lock unlock];
-  return t;
+  VideoFrameCPU* v = [_frameQue front];
+  return v.time;
 }
 
 - (void)draw
 {
-  loadTexture(_texIds[_front][0], _width, _height, [self dataY:_front], [self strideY:_front]);
-  loadTexture(_texIds[_front][1], _width/2, _height/2, [self dataU:_front], [self strideU:_front]);
-  loadTexture(_texIds[_front][2], _width/2, _height/2, [self dataV:_front], [self strideV:_front]);
+  VideoFrameCPU* v = [_frameQue get];
+  
+  loadTexture(v.textureY, _width, _height, v.dataY, v.strideY);
+  loadTexture(v.textureU, _width/2, _height/2, v.dataU, v.strideU);
+  loadTexture(v.textureV, _width/2, _height/2, v.dataV, v.strideV);
   
   glUseProgram(_program);
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, _texIds[_front][0]);
+  glBindTexture(GL_TEXTURE_2D, v.textureY);
   glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, _texIds[_front][1]);
+  glBindTexture(GL_TEXTURE_2D, v.textureU);
   glActiveTexture(GL_TEXTURE2);
-  glBindTexture(GL_TEXTURE_2D, _texIds[_front][2]);
+  glBindTexture(GL_TEXTURE_2D, v.textureV);
   glDrawArrays(GL_QUADS, 0, 4);
   
-  [self remove];
   [self signal];
-}
-
-- (GLubyte *)dataY:(int)i
-{
-  return _frame[i]->data[0];
-}
-
-- (GLubyte *)dataU:(int)i
-{
-  return _frame[i]->data[1];
-}
-
-- (GLubyte *)dataV:(int)i
-{
-  return _frame[i]->data[2];
-}
-
-- (int)strideY:(int)i
-{
-  return _frame[i]->linesize[0];
-}
-
-- (int)strideU:(int)i
-{
-  return _frame[i]->linesize[1];
-}
-
-- (int)strideV:(int)i
-{
-  return _frame[i]->linesize[2];
-}
-
-- (BOOL)isFull
-{
-  return _count >= TEXTURE_COUNT;
-}
-
-- (void)remove
-{
-  [_lock lock];
-  _front = (_front + 1) % TEXTURE_COUNT;
-  _count--;
-  [_lock unlock];
 }
 
 - (void)decodeLoop
 {
-  AVPacket pkt = { 0 };
-  AVFrame *frame = _frame[_back];
   double pts;
   AVRational tb = _stream->time_base;
   
-  while (!_quit && ![_decoder.videoQue isEmpty] && ![self isFull]) {
-    if ([self getVideoFrame:frame]) {
-      pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
-      [self putTime:pts pos:av_frame_get_pkt_pos(frame)];
+  while (!_quit && ![_decoder.videoQue isEmpty] && ![_frameQue isFull]) {
+    VideoFrameCPU* v = [_frameQue back];
+    if ([self getVideoFrame:v]) {
+      pts = (v.frame->pts == AV_NOPTS_VALUE) ? NAN : v.frame->pts * av_q2d(tb);
+      [self put:v time:pts pos:av_frame_get_pkt_pos(v.frame)];
 //      av_frame_unref(frame);
     }
-    av_free_packet(&pkt);
   }
 }
 
-- (BOOL)getVideoFrame:(AVFrame*)frame
+- (BOOL)getVideoFrame:(VideoFrameCPU*)v
 {
-  Packet* pkt = [_decoder.videoQue remove];
+  Packet* pkt = [_decoder.videoQue get];
   int got_picture = NO;
-  if (avcodec_decode_video2(_stream->codec, frame, &got_picture, pkt.packet) < 0) {
+  if (avcodec_decode_video2(_stream->codec, v.frame, &got_picture, pkt.packet) < 0) {
     NSLog(@"avcodec_decode_video2");
     return NO;
   }
   if (got_picture) {
     double dpts = NAN;
     
-    frame->pts = av_frame_get_best_effort_timestamp(frame);
+    v.frame->pts = av_frame_get_best_effort_timestamp(v.frame);
     
-    if (frame->pts != AV_NOPTS_VALUE)
-      dpts = av_q2d(_stream->time_base) * frame->pts;
+    if (v.frame->pts != AV_NOPTS_VALUE)
+      dpts = av_q2d(_stream->time_base) * v.frame->pts;
     
     return YES;
   }
   return NO;
 }
 
-- (void)putTime:(double)t pos:(int64_t)p
+- (void)put:(VideoFrameCPU*)v time:(double)t pos:(int64_t)p
 {
+  v.time = t;
+  [_frameQue advance];
 //    _img_convert_ctx = sws_getCachedContext(_img_convert_ctx,
 //                                            frame->width, frame->height, frame->format,
 //                                            _width, _height,
@@ -287,12 +230,6 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
 //    int linesize[] = { _width * 4 };
 //    sws_scale(_img_convert_ctx, (const uint8_t* const*)frame->data, frame->linesize, 0, _height,
 //              data, linesize);
-  [_lock lock];
-  _time[_back] = t;
-  _back = (_back + 1) % TEXTURE_COUNT;
-  _count++;
-  [_lock unlock];
-  //  NSLog(@"decoded %d", i);
 }
 
 @end

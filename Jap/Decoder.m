@@ -100,22 +100,22 @@
     NSLog(@"avformat_find_stream_info %d", err);
     return NO;
   }
-  _video_stream = av_find_best_stream(_formatContext, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
-  AVCodecContext* context = _formatContext->streams[_video_stream]->codec;
+  _videoStream = av_find_best_stream(_formatContext, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
+  AVCodecContext* context = _formatContext->streams[_videoStream]->codec;
   if (context->codec_id == AV_CODEC_ID_H264) {
-    _videoBuf = [[VideoBufGPU alloc] initDecoder:self stream:_formatContext->streams[_video_stream]];
+    _videoBuf = [[VideoBufGPU alloc] initDecoder:self stream:_formatContext->streams[_videoStream]];
   } else {
-    _videoBuf = [[VideoBufCPU alloc] initDecoder:self stream:[self openStream:_video_stream]];
+    _videoBuf = [[VideoBufCPU alloc] initDecoder:self stream:[self openStream:_videoStream]];
   }
   
-  _audio_stream = av_find_best_stream(_formatContext, AVMEDIA_TYPE_AUDIO, -1, _video_stream, NULL, 0);
-  _audioBuf = [[AudioBuf alloc] initDecoder:self stream:[self openStream:_audio_stream]];
+  _audioStream = av_find_best_stream(_formatContext, AVMEDIA_TYPE_AUDIO, -1, _videoStream, NULL, 0);
+  _audioBuf = [[AudioBuf alloc] initDecoder:self stream:[self openStream:_audioStream]];
   [_audioBuf prepare];
 
-  _subtitle_stream = av_find_best_stream(_formatContext, AVMEDIA_TYPE_SUBTITLE, -1,
-                                         (_audio_stream >= 0 ? _audio_stream : _video_stream),
+  _subtitleStream = av_find_best_stream(_formatContext, AVMEDIA_TYPE_SUBTITLE, -1,
+                                         (_audioStream >= 0 ? _audioStream : _videoStream),
                                          NULL, 0);
-  _subtitleBuf = [[SubtitleBuf alloc] initDecoder:self stream:[self openStream:_subtitle_stream]];
+  _subtitleBuf = [[SubtitleBuf alloc] initDecoder:self stream:[self openStream:_subtitleStream]];
   
   while (!_quit) {
     while (![_videoQue isFull] && ![_audioQue isFull]) {
@@ -124,12 +124,12 @@
       if (ret < 0) {
         NSLog(@"av_read_frame %d", ret);
       }
-      if (packet.streamIndex == _video_stream)
-        [_videoQue add:packet];
-      else if (packet.streamIndex == _audio_stream)
-        [_audioQue add:packet];
-      else if (packet.streamIndex == _subtitle_stream)
-        [_subtitleQue add:packet];
+      if (packet.streamIndex == _videoStream)
+        [_videoQue put:packet];
+      else if (packet.streamIndex == _audioStream)
+        [_audioQue put:packet];
+      else if (packet.streamIndex == _subtitleStream)
+        [_subtitleQue put:packet];
       // packet will be freed here as it goes out of scope
     }
     dispatch_semaphore_wait(_readSema, DISPATCH_TIME_FOREVER);

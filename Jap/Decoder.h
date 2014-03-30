@@ -23,9 +23,9 @@
   dispatch_semaphore_t _readSema;
 
   AVFormatContext *_formatContext;
-  int _video_stream;
-  int _audio_stream;
-  int _subtitle_stream;
+  int _videoStream;
+  int _audioStream;
+  int _subtitleStream;
   
   AudioBuf* _audioBuf;
   SubtitleBuf* _subtitleBuf;

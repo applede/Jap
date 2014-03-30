@@ -49,7 +49,23 @@
   return r;
 }
 
-- (void)add:obj
+- (id)front
+{
+  [_lock lock];
+  id r = _objs[_front];
+  [_lock unlock];
+  return r;
+}
+
+- (id)back
+{
+  [_lock lock];
+  id r = _objs[_back];
+  [_lock unlock];
+  return r;
+}
+
+- (void)put:obj
 {
   assert(_count < _size);
   [_lock lock];
@@ -59,7 +75,15 @@
   [_lock unlock];
 }
 
-- remove
+- (void)advance
+{
+  [_lock lock];
+  _back = (_back + 1) % _size;
+  _count++;
+  [_lock unlock];
+}
+
+- get
 {
   assert(_count > 0);
   id r;
@@ -67,6 +91,22 @@
   r = _objs[_front];
   _front = (_front + 1) % _size;
   _count--;
+  [_lock unlock];
+  return r;
+}
+
+- (void)setObject:(id)obj atIndexedSubscript:(NSUInteger)i
+{
+  [_lock lock];
+  _objs[i] = obj;
+  [_lock unlock];
+}
+
+- (id)objectAtIndexedSubscript:(NSUInteger)i
+{
+  id r;
+  [_lock lock];
+  r = _objs[i];
   [_lock unlock];
   return r;
 }

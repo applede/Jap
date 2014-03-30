@@ -22,9 +22,18 @@
 
 - initSize:(int)size;
 - (int)count;
+
 - (BOOL)isEmpty;
 - (BOOL)isFull;
-- (void)add:obj;
-- remove;
+
+- front;
+- back;
+
+- (void)put:obj;
+- (void)advance;
+- get;
+
+- objectAtIndexedSubscript:(NSUInteger)idx;
+- (void)setObject:obj atIndexedSubscript:(NSUInteger)idx;
 
 @end

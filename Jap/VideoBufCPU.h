@@ -8,22 +8,17 @@
 
 #import <Foundation/Foundation.h>
 #import "VideoBuf.h"
+#import "CircularQueue.h"
 
 @interface VideoBufCPU : VideoBuf
 {
-  double _time[TEXTURE_COUNT];
-	GLuint _texIds[TEXTURE_COUNT][3];
-  AVFrame* _frame[TEXTURE_COUNT];
+  CircularQueue* _frameQue;
+  
   int _frameSize;
-  struct SwsContext *_imgConvertCtx;
-  
-  int _count;
-  int _front;
-  int _back;
-  NSLock* _lock;
-  
   int _size;
   GLubyte* _data;
+
+  struct SwsContext *_imgConvertCtx;
 }
 
 - initDecoder:(Decoder*)decoder stream:(AVStream*)stream;

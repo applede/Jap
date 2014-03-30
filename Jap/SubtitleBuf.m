@@ -47,7 +47,7 @@
     while (!_quit) {
       @autoreleasepool {
         while (!_quit && ![_decoder.subtitleQue isEmpty] && ![self isFull]) {
-          Packet* packet = [_decoder.subtitleQue remove];
+          Packet* packet = [_decoder.subtitleQue get];
           pts = 0;
           if (packet.pts != AV_NOPTS_VALUE)
             pts = av_q2d(_stream->time_base) * packet.pts;

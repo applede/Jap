@@ -336,7 +336,7 @@ static OSStatus audioCallback(void *inRefCon,
     if ([_decoder.audioQue isEmpty]) {
       return -1;
     }
-    Packet* pkt = [_decoder.audioQue remove];
+    Packet* pkt = [_decoder.audioQue get];
     
 //    if (pkt->data == flush_pkt.data) {
 //      avcodec_flush_buffers(dec);

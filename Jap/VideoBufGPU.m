@@ -127,7 +127,7 @@ static void OnFrameReadyCallback(void *callback_data,
   AVRational tb = _stream->time_base;
  
   while (!_quit && ![_decoder.videoQue isEmpty] && ![_frameQue isFull]) {
-    Packet* pkt = [_decoder.videoQue remove];
+    Packet* pkt = [_decoder.videoQue get];
     assert(pkt.data);
     
     NSData* data = [NSData dataWithBytes:pkt.data length:pkt.size];
