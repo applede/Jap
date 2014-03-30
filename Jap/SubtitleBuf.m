@@ -8,6 +8,7 @@
 
 #import "SubtitleBuf.h"
 #import "Decoder.h"
+#import "Packet.h"
 
 @implementation SubtitleBuf
 
@@ -41,18 +42,17 @@
   dispatch_async(_q, ^{
     AVSubtitle* sub;
     int got_subtitle;
-    AVPacket packet;
     double pts;
     
     while (!_quit) {
       @autoreleasepool {
         while (!_quit && ![_decoder.subtitleQue isEmpty] && ![self isFull]) {
-          [_decoder.subtitleQue get:&packet];
+          Packet* packet = [_decoder.subtitleQue remove];
           pts = 0;
           if (packet.pts != AV_NOPTS_VALUE)
             pts = av_q2d(_stream->time_base) * packet.pts;
           sub = [self back];
-          avcodec_decode_subtitle2(_stream->codec, sub, &got_subtitle, &packet);
+          avcodec_decode_subtitle2(_stream->codec, sub, &got_subtitle, packet.packet);
           if (got_subtitle) {
             if (sub->pts != AV_NOPTS_VALUE)
                 pts = sub->pts / (double)AV_TIME_BASE;
@@ -62,7 +62,7 @@
               assert(sub->rects);
             }
           }
-          av_free_packet(&packet);
+          av_free_packet(packet.packet);
         }
         dispatch_semaphore_wait(_sema, DISPATCH_TIME_FOREVER);
       }

@@ -9,6 +9,7 @@
 #import <libavcodec/avcodec.h>
 #import <libavutil/opt.h>
 #import "Decoder.h"
+#import "Packet.h"
 
 #define PACKET_Q_SIZE 300
 
@@ -19,9 +20,9 @@
   self = [super init];
   if (self) {
     _quit = NO;
-    _videoQue = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
-    _audioQue = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
-    _subtitleQue = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
+    _videoQue = [[CircularQueue alloc] initSize:PACKET_Q_SIZE];
+    _audioQue = [[CircularQueue alloc] initSize:PACKET_Q_SIZE];
+    _subtitleQue = [[CircularQueue alloc] initSize:PACKET_Q_SIZE];
     _readQ = dispatch_queue_create("jap.read", DISPATCH_QUEUE_SERIAL);
     _readSema = dispatch_semaphore_create(0);
     av_register_all();
@@ -116,21 +117,20 @@
                                          NULL, 0);
   _subtitleBuf = [[SubtitleBuf alloc] initDecoder:self stream:[self openStream:_subtitle_stream]];
   
-  AVPacket pkt1, *pkt = &pkt1;
   while (!_quit) {
     while (![_videoQue isFull] && ![_audioQue isFull]) {
-      int ret = av_read_frame(_formatContext, pkt);
+      Packet* packet = [[Packet alloc] init];
+      int ret = av_read_frame(_formatContext, packet.packet);
       if (ret < 0) {
         NSLog(@"av_read_frame %d", ret);
       }
-      if (pkt->stream_index == _video_stream)
-        [_videoQue put:pkt];
-      else if (pkt->stream_index == _audio_stream)
-        [_audioQue put:pkt];
-      else if (pkt->stream_index == _subtitle_stream)
-        [_subtitleQue put:pkt];
-      else
-        av_free_packet(pkt);
+      if (packet.streamIndex == _video_stream)
+        [_videoQue add:packet];
+      else if (packet.streamIndex == _audio_stream)
+        [_audioQue add:packet];
+      else if (packet.streamIndex == _subtitle_stream)
+        [_subtitleQue add:packet];
+      // packet will be freed here as it goes out of scope
     }
     dispatch_semaphore_wait(_readSema, DISPATCH_TIME_FOREVER);
   }

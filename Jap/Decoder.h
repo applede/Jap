@@ -12,7 +12,7 @@
 #import "VideoBufGPU.h"
 #import "AudioBuf.h"
 #import "SubtitleBuf.h"
-#import "PacketQueue.h"
+#import "CircularQueue.h"
 
 @interface Decoder : NSObject
 {
@@ -31,9 +31,9 @@
   SubtitleBuf* _subtitleBuf;
 }
 
-@property (readonly) PacketQueue* videoQue;
-@property (readonly) PacketQueue* audioQue;
-@property (readonly) PacketQueue* subtitleQue;
+@property (readonly) CircularQueue* videoQue;
+@property (readonly) CircularQueue* audioQue;
+@property (readonly) CircularQueue* subtitleQue;
 @property (readonly) VideoBuf* videoBuf;
 @property (weak) CATextLayer* subtitle;
 

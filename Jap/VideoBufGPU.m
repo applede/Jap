@@ -10,6 +10,7 @@
 #import "Decoder.h"
 #import "VideoFrame.h"
 #import "Queue.h"
+#import "Packet.h"
 
 NSString* const kDisplayTimeKey = @"display_time";
 
@@ -123,11 +124,10 @@ static void OnFrameReadyCallback(void *callback_data,
 
 - (void)decodeLoop
 {
-  AVPacket pkt = { 0 };
   AVRational tb = _stream->time_base;
  
   while (!_quit && ![_decoder.videoQue isEmpty] && ![_frameQue isFull]) {
-    [_decoder.videoQue get:&pkt];
+    Packet* pkt = [_decoder.videoQue remove];
     assert(pkt.data);
     
     NSData* data = [NSData dataWithBytes:pkt.data length:pkt.size];
@@ -136,7 +136,7 @@ static void OnFrameReadyCallback(void *callback_data,
     OSStatus r = VDADecoderDecode(_vdaDecoder, 0, (__bridge CFDataRef)data,
                                   (__bridge CFDictionaryRef)frame_info);
     assert(r == 0);
-    av_free_packet(&pkt);
+    av_free_packet(pkt.packet);
   }
 }
 

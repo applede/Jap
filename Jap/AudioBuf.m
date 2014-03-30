@@ -10,6 +10,7 @@
 #import <libswresample/swresample.h>
 #import "AudioBuf.h"
 #import "Decoder.h"
+#import "Packet.h"
 
 #define SAMPLE_SIZE sizeof(float)
 
@@ -335,7 +336,7 @@ static OSStatus audioCallback(void *inRefCon,
     if ([_decoder.audioQue isEmpty]) {
       return -1;
     }
-    [_decoder.audioQue get:pkt];
+    Packet* pkt = [_decoder.audioQue remove];
     
 //    if (pkt->data == flush_pkt.data) {
 //      avcodec_flush_buffers(dec);
@@ -345,7 +346,7 @@ static OSStatus audioCallback(void *inRefCon,
 //        _audio_frame_next_pts = _stream->start_time;
 //    }
     
-    *pkt_temp = *pkt;
+    *pkt_temp = *pkt.packet;
   }
 }
 

@@ -9,6 +9,7 @@
 #import <OpenGL/gl.h>
 #import "VideoBufCPU.h"
 #import "Decoder.h"
+#import "Packet.h"
 
 #define TEXTURE_WIDTH		1920
 #define TEXTURE_HEIGHT	1080
@@ -243,7 +244,7 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   AVRational tb = _stream->time_base;
   
   while (!_quit && ![_decoder.videoQue isEmpty] && ![self isFull]) {
-    if ([self getVideoFrame:frame packet:&pkt]) {
+    if ([self getVideoFrame:frame]) {
       pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
       [self putTime:pts pos:av_frame_get_pkt_pos(frame)];
 //      av_frame_unref(frame);
@@ -252,11 +253,11 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   }
 }
 
-- (BOOL)getVideoFrame:(AVFrame*)frame packet:(AVPacket*)pkt
+- (BOOL)getVideoFrame:(AVFrame*)frame
 {
-  [_decoder.videoQue get:pkt];
+  Packet* pkt = [_decoder.videoQue remove];
   int got_picture = NO;
-  if (avcodec_decode_video2(_stream->codec, frame, &got_picture, pkt) < 0) {
+  if (avcodec_decode_video2(_stream->codec, frame, &got_picture, pkt.packet) < 0) {
     NSLog(@"avcodec_decode_video2");
     return NO;
   }

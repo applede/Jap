@@ -25,13 +25,15 @@
 		1816DFB318D6E7CA00FCE287 /* VideoBuf.m in Sources */ = {isa = PBXBuildFile; fileRef = 1816DFB218D6E7CA00FCE287 /* VideoBuf.m */; };
 		181DF7EE18DB164000FF7739 /* AudioBuf.m in Sources */ = {isa = PBXBuildFile; fileRef = 181DF7ED18DB164000FF7739 /* AudioBuf.m */; };
 		181DF7F018DB431700FF7739 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 181DF7EF18DB431700FF7739 /* libswresample.a */; };
+		18619F7218E81B3400781326 /* CircularQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F7118E81B3400781326 /* CircularQueue.m */; };
+		18619F7518E828C100781326 /* Packet.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F7418E828C100781326 /* Packet.m */; };
+		18619F7818E82BD800781326 /* VideoFrameCPU.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F7718E82BD800781326 /* VideoFrameCPU.m */; };
 		1897644D18DE764900673BD3 /* MyOpenGLLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1897644C18DE764900673BD3 /* MyOpenGLLayer.m */; };
 		1897645018DE8DC800673BD3 /* MyView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1897644F18DE8DC800673BD3 /* MyView.m */; };
 		1897645318DF228B00673BD3 /* SubtitleBuf.m in Sources */ = {isa = PBXBuildFile; fileRef = 1897645218DF228B00673BD3 /* SubtitleBuf.m */; };
 		18E183DF18D7142300A35231 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E183DE18D7142300A35231 /* libavformat.a */; };
 		18E183E118D7144A00A35231 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E183E018D7144A00A35231 /* libz.dylib */; };
 		18E183E318D714C700A35231 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E183E218D714C700A35231 /* libbz2.dylib */; };
-		18E183E618D7238B00A35231 /* PacketQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E183E518D7238B00A35231 /* PacketQueue.m */; };
 		18E183E818D743FE00A35231 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E183E718D743FE00A35231 /* libswscale.a */; };
 		18F420CE18E4830200B5F2F8 /* VideoDecodeAcceleration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18F420CD18E4830200B5F2F8 /* VideoDecodeAcceleration.framework */; };
 		18F420D718E5BAE200B5F2F8 /* VideoBufGPU.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F420D618E5BAE200B5F2F8 /* VideoBufGPU.m */; };
@@ -81,6 +83,12 @@
 		181DF7ED18DB164000FF7739 /* AudioBuf.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioBuf.m; sourceTree = "<group>"; };
 		181DF7EF18DB431700FF7739 /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswresample.a; path = ../../../../usr/local/lib/libswresample.a; sourceTree = "<group>"; };
 		181DF7F118DDBFDD00FF7739 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
+		18619F7018E81B3400781326 /* CircularQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CircularQueue.h; sourceTree = "<group>"; };
+		18619F7118E81B3400781326 /* CircularQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CircularQueue.m; sourceTree = "<group>"; };
+		18619F7318E828C100781326 /* Packet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Packet.h; sourceTree = "<group>"; };
+		18619F7418E828C100781326 /* Packet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Packet.m; sourceTree = "<group>"; };
+		18619F7618E82BD800781326 /* VideoFrameCPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoFrameCPU.h; sourceTree = "<group>"; };
+		18619F7718E82BD800781326 /* VideoFrameCPU.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoFrameCPU.m; sourceTree = "<group>"; };
 		1897644B18DE764900673BD3 /* MyOpenGLLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyOpenGLLayer.h; sourceTree = "<group>"; };
 		1897644C18DE764900673BD3 /* MyOpenGLLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyOpenGLLayer.m; sourceTree = "<group>"; };
 		1897644E18DE8DC800673BD3 /* MyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyView.h; sourceTree = "<group>"; };
@@ -90,8 +98,6 @@
 		18E183DE18D7142300A35231 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = ../../../../usr/local/lib/libavformat.a; sourceTree = "<group>"; };
 		18E183E018D7144A00A35231 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		18E183E218D714C700A35231 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
-		18E183E418D7238B00A35231 /* PacketQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PacketQueue.h; sourceTree = "<group>"; };
-		18E183E518D7238B00A35231 /* PacketQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PacketQueue.m; sourceTree = "<group>"; };
 		18E183E718D743FE00A35231 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswscale.a; path = ../../../../usr/local/lib/libswscale.a; sourceTree = "<group>"; };
 		18F420CD18E4830200B5F2F8 /* VideoDecodeAcceleration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoDecodeAcceleration.framework; path = System/Library/Frameworks/VideoDecodeAcceleration.framework; sourceTree = SDKROOT; };
 		18F420D518E5BAE200B5F2F8 /* VideoBufGPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoBufGPU.h; sourceTree = "<group>"; };
@@ -253,12 +259,16 @@
 				18F420D618E5BAE200B5F2F8 /* VideoBufGPU.m */,
 				1897645118DF228B00673BD3 /* SubtitleBuf.h */,
 				1897645218DF228B00673BD3 /* SubtitleBuf.m */,
-				18E183E418D7238B00A35231 /* PacketQueue.h */,
-				18E183E518D7238B00A35231 /* PacketQueue.m */,
 				18F420DB18E7B5A500B5F2F8 /* Queue.h */,
 				18F420DC18E7B5A500B5F2F8 /* Queue.m */,
 				18F420DE18E7BC0B00B5F2F8 /* VideoFrame.h */,
 				18F420DF18E7BC0B00B5F2F8 /* VideoFrame.m */,
+				18619F7618E82BD800781326 /* VideoFrameCPU.h */,
+				18619F7718E82BD800781326 /* VideoFrameCPU.m */,
+				18619F7018E81B3400781326 /* CircularQueue.h */,
+				18619F7118E81B3400781326 /* CircularQueue.m */,
+				18619F7318E828C100781326 /* Packet.h */,
+				18619F7418E828C100781326 /* Packet.m */,
 			);
 			name = Decoder;
 			sourceTree = "<group>";
@@ -365,15 +375,17 @@
 				1816DFB318D6E7CA00FCE287 /* VideoBuf.m in Sources */,
 				1897645018DE8DC800673BD3 /* MyView.m in Sources */,
 				18F420DD18E7B5A500B5F2F8 /* Queue.m in Sources */,
+				18619F7818E82BD800781326 /* VideoFrameCPU.m in Sources */,
 				18F420E018E7BC0B00B5F2F8 /* VideoFrame.m in Sources */,
+				18619F7518E828C100781326 /* Packet.m in Sources */,
 				1897644D18DE764900673BD3 /* MyOpenGLLayer.m in Sources */,
 				1897645318DF228B00673BD3 /* SubtitleBuf.m in Sources */,
 				1816DF7E18D5D84200FCE287 /* main.m in Sources */,
 				181DF7EE18DB164000FF7739 /* AudioBuf.m in Sources */,
 				18F420DA18E5BCD400B5F2F8 /* VideoBufCPU.m in Sources */,
+				18619F7218E81B3400781326 /* CircularQueue.m in Sources */,
 				18F420D718E5BAE200B5F2F8 /* VideoBufGPU.m in Sources */,
 				1816DFAA18D5EA0500FCE287 /* Decoder.m in Sources */,
-				18E183E618D7238B00A35231 /* PacketQueue.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
