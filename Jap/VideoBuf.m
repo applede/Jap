@@ -36,6 +36,16 @@
   return _height;
 }
 
+- (float)textureWidth
+{
+  return _width;
+}
+
+- (float)textureHeight
+{
+  return _height;
+}
+
 GLuint compileShader(GLenum type, const GLchar* src)
 {
   GLuint shader = glCreateShader(type);

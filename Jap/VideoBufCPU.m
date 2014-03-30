@@ -47,6 +47,16 @@
   free(_data);
 }
 
+- (float)textureWidth
+{
+  return 1.0;
+}
+
+- (float)textureHeight
+{
+  return 1.0;
+}
+
 GLuint createTexture(GLenum unit, GLsizei width, GLsizei height, GLubyte* data)
 {
   GLuint texture = 0;
@@ -152,6 +162,17 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
 }
 
+- (double)frontTime
+{
+  double t = DBL_MAX;
+  [_lock lock];
+  if (_count > 0) {
+    t = _time[_front];
+  }
+  [_lock unlock];
+  return t;
+}
+
 - (void)draw
 {
   loadTexture(_texIds[_front][0], _width, _height, [self dataY:_front], [self strideY:_front]);
@@ -166,10 +187,9 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(GL_TEXTURE_2D, _texIds[_front][2]);
   glDrawArrays(GL_QUADS, 0, 4);
-}
-
-- (void)setDecoder:(Decoder *)decoder stream:(AVStream *)stream
-{
+  
+  [self remove];
+  [self signal];
 }
 
 - (GLubyte *)dataY:(int)i
@@ -207,7 +227,15 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   return _count >= TEXTURE_COUNT;
 }
 
-- (void)decode
+- (void)remove
+{
+  [_lock lock];
+  _front = (_front + 1) % TEXTURE_COUNT;
+  _count--;
+  [_lock unlock];
+}
+
+- (void)decodeLoop
 {
   AVPacket pkt = { 0 };
   AVFrame *frame = _frame[_back];

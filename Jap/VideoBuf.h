@@ -28,6 +28,8 @@
 
 - (int)width;
 - (int)height;
+- (float)textureWidth;
+- (float)textureHeight;
 
 - (void)compileVertex:(const char*)vertexSrc fragment:(const char*)fragmentSrc;
 - (void)prepare:(CGLContextObj)cgl;

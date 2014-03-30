@@ -22,9 +22,6 @@
     _videoQue = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
     _audioQue = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
     _subtitleQue = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
-//    _videoBuf = [[VideoBuf alloc] init];
-//    audioBuf_ = [[AudioBuf alloc] init];
-//    subtitleBuf_ = [[SubtitleBuf alloc] init];
     _readQ = dispatch_queue_create("jap.read", DISPATCH_QUEUE_SERIAL);
     _readSema = dispatch_semaphore_create(0);
     av_register_all();

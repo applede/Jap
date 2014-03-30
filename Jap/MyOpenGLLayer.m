@@ -85,20 +85,17 @@
   GLfloat vw = rect.size.width * s;
   GLfloat vh = rect.size.height * s;
 	
-  GLfloat w = _decoder.videoBuf.width;
-  GLfloat h = _decoder.videoBuf.height;
-#if 1
   [_decoder.videoBuf viewWidth:vw height:vh];
-#endif
   [self calcRect];
   
   GLfloat x0 = _movieRect.origin.x;
   GLfloat y0 = _movieRect.origin.y;
   GLfloat x1 = _movieRect.origin.x + _movieRect.size.width;
   GLfloat y1 = _movieRect.origin.y + _movieRect.size.height;
+  GLfloat w = [_decoder.videoBuf textureWidth];
+  GLfloat h = [_decoder.videoBuf textureHeight];
   GLfloat vertices[16] = {
     x0, y0,   x0, y1,   x1, y1,   x1, y0,
-//    0, 1,     0, 0,     1, 0,     1, 1
     0, h,     0, 0,     w, 0,     w, h
   };
   glBindBuffer(GL_ARRAY_BUFFER, buffer_);
