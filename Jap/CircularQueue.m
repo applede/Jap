@@ -31,6 +31,11 @@
   }
 }
 
+- (int)count
+{
+  return _count;
+}
+
 - (BOOL)isEmpty
 {
   BOOL r;

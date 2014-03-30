@@ -9,6 +9,9 @@
 #import "SubtitleBuf.h"
 #import "Decoder.h"
 #import "Packet.h"
+#import "SubtitleFrame.h"
+
+#define QSIZE 32
 
 @implementation SubtitleBuf
 
@@ -16,53 +19,42 @@
 {
   self = [super init];
   if (self) {
-    _q = dispatch_queue_create("jap.subtitle", DISPATCH_QUEUE_SERIAL);
-    _front = 0;
-    _back = 0;
-    _size = 32;
-    _count = 0;
-    _sub = calloc(_size, sizeof(*_sub));
-    _time = calloc(_size, sizeof(*_time));
-    _lock = [[NSLock alloc] init];
-    _sema = dispatch_semaphore_create(0);
     _decoder = decoder;
     _stream = stream;
+    _sema = dispatch_semaphore_create(0);
+    _frameQue = [[CircularQueue alloc] initSize:QSIZE];
+    for (int i = 0; i < QSIZE; i++) {
+      _frameQue[i] = [[SubtitleFrame alloc] init];
+    }
   }
   return self;
 }
 
-- (void)dealloc
-{
-  free(_sub);
-  free(_time);
-}
-
 - (void)start
 {
-  dispatch_async(_q, ^{
-    AVSubtitle* sub;
+  dispatch_queue_t q = dispatch_queue_create("jap.subtitle", DISPATCH_QUEUE_SERIAL);
+  dispatch_async(q, ^{
     int got_subtitle;
     double pts;
     
     while (!_quit) {
       @autoreleasepool {
-        while (!_quit && ![_decoder.subtitleQue isEmpty] && ![self isFull]) {
+        while (!_quit && ![_decoder.subtitleQue isEmpty] && ![_frameQue isFull]) {
           Packet* packet = [_decoder.subtitleQue get];
           pts = 0;
           if (packet.pts != AV_NOPTS_VALUE)
             pts = av_q2d(_stream->time_base) * packet.pts;
-          sub = [self back];
-          avcodec_decode_subtitle2(_stream->codec, sub, &got_subtitle, packet.packet);
+          SubtitleFrame* s = [_frameQue back];
+          avcodec_decode_subtitle2(_stream->codec, s.sub, &got_subtitle, packet.packet);
           if (got_subtitle) {
-            if (sub->pts != AV_NOPTS_VALUE)
-                pts = sub->pts / (double)AV_TIME_BASE;
-            if (sub->rects) {
-              [self put:pts];
+            if (s.pts != AV_NOPTS_VALUE)
+                pts = s.pts / (double)AV_TIME_BASE;
+            if (s.rects) {
+              [self put:s time:pts];
             } else {
-              assert(sub->rects);
+              assert(s.rects);
             }
           }
-          av_free_packet(packet.packet);
         }
         dispatch_semaphore_wait(_sema, DISPATCH_TIME_FOREVER);
       }
@@ -70,52 +62,19 @@
   });
 }
 
-- (BOOL)isEmpty
+- (void)put:(SubtitleFrame*)s time:(double)time
 {
-  return _count == 0;
+  s.time = time;
+  [_frameQue advance];
 }
 
-- (BOOL)isFull
+- (SubtitleFrame*)get:(double)time
 {
-  return _count == _size;
-}
-
-- (AVSubtitle*)back
-{
-  return &_sub[_back];
-}
-
-- (void)put:(double)time
-{
-  [_lock lock];
-  assert(_count < _size);
-  _time[_back] = time;
-  _back = (_back + 1) % _size;
-  _count++;
-  [_lock unlock];
-}
-
-- (AVSubtitle*)get:(double)time startTime:(double*)s
-{
-  AVSubtitle* ret = nil;
-  [_lock lock];
-  if (_count > 0) {
-    if (_time[_front] <= time) {
-      ret = &_sub[_front];
-      *s = _time[_front];
-    }
+  SubtitleFrame* s = [_frameQue front];
+  if (s.time <= time) {
+    return s;
   }
-  [_lock unlock];
-  return ret;
-}
-
-- (void)remove
-{
-  [_lock lock];
-  avsubtitle_free(&_sub[_front]);
-  _front = (_front + 1) % _size;
-  _count--;
-  [_lock unlock];
+  return nil;
 }
 
 static const char* findSub(const char* str)
@@ -149,22 +108,22 @@ static int convert(const char* src, char* dst)
 
 - (void)display:(CATextLayer *)layer time:(double)t
 {
-  if ([self isEmpty]) {
+  if ([_frameQue isEmpty]) {
     return;
   }
-  double start;
-  AVSubtitle* sub = [self get:t startTime:&start];
-  if (sub) {
-    if (start + sub->end_display_time / 1000.0 <= t) {
+  SubtitleFrame* s = [self get:t];
+  if (s) {
+    if (s.endTime <= t) {
       layer.string = @"";
-      [self remove];
+      avsubtitle_free(s.sub);
+      [_frameQue get];
     } else {
       char buf[2048];
-      convert(findSub(sub->rects[0]->ass), buf);
+      convert(findSub(s.ass), buf);
       layer.string = [NSString stringWithUTF8String:buf];
     }
   }
-  if (_count < _size / 3) {
+  if ([_frameQue count] < QSIZE / 3) {
     dispatch_semaphore_signal(_sema);
   }
 }

@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <libavformat/avformat.h>
 #import <Quartz/Quartz.h>
+#import "CircularQueue.h"
 
 @class Decoder;
 
@@ -16,17 +17,9 @@
 {
   Decoder* _decoder;
   AVStream* _stream;
-  dispatch_queue_t _q;
   dispatch_semaphore_t _sema;
   BOOL _quit;
-  
-  NSLock* _lock;
-  int _size;
-  int _count;
-  int _front;
-  int _back;
-  double *_time;
-  AVSubtitle *_sub;
+  CircularQueue* _frameQue;
 }
 
 - (id)initDecoder:(Decoder*)decoder stream:(AVStream*)stream;
