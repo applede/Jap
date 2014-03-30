@@ -66,7 +66,6 @@ static void OnFrameReadyCallback(void *callback_data,
 
 - (void)onFrameReady:(CVPixelBufferRef)image time:(double)time
 {
-  NSLog(@"time %.3f", time);
   VideoFrame* v = [[VideoFrame alloc] initImage:image time:time];
   [_frameQue add:v];
 }

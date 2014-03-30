@@ -25,7 +25,6 @@
 //    _videoBuf = [[VideoBuf alloc] init];
 //    audioBuf_ = [[AudioBuf alloc] init];
 //    subtitleBuf_ = [[SubtitleBuf alloc] init];
-    _decodeQ = dispatch_queue_create("jap.decode", DISPATCH_QUEUE_SERIAL);
     _readQ = dispatch_queue_create("jap.read", DISPATCH_QUEUE_SERIAL);
     _readSema = dispatch_semaphore_create(0);
     av_register_all();
@@ -147,15 +146,6 @@
     avformat_close_input(&_formatContext);
   }
   [_audioBuf close];
-}
-
-- (void)decodeVideoBuffer
-{
-  dispatch_async(_decodeQ, ^{
-    @autoreleasepool {
-      [_videoBuf decodeLoop];
-    }
-  });
 }
 
 - (void)checkQueue

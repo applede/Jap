@@ -28,11 +28,4 @@
 
 - initDecoder:(Decoder*)decoder stream:(AVStream*)stream;
 
-- (GLubyte*)dataY:(int)i;
-- (GLubyte*)dataU:(int)i;
-- (GLubyte*)dataV:(int)i;
-- (int)strideY:(int)i;
-- (int)strideU:(int)i;
-- (int)strideV:(int)i;
-
 @end
