@@ -26,36 +26,6 @@
   return ctx;
 }
 
-void makeOrtho(GLfloat width, GLfloat height, GLfloat* mat)
-{
-  GLfloat left = 0;
-  GLfloat right = width;
-  GLfloat bottom = 0;
-  GLfloat top = height;
-  GLfloat near = -1;
-  GLfloat far = 1;
-  
-  mat[0] = 2.0 / (right - left);
-  mat[1] = 0;
-  mat[2] = 0;
-  mat[3] = 0;
-  
-  mat[4] = 0;
-  mat[5] = 2.0 / (top - bottom);
-  mat[6] = 0;
-  mat[7] = 0;
-  
-  mat[8] = 0;
-  mat[9] = 0;
-  mat[10] = -2.0 / (far - near);
-  mat[11] = 0;
-  
-  mat[12] = -(right + left) / (right - left);
-  mat[13] = -(top + bottom) / (top - bottom);
-  mat[14] = -(far + near) / (far - near);
-  mat[15] = 1.0;
-}
-
 - (void)initGL:(NSOpenGLContext*)ctx
 {
   [ctx makeCurrentContext];
@@ -77,7 +47,7 @@ void makeOrtho(GLfloat width, GLfloat height, GLfloat* mat)
                   forLayerTime:(CFTimeInterval)lt displayTime:(const CVTimeStamp *)ts
 {
   double t = [_decoder masterClock];
-  return _decoder.videoBuf && [_decoder.videoBuf time:_current] <= t;
+  return _decoder.videoBuf && [_decoder.videoBuf frontTime] <= t;
 }
 
 - (void)drawInOpenGLContext:(NSOpenGLContext *)context
@@ -85,52 +55,16 @@ void makeOrtho(GLfloat width, GLfloat height, GLfloat* mat)
                forLayerTime:(CFTimeInterval)t displayTime:(const CVTimeStamp *)ts;
 {
   @autoreleasepool {
-    [self load:_current];
-    [self draw:_current];
+    [self draw];
     [_decoder displaySubtitle];
-    [_decoder decodeVideoBuffer:_current + ADVANCE];
-    _current++;
   }
 }
 
-- (void) load:(int)i
-{
-  [_decoder.videoBuf load:i];
-  
-//  // Bind the rectange texture
-//  glBindTexture(GL_TEXTURE_RECTANGLE_EXT, texIds[i % TEXTURE_COUNT][0]);
-//  glTexParameterf(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_PRIORITY, 1.0 );
-//  
-//  // Set a CACHED or SHARED storage hint for requesting VRAM or AGP texturing respectively
-//  // GL_STORAGE_PRIVATE_APPLE is the default and specifies normal texturing path
-//  glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_STORAGE_HINT_APPLE , GL_STORAGE_CACHED_APPLE);
-//  
-//  // Eliminate a data copy by the OpenGL framework using the Apple client storage extension
-//  glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_TRUE);
-//  
-//  // Rectangle textures has its limitations compared to using POT textures, for example,
-//  // Rectangle textures can't use mipmap filtering
-//  glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//  glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//  
-//  // Rectangle textures can't use the GL_REPEAT warp mode
-//  glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-//  glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//  
-//  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-//  
-//  // OpenGL likes the GL_BGRA + GL_UNSIGNED_INT_8_8_8_8_REV combination
-//  glTexImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA,
-//               _decoder.videoBuf.width, _decoder.videoBuf.height, 0,
-//               GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, [_decoder.videoBuf data:i]);
-}
-
-- (void) draw:(int)i
+- (void)draw
 {
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
-  
-  [_decoder.videoBuf draw:i];
+  [_decoder.videoBuf draw];
 }
 
 - (BOOL)frameChanged
@@ -154,13 +88,7 @@ void makeOrtho(GLfloat width, GLfloat height, GLfloat* mat)
   GLfloat w = _decoder.videoBuf.width;
   GLfloat h = _decoder.videoBuf.height;
 #if 1
-  GLuint program = _decoder.videoBuf.program;
-  glUseProgram(program);
-  GLint ortho = glGetUniformLocation(program, "Ortho");
-  assert(ortho >= 0);
-  GLfloat orthoMat[16];
-  makeOrtho(vw, vh, orthoMat);
-  glUniformMatrix4fv(ortho, 1, NO, orthoMat);
+  [_decoder.videoBuf viewWidth:vw height:vh];
 #endif
   [self calcRect];
   
@@ -208,11 +136,7 @@ void makeOrtho(GLfloat width, GLfloat height, GLfloat* mat)
 - (void)open:(NSString *)path
 {
   [_decoder open:path];
-  [self.openGLContext makeCurrentContext];
   [_decoder.videoBuf prepare:self.openGLContext.CGLContextObj];
-  for (int i = 0; i < ADVANCE; ++i) {
-    [_decoder decodeVideoBuffer:_current + i];
-  }
   self.asynchronous = YES;
 }
 

@@ -9,17 +9,17 @@
 #import <Foundation/Foundation.h>
 #import <VideoDecodeAcceleration/VDADecoder.h>
 #import "VideoBuf.h"
+#import "Queue.h"
 
 @interface VideoBufGPU : VideoBuf
 {
-  VDADecoder vda_decoder_;
-  CGLContextObj cgl_ctx_;
-  CVPixelBufferRef image_[TEXTURE_COUNT];
-  IOSurfaceRef surface_[TEXTURE_COUNT];
-  GLuint texIds_[TEXTURE_COUNT];
+  VDADecoder _vdaDecoder;
+  CGLContextObj _cglCtx;
+  Queue* _frameQue;
+  GLuint _texture;
 }
 
 - initDecoder:(Decoder*)decoder stream:(AVStream *)stream;
-- (void)onFrameReady:(CVImageBufferRef)image time:(double)time index:(int)i;
+- (void)onFrameReady:(CVImageBufferRef)image time:(double)time;
 
 @end

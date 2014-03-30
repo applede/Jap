@@ -11,14 +11,20 @@
 
 @interface VideoBufCPU : VideoBuf
 {
-	GLuint texIds_[TEXTURE_COUNT][3];
-  AVFrame* frame_[TEXTURE_COUNT];
-  int frameSize_;
-  struct SwsContext *img_convert_ctx_;
+  double _time[TEXTURE_COUNT];
+	GLuint _texIds[TEXTURE_COUNT][3];
+  AVFrame* _frame[TEXTURE_COUNT];
+  int _frameSize;
+  struct SwsContext *_imgConvertCtx;
+  
+  int _count;
+  int _front;
+  int _back;
+  NSLock* _lock;
+  
+  int _size;
+  GLubyte* _data;
 }
-
-@property (readonly) int size;
-@property (readonly) GLubyte* data;
 
 - initDecoder:(Decoder*)decoder stream:(AVStream*)stream;
 

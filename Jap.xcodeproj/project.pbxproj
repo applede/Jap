@@ -36,6 +36,8 @@
 		18F420CE18E4830200B5F2F8 /* VideoDecodeAcceleration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18F420CD18E4830200B5F2F8 /* VideoDecodeAcceleration.framework */; };
 		18F420D718E5BAE200B5F2F8 /* VideoBufGPU.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F420D618E5BAE200B5F2F8 /* VideoBufGPU.m */; };
 		18F420DA18E5BCD400B5F2F8 /* VideoBufCPU.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F420D918E5BCD400B5F2F8 /* VideoBufCPU.m */; };
+		18F420DD18E7B5A500B5F2F8 /* Queue.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F420DC18E7B5A500B5F2F8 /* Queue.m */; };
+		18F420E018E7BC0B00B5F2F8 /* VideoFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F420DF18E7BC0B00B5F2F8 /* VideoFrame.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -96,6 +98,10 @@
 		18F420D618E5BAE200B5F2F8 /* VideoBufGPU.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoBufGPU.m; sourceTree = "<group>"; };
 		18F420D818E5BCD400B5F2F8 /* VideoBufCPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoBufCPU.h; sourceTree = "<group>"; };
 		18F420D918E5BCD400B5F2F8 /* VideoBufCPU.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoBufCPU.m; sourceTree = "<group>"; };
+		18F420DB18E7B5A500B5F2F8 /* Queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Queue.h; sourceTree = "<group>"; };
+		18F420DC18E7B5A500B5F2F8 /* Queue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Queue.m; sourceTree = "<group>"; };
+		18F420DE18E7BC0B00B5F2F8 /* VideoFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoFrame.h; sourceTree = "<group>"; };
+		18F420DF18E7BC0B00B5F2F8 /* VideoFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoFrame.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -249,6 +255,10 @@
 				1897645218DF228B00673BD3 /* SubtitleBuf.m */,
 				18E183E418D7238B00A35231 /* PacketQueue.h */,
 				18E183E518D7238B00A35231 /* PacketQueue.m */,
+				18F420DB18E7B5A500B5F2F8 /* Queue.h */,
+				18F420DC18E7B5A500B5F2F8 /* Queue.m */,
+				18F420DE18E7BC0B00B5F2F8 /* VideoFrame.h */,
+				18F420DF18E7BC0B00B5F2F8 /* VideoFrame.m */,
 			);
 			name = Decoder;
 			sourceTree = "<group>";
@@ -354,6 +364,8 @@
 				1816DF8518D5D84200FCE287 /* AppDelegate.m in Sources */,
 				1816DFB318D6E7CA00FCE287 /* VideoBuf.m in Sources */,
 				1897645018DE8DC800673BD3 /* MyView.m in Sources */,
+				18F420DD18E7B5A500B5F2F8 /* Queue.m in Sources */,
+				18F420E018E7BC0B00B5F2F8 /* VideoFrame.m in Sources */,
 				1897644D18DE764900673BD3 /* MyOpenGLLayer.m in Sources */,
 				1897645318DF228B00673BD3 /* SubtitleBuf.m in Sources */,
 				1816DF7E18D5D84200FCE287 /* main.m in Sources */,

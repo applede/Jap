@@ -8,9 +8,10 @@
 
 #import "VideoBufGPU.h"
 #import "Decoder.h"
+#import "VideoFrame.h"
+#import "Queue.h"
 
 NSString* const kDisplayTimeKey = @"display_time";
-NSString* const kIndexKey = @"index";
 
 static void OnFrameReadyCallback(void *callback_data,
                                  CFDictionaryRef frame_info,
@@ -24,8 +25,7 @@ static void OnFrameReadyCallback(void *callback_data,
 //    CGSize size = CVImageBufferGetDisplaySize(image_buffer);
     NSDictionary* info = (__bridge NSDictionary*)frame_info;
     VideoBufGPU* videoBuf = (__bridge VideoBufGPU*)callback_data;
-    [videoBuf onFrameReady:image_buffer time:[info[kDisplayTimeKey] doubleValue]
-                     index:[info[kIndexKey] intValue]];
+    [videoBuf onFrameReady:image_buffer time:[info[kDisplayTimeKey] doubleValue]];
   }
 }
 
@@ -33,37 +33,17 @@ static void OnFrameReadyCallback(void *callback_data,
 
 - (id)initDecoder:(Decoder *)decoder stream:(AVStream *)stream
 {
-  self = [super init];
+  self = [super initDecoder:decoder stream:stream];
   if (self) {
-    decoder_ = decoder;
-    stream_ = stream;
-    AVCodecContext* context = stream->codec;
-    width_ = context->width;
-    height_ = context->height;
+    _frameQue = [[Queue alloc] initSize:8];
     int sourceFormat = 'avc1';
-    NSDictionary* config = @{(id)kVDADecoderConfiguration_Width:@(width_),
-                             (id)kVDADecoderConfiguration_Height:@(height_),
+    AVCodecContext* context = stream->codec;
+    NSDictionary* config = @{(id)kVDADecoderConfiguration_Width:@(_width),
+                             (id)kVDADecoderConfiguration_Height:@(_height),
                              (id)kVDADecoderConfiguration_SourceFormat:@(sourceFormat),
                              (id)kVDADecoderConfiguration_avcCData:[NSData dataWithBytes:context->extradata
                                                                                   length:context->extradata_size]};
-//    NSMutableDictionary* config = [NSMutableDictionary dictionary];
-//    [config setObject:[NSNumber numberWithInt:width]
-//               forKey:(NSString*)kVDADecoderConfiguration_Width];
-//    [config setObject:[NSNumber numberWithInt:height]
-//               forKey:(NSString*)kVDADecoderConfiguration_Height];
-//    [config setObject:[NSNumber numberWithInt:source_format]
-//               forKey:(NSString*)kVDADecoderConfiguration_SourceFormat];
     assert(context->extradata);
-//    NSData* avc_data = [NSData dataWithBytes:avc_bytes length:avc_size];
-//    [config setObject:avc_data
-//               forKey:(NSString*)kVDADecoderConfiguration_avcCData];
-
-//    NSMutableDictionary* format_info = [NSMutableDictionary dictionary];
-//    // This format is used by the CGLTexImageIOSurface2D call in IOSurfaceTestView.
-//    [format_info setObject:[NSNumber numberWithInt:kCVPixelFormatType_422YpCbCr8]
-//                    forKey:(NSString*)kCVPixelBufferPixelFormatTypeKey];
-//    [format_info setObject:[NSDictionary dictionary]
-//                    forKey:(NSString*)kCVPixelBufferIOSurfacePropertiesKey];
     NSDictionary* formatInfo = @{(id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_422YpCbCr8),
                                  (id)kCVPixelBufferIOSurfacePropertiesKey: @{}};
 
@@ -71,7 +51,7 @@ static void OnFrameReadyCallback(void *callback_data,
                                        (__bridge CFDictionaryRef)formatInfo, // optional
                                        (VDADecoderOutputCallback*)OnFrameReadyCallback,
                                        (__bridge void*)self,
-                                       &vda_decoder_);
+                                       &_vdaDecoder);
     if (status == kVDADecoderHardwareNotSupportedErr)
       fprintf(stderr, "hadware does not support GPU decoding\n");
     assert(status == kVDADecoderNoErr);
@@ -81,40 +61,22 @@ static void OnFrameReadyCallback(void *callback_data,
 
 - (void)dealloc
 {
-  VDADecoderDestroy(vda_decoder_);
+  VDADecoderDestroy(_vdaDecoder);
 }
 
-- (void)onFrameReady:(CVPixelBufferRef)image time:(double)time index:(int)i
+- (void)onFrameReady:(CVPixelBufferRef)image time:(double)time
 {
-  NSLog(@"frame ready %.3f %d", time, i);
-  if (image_[mod(i)]) {
-    CFRelease(image_[mod(i)]);
-  }
-  image_[mod(i)] = CVBufferRetain(image);
-  IOSurfaceRef io_surface = CVPixelBufferGetIOSurface(image);
-  // _bindSurfaceToTexture assumes that the surface is retained.
-  CFRetain(io_surface);
-  [self _bindSurfaceToTexture:io_surface to:i];
-  [self setTime:time of:i];
-}
-
-- (void)_bindSurfaceToTexture:(IOSurfaceRef)aSurface to:(int)index
-{
-  int i = mod(index);
-	if (surface_[i] && (surface_[i] != aSurface)) {
-		CFRelease(surface_[i]);
-	}
-	surface_[i] = aSurface;
+  NSLog(@"time %.3f", time);
+  VideoFrame* v = [[VideoFrame alloc] initImage:image time:time];
+  [_frameQue add:v];
 }
 
 - (void)prepare:(CGLContextObj)cgl
 {
-  cgl_ctx_ = cgl;
+  CGLSetCurrentContext(cgl);
+  _cglCtx = cgl;
   glEnable(GL_TEXTURE_RECTANGLE_ARB);
-  for (int i = 0; i < TEXTURE_COUNT; i++) {
-    assert(texIds_[i] == 0);
-    glGenTextures(1, &texIds_[i]);
-  }
+  glGenTextures(1, &_texture);
 #if 1
   [self compileVertex:
    "#version 120\n"
@@ -135,58 +97,62 @@ static void OnFrameReadyCallback(void *callback_data,
    "{"
    "  gl_FragColor = texture2DRect(sampler0, TexCoordOut);"
    "}"];
-  glUseProgram(program_);
-  GLint sampler0 = glGetUniformLocation(program_, "sampler0");
+  glUseProgram(_program);
+  GLint sampler0 = glGetUniformLocation(_program, "sampler0");
   assert(sampler0 >= 0);
   glUniform1i(sampler0, 0);
   
-  GLint position = glGetAttribLocation(program_, "Position");
+  GLint position = glGetAttribLocation(_program, "Position");
   assert(position >= 0);
   glVertexAttribPointer(position, 2, GL_FLOAT, GL_FALSE, 0, 0);
   glEnableVertexAttribArray(position);
   
-  GLint texcoord = glGetAttribLocation(program_, "TexCoordIn");
+  GLint texcoord = glGetAttribLocation(_program, "TexCoordIn");
   assert(texcoord >= 0);
   glVertexAttribPointer(texcoord, 2, GL_FLOAT, GL_FALSE, 0, (char*)0 + 8 * sizeof(GLfloat));
   glEnableVertexAttribArray(texcoord);
 #endif
 }
 
-- (void)decode:(int)i
+- (double)frontTime
+{
+  if ([_frameQue isEmpty]) {
+    return DBL_MAX;
+  }
+  return [[_frameQue front] time];
+}
+
+- (void)decodeLoop
 {
   AVPacket pkt = { 0 };
-  AVRational tb = stream_->time_base;
-  
-  if (!quit_ && ![decoder_.videoQue isEmpty]) {
-    [decoder_.videoQue get:&pkt];
+  AVRational tb = _stream->time_base;
+ 
+  while (!_quit && ![_decoder.videoQue isEmpty] && ![_frameQue isFull]) {
+    [_decoder.videoQue get:&pkt];
     assert(pkt.data);
-    NSLog(@"i %d", i);
     
     NSData* data = [NSData dataWithBytes:pkt.data length:pkt.size];
     double pts = pkt.pts * av_q2d(tb);
-    NSDictionary* frame_info = @{kDisplayTimeKey:@(pts),
-                                 kIndexKey:@(i)};
-    OSStatus r = VDADecoderDecode(vda_decoder_, 0, (__bridge CFDataRef)data,
+    NSDictionary* frame_info = @{kDisplayTimeKey:@(pts)};
+    OSStatus r = VDADecoderDecode(_vdaDecoder, 0, (__bridge CFDataRef)data,
                                   (__bridge CFDictionaryRef)frame_info);
     assert(r == 0);
     av_free_packet(&pkt);
   }
-  [decoder_ checkQueue];
 }
 
-- (void)load:(int)index
+- (void)draw
 {
-  NSLog(@"load");
-  int i = mod(index);
-  assert(surface_[i]);
-  GLsizei	width	= (GLsizei)IOSurfaceGetWidth(surface_[i]);
-  GLsizei	height = (GLsizei)IOSurfaceGetHeight(surface_[i]);
+  VideoFrame* v = [_frameQue get];
+  IOSurfaceRef surface = [v surface];
+  GLsizei	width	= (GLsizei)IOSurfaceGetWidth(surface);
+  GLsizei	height = (GLsizei)IOSurfaceGetHeight(surface);
 	
   glEnable(GL_TEXTURE_RECTANGLE_ARB);
-  glBindTexture(GL_TEXTURE_RECTANGLE_ARB, texIds_[i]);
-  CGLTexImageIOSurface2D(cgl_ctx_, GL_TEXTURE_RECTANGLE_ARB, GL_RGB8,
+  glBindTexture(GL_TEXTURE_RECTANGLE_ARB, _texture);
+  CGLTexImageIOSurface2D(_cglCtx, GL_TEXTURE_RECTANGLE_ARB, GL_RGB8,
                          width, height,
-                         GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, surface_[i], 0);
+                         GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, surface, 0);
   //		CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE_ARB, GL_RGBA8,
   //							   _texWidth, _texHeight,
   //							   GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, _surface, 0);
@@ -194,15 +160,11 @@ static void OnFrameReadyCallback(void *callback_data,
   glDisable(GL_TEXTURE_RECTANGLE_ARB);
   
   glFlush();
-}
 
-- (void)draw:(int)i
-{
-  NSLog(@"draw");
 #if 1
-  glUseProgram(program_);
+  glUseProgram(_program);
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_RECTANGLE_ARB, texIds_[mod(i)]);
+  glBindTexture(GL_TEXTURE_RECTANGLE_ARB, _texture);
   glDrawArrays(GL_QUADS, 0, 4);
 #else
   glEnable(GL_TEXTURE_RECTANGLE_ARB);
@@ -219,6 +181,7 @@ static void OnFrameReadyCallback(void *callback_data,
 		glVertex3f(-1.0, 1.0, 0.0);
 	glEnd();
 #endif
+  [self signal];
 }
 
 @end

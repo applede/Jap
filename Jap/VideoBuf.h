@@ -13,37 +13,30 @@
 
 #define TEXTURE_COUNT		5
 
-static inline int mod(int x)
-{
-  assert(x >= 0);
-  return x % TEXTURE_COUNT;
-}
-
 @interface VideoBuf : NSObject
 {
-  BOOL quit_;
-  Decoder* decoder_;
-  AVStream* stream_;
-  GLuint program_;
-  int width_;
-  int height_;
-  
-  double time_[TEXTURE_COUNT];
+  BOOL _quit;
+  Decoder* _decoder;
+  AVStream* _stream;
+  dispatch_semaphore_t _sema;
+  GLuint _program;
+  int _width;
+  int _height;
 }
+
+- initDecoder:(Decoder*)decoder stream:(AVStream *)stream;
 
 - (int)width;
 - (int)height;
 
-- (GLuint)program;
 - (void)compileVertex:(const char*)vertexSrc fragment:(const char*)fragmentSrc;
-
 - (void)prepare:(CGLContextObj)cgl;
+- (void)viewWidth:(GLfloat)width height:(GLfloat)height;
+- (void)start;
+- (void)signal;
 
-- (double)time:(int)i;
-- (void)setTime:(double)t of:(int)i;
-
-- (void)decode:(int)i;
-- (void)load:(int)i;
-- (void)draw:(int)i;
+- (double)frontTime;
+- (void)decodeLoop;
+- (void)draw;
 
 @end

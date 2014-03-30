@@ -17,25 +17,24 @@
 
 - (id)initDecoder:(Decoder *)decoder stream:(AVStream *)stream
 {
-  self = [super init];
+  self = [super initDecoder:decoder stream:stream];
   if (self) {
-    decoder_ = decoder;
-    stream_ = stream;
-    width_ = TEXTURE_WIDTH;
-    height_ = TEXTURE_HEIGHT;
     AVCodecContext *context = stream->codec;
     AVCodec *codec = avcodec_find_decoder(context->codec_id);
     if (avcodec_open2(context, codec, NULL) < 0) {
       NSLog(@"avcodec_open2");
     }
-    frameSize_ = avpicture_get_size(AV_PIX_FMT_YUV420P, width_, height_);
-    _size = frameSize_ * TEXTURE_COUNT;
-    _data = calloc(TEXTURE_COUNT, frameSize_);
+    _frameSize = avpicture_get_size(AV_PIX_FMT_YUV420P, _width, _height);
+    _size = _frameSize * TEXTURE_COUNT;
+    _data = calloc(TEXTURE_COUNT, _frameSize);
     for (int i = 0; i < TEXTURE_COUNT; i++) {
-      time_[i] = DBL_MAX;
-      frame_[i] = av_frame_alloc();
-      avpicture_fill((AVPicture*)frame_[i], &_data[frameSize_ * i], AV_PIX_FMT_YUV420P, width_, height_);
+      _frame[i] = av_frame_alloc();
+      avpicture_fill((AVPicture*)_frame[i], &_data[_frameSize * i], AV_PIX_FMT_YUV420P, _width, _height);
     }
+    _front = 0;
+    _back = 0;
+    _count = 0;
+    _lock = [[NSLock alloc] init];
   }
   return self;
 }
@@ -43,7 +42,7 @@
 - (void)dealloc
 {
   for (int i = 0; i < TEXTURE_COUNT; i++) {
-    av_frame_free(&frame_[i]);
+    av_frame_free(&_frame[i]);
   }
   free(_data);
 }
@@ -76,16 +75,16 @@ GLuint createTexture(GLenum unit, GLsizei width, GLsizei height, GLubyte* data)
   
   for (int i = 0; i < TEXTURE_COUNT; i++) {
     //: Y Texture
-    assert(texIds_[i][0] == 0);
-    texIds_[i][0] = createTexture(GL_TEXTURE0, width_, height_, [self dataY:i]);
+    assert(_texIds[i][0] == 0);
+    _texIds[i][0] = createTexture(GL_TEXTURE0, _width, _height, [self dataY:i]);
     
     //: U Texture
-    assert(texIds_[i][1] == 0);
-    texIds_[i][1] = createTexture(GL_TEXTURE1, width_ / 2, height_ / 2, [self dataU:i]);
+    assert(_texIds[i][1] == 0);
+    _texIds[i][1] = createTexture(GL_TEXTURE1, _width / 2, _height / 2, [self dataU:i]);
     
     //: V Texture
-    assert(texIds_[i][2] == 0);
-    texIds_[i][2] = createTexture(GL_TEXTURE2, width_ / 2, height_ / 2, [self dataV:i]);
+    assert(_texIds[i][2] == 0);
+    _texIds[i][2] = createTexture(GL_TEXTURE2, _width / 2, _height / 2, [self dataV:i]);
   }
 
   [self compileVertex:
@@ -121,24 +120,24 @@ GLuint createTexture(GLenum unit, GLsizei width, GLsizei height, GLubyte* data)
    "  gl_FragColor = vec4(r, g, b, 1.0);"
    "}"];
   
-  glUseProgram(program_);
+  glUseProgram(_program);
   
-  GLint sampler0 = glGetUniformLocation(program_, "sampler0");
+  GLint sampler0 = glGetUniformLocation(_program, "sampler0");
   assert(sampler0 >= 0);
   glUniform1i(sampler0, 0);
-  GLint sampler1 = glGetUniformLocation(program_, "sampler1");
+  GLint sampler1 = glGetUniformLocation(_program, "sampler1");
   assert(sampler1 >= 0);
   glUniform1i(sampler1, 1);
-  GLint sampler2 = glGetUniformLocation(program_, "sampler2");
+  GLint sampler2 = glGetUniformLocation(_program, "sampler2");
   assert(sampler2 >= 0);
   glUniform1i(sampler2, 2);
   
-  GLint position = glGetAttribLocation(program_, "Position");
+  GLint position = glGetAttribLocation(_program, "Position");
   assert(position >= 0);
   glVertexAttribPointer(position, 2, GL_FLOAT, GL_FALSE, 0, 0);
   glEnableVertexAttribArray(position);
   
-  GLint texcoord = glGetAttribLocation(program_, "TexCoordIn");
+  GLint texcoord = glGetAttribLocation(_program, "TexCoordIn");
   assert(texcoord >= 0);
   glVertexAttribPointer(texcoord, 2, GL_FLOAT, GL_FALSE, 0, (char*)0 + 8 * sizeof(GLfloat));
   glEnableVertexAttribArray(texcoord);
@@ -153,22 +152,19 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
 }
 
-- (void)loadTexture:(int)i
+- (void)draw
 {
-  loadTexture(texIds_[mod(i)][0], width_, height_, [self dataY:i], [self strideY:i]);
-  loadTexture(texIds_[mod(i)][1], width_/2, height_/2, [self dataU:i], [self strideU:i]);
-  loadTexture(texIds_[mod(i)][2], width_/2, height_/2, [self dataV:i], [self strideV:i]);
-}
-
-- (void)draw:(int)i
-{
-  glUseProgram(program_);
+  loadTexture(_texIds[_front][0], _width, _height, [self dataY:_front], [self strideY:_front]);
+  loadTexture(_texIds[_front][1], _width/2, _height/2, [self dataU:_front], [self strideU:_front]);
+  loadTexture(_texIds[_front][2], _width/2, _height/2, [self dataV:_front], [self strideV:_front]);
+  
+  glUseProgram(_program);
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, texIds_[mod(i)][0]);
+  glBindTexture(GL_TEXTURE_2D, _texIds[_front][0]);
   glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, texIds_[mod(i)][1]);
+  glBindTexture(GL_TEXTURE_2D, _texIds[_front][1]);
   glActiveTexture(GL_TEXTURE2);
-  glBindTexture(GL_TEXTURE_2D, texIds_[mod(i)][2]);
+  glBindTexture(GL_TEXTURE_2D, _texIds[_front][2]);
   glDrawArrays(GL_QUADS, 0, 4);
 }
 
@@ -178,60 +174,61 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
 
 - (GLubyte *)dataY:(int)i
 {
-  return frame_[mod(i)]->data[0];
+  return _frame[i]->data[0];
 }
 
 - (GLubyte *)dataU:(int)i
 {
-  return frame_[mod(i)]->data[1];
+  return _frame[i]->data[1];
 }
 
 - (GLubyte *)dataV:(int)i
 {
-  return frame_[mod(i)]->data[2];
+  return _frame[i]->data[2];
 }
 
 - (int)strideY:(int)i
 {
-  return frame_[mod(i)]->linesize[0];
+  return _frame[i]->linesize[0];
 }
 
 - (int)strideU:(int)i
 {
-  return frame_[mod(i)]->linesize[1];
+  return _frame[i]->linesize[1];
 }
 
 - (int)strideV:(int)i
 {
-  return frame_[mod(i)]->linesize[2];
+  return _frame[i]->linesize[2];
 }
 
-- (void)decode:(int)i
+- (BOOL)isFull
+{
+  return _count >= TEXTURE_COUNT;
+}
+
+- (void)decode
 {
   AVPacket pkt = { 0 };
-  AVFrame *frame = frame_[mod(i)];
+  AVFrame *frame = _frame[_back];
   double pts;
-  AVRational tb = stream_->time_base;
+  AVRational tb = _stream->time_base;
   
-  while (!quit_ && ![decoder_.videoQue isEmpty]) {
+  while (!_quit && ![_decoder.videoQue isEmpty] && ![self isFull]) {
     if ([self getVideoFrame:frame packet:&pkt]) {
       pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
-      [self putTime:pts pos:av_frame_get_pkt_pos(frame) into:i];
+      [self putTime:pts pos:av_frame_get_pkt_pos(frame)];
 //      av_frame_unref(frame);
-      break;
     }
     av_free_packet(&pkt);
   }
-  [decoder_ checkQueue];
-
-  av_free_packet(&pkt);
 }
 
 - (BOOL)getVideoFrame:(AVFrame*)frame packet:(AVPacket*)pkt
 {
-  [decoder_.videoQue get:pkt];
+  [_decoder.videoQue get:pkt];
   int got_picture = NO;
-  if (avcodec_decode_video2(stream_->codec, frame, &got_picture, pkt) < 0) {
+  if (avcodec_decode_video2(_stream->codec, frame, &got_picture, pkt) < 0) {
     NSLog(@"avcodec_decode_video2");
     return NO;
   }
@@ -241,14 +238,14 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
     frame->pts = av_frame_get_best_effort_timestamp(frame);
     
     if (frame->pts != AV_NOPTS_VALUE)
-      dpts = av_q2d(stream_->time_base) * frame->pts;
+      dpts = av_q2d(_stream->time_base) * frame->pts;
     
     return YES;
   }
   return NO;
 }
 
-- (void)putTime:(double)t pos:(int64_t)p into:(int)i
+- (void)putTime:(double)t pos:(int64_t)p
 {
 //    _img_convert_ctx = sws_getCachedContext(_img_convert_ctx,
 //                                            frame->width, frame->height, frame->format,
@@ -261,7 +258,11 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
 //    int linesize[] = { _width * 4 };
 //    sws_scale(_img_convert_ctx, (const uint8_t* const*)frame->data, frame->linesize, 0, _height,
 //              data, linesize);
-  [self setTime:t of:i];
+  [_lock lock];
+  _time[_back] = t;
+  _back = (_back + 1) % TEXTURE_COUNT;
+  _count++;
+  [_lock unlock];
   //  NSLog(@"decoded %d", i);
 }
 

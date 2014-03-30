@@ -12,9 +12,28 @@
 
 @implementation VideoBuf
 
-- (GLuint)program
+- initDecoder:(Decoder*)decoder stream:(AVStream *)stream
 {
-  return program_;
+  self = [super init];
+  if (self) {
+    _decoder = decoder;
+    _stream = stream;
+    _sema = dispatch_semaphore_create(0);
+    AVCodecContext* context = stream->codec;
+    _width = context->width;
+    _height = context->height;
+  }
+  return self;
+}
+
+- (int)width
+{
+  return _width;
+}
+
+- (int)height
+{
+  return _height;
 }
 
 GLuint compileShader(GLenum type, const GLchar* src)
@@ -41,53 +60,91 @@ GLuint compileShader(GLenum type, const GLchar* src)
   GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexSrc);
   GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentSrc);
   
-  program_ = glCreateProgram();
-  glAttachShader(program_, vertexShader);
-  glAttachShader(program_, fragmentShader);
-  glLinkProgram(program_);
+  _program = glCreateProgram();
+  glAttachShader(_program, vertexShader);
+  glAttachShader(_program, fragmentShader);
+  glLinkProgram(_program);
   int logLen;
-  glGetProgramiv(program_, GL_INFO_LOG_LENGTH, &logLen);
+  glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &logLen);
   if (logLen > 0) {
     char log[2048];
-    glGetProgramInfoLog(program_, sizeof(log), &logLen, log);
+    glGetProgramInfoLog(_program, sizeof(log), &logLen, log);
     NSLog(@"%s", log);
   }
-}
-
-- (int)width
-{
-  return width_;
-}
-
-- (int)height
-{
-  return height_;
 }
 
 - (void)prepare:(CGLContextObj)cgl
 {
 }
 
-- (double)time:(int)i
+- (double)frontTime
 {
-  return time_[mod(i)];
+  return DBL_MAX;
 }
 
-- (void)setTime:(double)t of:(int)i
-{
-  time_[mod(i)] = t;
-}
-
-- (void)decode:(int)i
+- (void)decodeLoop
 {
 }
 
-- (void)load:(int)i
+- (void)draw
 {
 }
 
-- (void)draw:(int)i
+- (void)start
 {
+  dispatch_queue_t q = dispatch_queue_create("jap.video.decode", DISPATCH_QUEUE_SERIAL);
+  dispatch_async(q, ^{
+    while (!_quit) {
+      [self decodeLoop];
+      [_decoder checkQueue];
+      dispatch_semaphore_wait(_sema, DISPATCH_TIME_FOREVER);
+    }
+  });
+}
+
+- (void)signal
+{
+  dispatch_semaphore_signal(_sema);
+}
+
+void makeOrtho(GLfloat width, GLfloat height, GLfloat* mat)
+{
+  GLfloat left = 0;
+  GLfloat right = width;
+  GLfloat bottom = 0;
+  GLfloat top = height;
+  GLfloat near = -1;
+  GLfloat far = 1;
+  
+  mat[0] = 2.0 / (right - left);
+  mat[1] = 0;
+  mat[2] = 0;
+  mat[3] = 0;
+  
+  mat[4] = 0;
+  mat[5] = 2.0 / (top - bottom);
+  mat[6] = 0;
+  mat[7] = 0;
+  
+  mat[8] = 0;
+  mat[9] = 0;
+  mat[10] = -2.0 / (far - near);
+  mat[11] = 0;
+  
+  mat[12] = -(right + left) / (right - left);
+  mat[13] = -(top + bottom) / (top - bottom);
+  mat[14] = -(far + near) / (far - near);
+  mat[15] = 1.0;
+}
+
+- (void)viewWidth:(GLfloat)width height:(GLfloat)height
+{
+  glUseProgram(_program);
+  GLint ortho = glGetUniformLocation(_program, "Ortho");
+  assert(ortho >= 0);
+  GLfloat orthoMat[16];
+  makeOrtho(width, height, orthoMat);
+  glUniformMatrix4fv(ortho, 1, NO, orthoMat);
 }
 
 @end

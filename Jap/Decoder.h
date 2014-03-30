@@ -16,20 +16,20 @@
 
 @interface Decoder : NSObject
 {
-  NSString* path_;
+  NSString* _path;
   
-  BOOL quit_;
-  dispatch_queue_t decodeQ_;
-  dispatch_queue_t readQ_;
-  dispatch_semaphore_t readSema_;
+  BOOL _quit;
+  dispatch_queue_t _decodeQ;
+  dispatch_queue_t _readQ;
+  dispatch_semaphore_t _readSema;
 
-  AVFormatContext *formatContext_;
-  int video_stream_;
-  int audio_stream_;
-  int subtitle_stream_;
+  AVFormatContext *_formatContext;
+  int _video_stream;
+  int _audio_stream;
+  int _subtitle_stream;
   
-  AudioBuf* audioBuf_;
-  SubtitleBuf* subtitleBuf_;
+  AudioBuf* _audioBuf;
+  SubtitleBuf* _subtitleBuf;
 }
 
 @property (readonly) PacketQueue* videoQue;
@@ -41,7 +41,6 @@
 - (void)open:(NSString*)path;
 - (void)checkQueue;
 - (double)masterClock;
-- (void)decodeVideoBuffer:(int)i;
 - (void)displaySubtitle;
 
 @end
