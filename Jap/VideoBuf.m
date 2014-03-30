@@ -95,9 +95,11 @@ GLuint compileShader(GLenum type, const GLchar* src)
   dispatch_queue_t q = dispatch_queue_create("jap.video.decode", DISPATCH_QUEUE_SERIAL);
   dispatch_async(q, ^{
     while (!_quit) {
-      [self decodeLoop];
-      [_decoder checkQueue];
-      dispatch_semaphore_wait(_sema, DISPATCH_TIME_FOREVER);
+      @autoreleasepool {
+        [self decodeLoop];
+        [_decoder checkQueue];
+        dispatch_semaphore_wait(_sema, DISPATCH_TIME_FOREVER);        
+      }
     }
   });
 }
