@@ -7,7 +7,7 @@
 //
 
 #import <OpenGL/gl.h>
-#import "VideoBufCPU.h"
+#import "VideoTrackCPU.h"
 #import "Decoder.h"
 #import "Packet.h"
 #import "VideoFrameCPU.h"
@@ -15,7 +15,7 @@
 #define TEXTURE_WIDTH		1920
 #define TEXTURE_HEIGHT	1080
 
-@implementation VideoBufCPU
+@implementation VideoTrackCPU
 
 - (id)initDecoder:(Decoder *)decoder stream:(AVStream *)stream
 {

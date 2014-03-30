@@ -7,9 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "Queue.h"
+#import "FlexibleQueue.h"
 
-@interface VideoFrame : NSObject<Time>
+@interface VideoFrameGPU : NSObject<Time>
 {
   double time;
   CVPixelBufferRef image;

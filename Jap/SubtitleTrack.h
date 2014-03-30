@@ -13,12 +13,12 @@
 
 @class Decoder;
 
-@interface SubtitleBuf : NSObject
+@interface SubtitleTrack : NSObject
 {
+  BOOL _quit;
   Decoder* _decoder;
   AVStream* _stream;
   dispatch_semaphore_t _sema;
-  BOOL _quit;
   CircularQueue* _frameQue;
 }
 

@@ -22,13 +22,13 @@ typedef struct {
   int bytes_per_sec;
 } AudioParams;
 
-@interface AudioBuf : NSObject
+@interface AudioTrack : NSObject
 {
   Decoder* _decoder;
+  AVStream* _stream;
   
   AudioComponentInstance _audioC;
   
-  AVStream* _stream;
   AVPacket _audio_pkt_temp;
   AVPacket _audio_pkt;
   int _audio_buf_frames_pending;

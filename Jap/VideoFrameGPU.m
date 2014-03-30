@@ -6,9 +6,9 @@
 //  Copyright (c) 2014 Jake Song. All rights reserved.
 //
 
-#import "VideoFrame.h"
+#import "VideoFrameGPU.h"
 
-@implementation VideoFrame
+@implementation VideoFrameGPU
 
 - (id)initImage:(CVPixelBufferRef)i time:(double)t
 {

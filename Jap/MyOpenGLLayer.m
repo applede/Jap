@@ -47,7 +47,7 @@
                   forLayerTime:(CFTimeInterval)lt displayTime:(const CVTimeStamp *)ts
 {
   double t = [_decoder masterClock];
-  return _decoder.videoBuf && [_decoder.videoBuf frontTime] <= t;
+  return _decoder.videoTrack && [_decoder.videoTrack frontTime] <= t;
 }
 
 - (void)drawInOpenGLContext:(NSOpenGLContext *)context
@@ -64,13 +64,13 @@
 {
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
-  [_decoder.videoBuf draw];
+  [_decoder.videoTrack draw];
 }
 
 - (BOOL)frameChanged
 {
   NSOpenGLContext* context = self.openGLContext;
-  if (context && _decoder.videoBuf) {
+  if (context && _decoder.videoTrack) {
     [self.openGLContext makeCurrentContext];
     [self reshape];
     return YES;
@@ -85,15 +85,15 @@
   GLfloat vw = rect.size.width * s;
   GLfloat vh = rect.size.height * s;
 	
-  [_decoder.videoBuf viewWidth:vw height:vh];
+  [_decoder.videoTrack viewWidth:vw height:vh];
   [self calcRect];
   
   GLfloat x0 = _movieRect.origin.x;
   GLfloat y0 = _movieRect.origin.y;
   GLfloat x1 = _movieRect.origin.x + _movieRect.size.width;
   GLfloat y1 = _movieRect.origin.y + _movieRect.size.height;
-  GLfloat w = [_decoder.videoBuf textureWidth];
-  GLfloat h = [_decoder.videoBuf textureHeight];
+  GLfloat w = [_decoder.videoTrack textureWidth];
+  GLfloat h = [_decoder.videoTrack textureHeight];
   GLfloat vertices[16] = {
     x0, y0,   x0, y1,   x1, y1,   x1, y0,
     0, h,     0, 0,     w, 0,     w, h
@@ -109,8 +109,8 @@
   bounds.size.width *= s;
   bounds.size.height *= s;
   
-  int srcW = _decoder.videoBuf.width;
-  int srcH = _decoder.videoBuf.height;
+  int srcW = _decoder.videoTrack.width;
+  int srcH = _decoder.videoTrack.height;
   GLfloat viewW = bounds.size.width;
   GLfloat viewH = bounds.size.height;
 
@@ -133,7 +133,7 @@
 - (void)open:(NSString *)path
 {
   [_decoder open:path];
-  [_decoder.videoBuf prepare:self.openGLContext.CGLContextObj];
+  [_decoder.videoTrack prepare:self.openGLContext.CGLContextObj];
   self.asynchronous = YES;
 }
 

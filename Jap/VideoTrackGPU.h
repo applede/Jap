@@ -8,14 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import <VideoDecodeAcceleration/VDADecoder.h>
-#import "VideoBuf.h"
-#import "Queue.h"
+#import "VideoTrack.h"
+#import "FlexibleQueue.h"
 
-@interface VideoBufGPU : VideoBuf
+@interface VideoTrackGPU : VideoTrack
 {
   VDADecoder _vdaDecoder;
   CGLContextObj _cglCtx;
-  Queue* _frameQue;
+  FlexibleQueue* _frameQue;
   GLuint _texture;
 }
 

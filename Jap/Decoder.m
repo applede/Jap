@@ -41,20 +41,20 @@
   while ([_audioQue count] < 16) {
     usleep(100000);
   }
-  [_videoBuf start];
-  [_audioBuf start];
-  [_subtitleBuf start];
+  [_videoTrack start];
+  [_audioTrack start];
+  [_subtitleTrack start];
 }
 
 - (void)stop
 {
   _quit = YES;
-  [_audioBuf stop];
+  [_audioTrack stop];
 }
 
 - (double)masterClock
 {
-  return [_audioBuf clock];
+  return [_audioTrack clock];
 }
 
 - (void)readThread
@@ -103,19 +103,19 @@
   _videoStream = av_find_best_stream(_formatContext, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
   AVCodecContext* context = _formatContext->streams[_videoStream]->codec;
   if (context->codec_id == AV_CODEC_ID_H264) {
-    _videoBuf = [[VideoBufGPU alloc] initDecoder:self stream:_formatContext->streams[_videoStream]];
+    _videoTrack = [[VideoTrackGPU alloc] initDecoder:self stream:_formatContext->streams[_videoStream]];
   } else {
-    _videoBuf = [[VideoBufCPU alloc] initDecoder:self stream:[self openStream:_videoStream]];
+    _videoTrack = [[VideoTrackCPU alloc] initDecoder:self stream:[self openStream:_videoStream]];
   }
   
   _audioStream = av_find_best_stream(_formatContext, AVMEDIA_TYPE_AUDIO, -1, _videoStream, NULL, 0);
-  _audioBuf = [[AudioBuf alloc] initDecoder:self stream:[self openStream:_audioStream]];
-  [_audioBuf prepare];
+  _audioTrack = [[AudioTrack alloc] initDecoder:self stream:[self openStream:_audioStream]];
+  [_audioTrack prepare];
 
   _subtitleStream = av_find_best_stream(_formatContext, AVMEDIA_TYPE_SUBTITLE, -1,
                                          (_audioStream >= 0 ? _audioStream : _videoStream),
                                          NULL, 0);
-  _subtitleBuf = [[SubtitleBuf alloc] initDecoder:self stream:[self openStream:_subtitleStream]];
+  _subtitleTrack = [[SubtitleTrack alloc] initDecoder:self stream:[self openStream:_subtitleStream]];
   
   while (!_quit) {
     while (![_videoQue isFull] && ![_audioQue isFull]) {
@@ -142,7 +142,7 @@
   if (_formatContext) {
     avformat_close_input(&_formatContext);
   }
-  [_audioBuf close];
+  [_audioTrack close];
 }
 
 - (void)checkQueue
@@ -156,7 +156,7 @@
 
 - (void)displaySubtitle
 {
-  [_subtitleBuf display:_subtitle time:[self masterClock]];
+  [_subtitleTrack display:_subtitle time:[self masterClock]];
 }
 
 @end

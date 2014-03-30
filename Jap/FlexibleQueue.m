@@ -6,9 +6,9 @@
 //  Copyright (c) 2014 Jake Song. All rights reserved.
 //
 
-#import "Queue.h"
+#import "FlexibleQueue.h"
 
-@implementation Queue
+@implementation FlexibleQueue
 
 - (id)initSize:(int)size
 {

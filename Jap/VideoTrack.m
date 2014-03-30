@@ -7,10 +7,10 @@
 //
 
 #import <libswscale/swscale.h>
-#import "VideoBuf.h"
+#import "VideoTrack.h"
 #import "Decoder.h"
 
-@implementation VideoBuf
+@implementation VideoTrack
 
 - initDecoder:(Decoder*)decoder stream:(AVStream *)stream
 {

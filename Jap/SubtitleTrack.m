@@ -6,14 +6,14 @@
 //  Copyright (c) 2014 Jake Song. All rights reserved.
 //
 
-#import "SubtitleBuf.h"
+#import "SubtitleTrack.h"
 #import "Decoder.h"
 #import "Packet.h"
 #import "SubtitleFrame.h"
 
 #define QSIZE 32
 
-@implementation SubtitleBuf
+@implementation SubtitleTrack
 
 - (id)initDecoder:(Decoder *)decoder stream:(AVStream *)stream
 {

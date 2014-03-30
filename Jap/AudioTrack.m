@@ -8,13 +8,13 @@
 
 #import <CoreAudio/HostTime.h>
 #import <libswresample/swresample.h>
-#import "AudioBuf.h"
+#import "AudioTrack.h"
 #import "Decoder.h"
 #import "Packet.h"
 
 #define SAMPLE_SIZE sizeof(float)
 
-@implementation AudioBuf
+@implementation AudioTrack
 
 - (id)initDecoder:(Decoder *)decoder stream:(AVStream *)stream
 {
@@ -43,7 +43,7 @@ static OSStatus audioCallback(void *inRefCon,
                               UInt32 inNumberFrames,
                               AudioBufferList *ioData)
 {
-  [(__bridge AudioBuf*)inRefCon nextAudio:inTimeStamp busNumber:inBusNumber
+  [(__bridge AudioTrack*)inRefCon nextAudio:inTimeStamp busNumber:inBusNumber
                       frameNumber:inNumberFrames audioData:ioData];
   return noErr;
 }

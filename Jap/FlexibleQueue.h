@@ -8,13 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol Time <NSObject>
+@protocol Time
 
 - (double)time;
 
 @end
 
-@interface Queue : NSObject
+/// It allows to put elements even if it is full.
+
+@interface FlexibleQueue : NSObject
 {
   int _size;
   NSMutableArray* _array;

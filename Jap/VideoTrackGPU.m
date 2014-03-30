@@ -6,10 +6,10 @@
 //  Copyright (c) 2014 Jake Song. All rights reserved.
 //
 
-#import "VideoBufGPU.h"
+#import "VideoTrackGPU.h"
 #import "Decoder.h"
-#import "VideoFrame.h"
-#import "Queue.h"
+#import "VideoFrameGPU.h"
+#import "FlexibleQueue.h"
 #import "Packet.h"
 
 NSString* const kDisplayTimeKey = @"display_time";
@@ -25,18 +25,18 @@ static void OnFrameReadyCallback(void *callback_data,
     assert(CVPixelBufferGetPixelFormatType(image_buffer) == '2vuy');
 //    CGSize size = CVImageBufferGetDisplaySize(image_buffer);
     NSDictionary* info = (__bridge NSDictionary*)frame_info;
-    VideoBufGPU* videoBuf = (__bridge VideoBufGPU*)callback_data;
-    [videoBuf onFrameReady:image_buffer time:[info[kDisplayTimeKey] doubleValue]];
+    VideoTrackGPU* videoTrack = (__bridge VideoTrackGPU*)callback_data;
+    [videoTrack onFrameReady:image_buffer time:[info[kDisplayTimeKey] doubleValue]];
   }
 }
 
-@implementation VideoBufGPU
+@implementation VideoTrackGPU
 
 - (id)initDecoder:(Decoder *)decoder stream:(AVStream *)stream
 {
   self = [super initDecoder:decoder stream:stream];
   if (self) {
-    _frameQue = [[Queue alloc] initSize:8];
+    _frameQue = [[FlexibleQueue alloc] initSize:8];
     int sourceFormat = 'avc1';
     AVCodecContext* context = stream->codec;
     NSDictionary* config = @{(id)kVDADecoderConfiguration_Width:@(_width),
@@ -67,7 +67,7 @@ static void OnFrameReadyCallback(void *callback_data,
 
 - (void)onFrameReady:(CVPixelBufferRef)image time:(double)time
 {
-  VideoFrame* v = [[VideoFrame alloc] initImage:image time:time];
+  VideoFrameGPU* v = [[VideoFrameGPU alloc] initImage:image time:time];
   [_frameQue add:v];
 }
 
@@ -142,7 +142,7 @@ static void OnFrameReadyCallback(void *callback_data,
 
 - (void)draw
 {
-  VideoFrame* v = [_frameQue get];
+  VideoFrameGPU* v = [_frameQue get];
   IOSurfaceRef surface = [v surface];
   GLsizei	width	= (GLsizei)IOSurfaceGetWidth(surface);
   GLsizei	height = (GLsizei)IOSurfaceGetHeight(surface);

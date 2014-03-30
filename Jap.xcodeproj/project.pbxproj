@@ -22,8 +22,8 @@
 		1816DFAC18D6E6B500FCE287 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1816DFAB18D6E6B500FCE287 /* libavcodec.a */; };
 		1816DFAE18D6E73F00FCE287 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1816DFAD18D6E73F00FCE287 /* libavutil.a */; };
 		1816DFB018D6E76900FCE287 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1816DFAF18D6E76900FCE287 /* libiconv.dylib */; };
-		1816DFB318D6E7CA00FCE287 /* VideoBuf.m in Sources */ = {isa = PBXBuildFile; fileRef = 1816DFB218D6E7CA00FCE287 /* VideoBuf.m */; };
-		181DF7EE18DB164000FF7739 /* AudioBuf.m in Sources */ = {isa = PBXBuildFile; fileRef = 181DF7ED18DB164000FF7739 /* AudioBuf.m */; };
+		1816DFB318D6E7CA00FCE287 /* VideoTrack.m in Sources */ = {isa = PBXBuildFile; fileRef = 1816DFB218D6E7CA00FCE287 /* VideoTrack.m */; };
+		181DF7EE18DB164000FF7739 /* AudioTrack.m in Sources */ = {isa = PBXBuildFile; fileRef = 181DF7ED18DB164000FF7739 /* AudioTrack.m */; };
 		181DF7F018DB431700FF7739 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 181DF7EF18DB431700FF7739 /* libswresample.a */; };
 		18619F7218E81B3400781326 /* CircularQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F7118E81B3400781326 /* CircularQueue.m */; };
 		18619F7518E828C100781326 /* Packet.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F7418E828C100781326 /* Packet.m */; };
@@ -31,16 +31,16 @@
 		18619F7B18E847DB00781326 /* SubtitleFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F7A18E847DB00781326 /* SubtitleFrame.m */; };
 		1897644D18DE764900673BD3 /* MyOpenGLLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1897644C18DE764900673BD3 /* MyOpenGLLayer.m */; };
 		1897645018DE8DC800673BD3 /* MyView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1897644F18DE8DC800673BD3 /* MyView.m */; };
-		1897645318DF228B00673BD3 /* SubtitleBuf.m in Sources */ = {isa = PBXBuildFile; fileRef = 1897645218DF228B00673BD3 /* SubtitleBuf.m */; };
+		1897645318DF228B00673BD3 /* SubtitleTrack.m in Sources */ = {isa = PBXBuildFile; fileRef = 1897645218DF228B00673BD3 /* SubtitleTrack.m */; };
 		18E183DF18D7142300A35231 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E183DE18D7142300A35231 /* libavformat.a */; };
 		18E183E118D7144A00A35231 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E183E018D7144A00A35231 /* libz.dylib */; };
 		18E183E318D714C700A35231 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E183E218D714C700A35231 /* libbz2.dylib */; };
 		18E183E818D743FE00A35231 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E183E718D743FE00A35231 /* libswscale.a */; };
 		18F420CE18E4830200B5F2F8 /* VideoDecodeAcceleration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18F420CD18E4830200B5F2F8 /* VideoDecodeAcceleration.framework */; };
-		18F420D718E5BAE200B5F2F8 /* VideoBufGPU.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F420D618E5BAE200B5F2F8 /* VideoBufGPU.m */; };
-		18F420DA18E5BCD400B5F2F8 /* VideoBufCPU.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F420D918E5BCD400B5F2F8 /* VideoBufCPU.m */; };
-		18F420DD18E7B5A500B5F2F8 /* Queue.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F420DC18E7B5A500B5F2F8 /* Queue.m */; };
-		18F420E018E7BC0B00B5F2F8 /* VideoFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F420DF18E7BC0B00B5F2F8 /* VideoFrame.m */; };
+		18F420D718E5BAE200B5F2F8 /* VideoTrackGPU.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F420D618E5BAE200B5F2F8 /* VideoTrackGPU.m */; };
+		18F420DA18E5BCD400B5F2F8 /* VideoTrackCPU.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F420D918E5BCD400B5F2F8 /* VideoTrackCPU.m */; };
+		18F420DD18E7B5A500B5F2F8 /* FlexibleQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F420DC18E7B5A500B5F2F8 /* FlexibleQueue.m */; };
+		18F420E018E7BC0B00B5F2F8 /* VideoFrameGPU.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F420DF18E7BC0B00B5F2F8 /* VideoFrameGPU.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -78,10 +78,10 @@
 		1816DFAB18D6E6B500FCE287 /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = ../../../../usr/local/lib/libavcodec.a; sourceTree = "<group>"; };
 		1816DFAD18D6E73F00FCE287 /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = ../../../../usr/local/lib/libavutil.a; sourceTree = "<group>"; };
 		1816DFAF18D6E76900FCE287 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
-		1816DFB118D6E7CA00FCE287 /* VideoBuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoBuf.h; sourceTree = "<group>"; };
-		1816DFB218D6E7CA00FCE287 /* VideoBuf.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoBuf.m; sourceTree = "<group>"; };
-		181DF7EC18DB164000FF7739 /* AudioBuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioBuf.h; sourceTree = "<group>"; };
-		181DF7ED18DB164000FF7739 /* AudioBuf.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioBuf.m; sourceTree = "<group>"; };
+		1816DFB118D6E7CA00FCE287 /* VideoTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoTrack.h; sourceTree = "<group>"; };
+		1816DFB218D6E7CA00FCE287 /* VideoTrack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoTrack.m; sourceTree = "<group>"; };
+		181DF7EC18DB164000FF7739 /* AudioTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioTrack.h; sourceTree = "<group>"; };
+		181DF7ED18DB164000FF7739 /* AudioTrack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioTrack.m; sourceTree = "<group>"; };
 		181DF7EF18DB431700FF7739 /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswresample.a; path = ../../../../usr/local/lib/libswresample.a; sourceTree = "<group>"; };
 		181DF7F118DDBFDD00FF7739 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 		18619F7018E81B3400781326 /* CircularQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CircularQueue.h; sourceTree = "<group>"; };
@@ -96,21 +96,21 @@
 		1897644C18DE764900673BD3 /* MyOpenGLLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyOpenGLLayer.m; sourceTree = "<group>"; };
 		1897644E18DE8DC800673BD3 /* MyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyView.h; sourceTree = "<group>"; };
 		1897644F18DE8DC800673BD3 /* MyView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyView.m; sourceTree = "<group>"; };
-		1897645118DF228B00673BD3 /* SubtitleBuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubtitleBuf.h; sourceTree = "<group>"; };
-		1897645218DF228B00673BD3 /* SubtitleBuf.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SubtitleBuf.m; sourceTree = "<group>"; };
+		1897645118DF228B00673BD3 /* SubtitleTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubtitleTrack.h; sourceTree = "<group>"; };
+		1897645218DF228B00673BD3 /* SubtitleTrack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SubtitleTrack.m; sourceTree = "<group>"; };
 		18E183DE18D7142300A35231 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = ../../../../usr/local/lib/libavformat.a; sourceTree = "<group>"; };
 		18E183E018D7144A00A35231 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		18E183E218D714C700A35231 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
 		18E183E718D743FE00A35231 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswscale.a; path = ../../../../usr/local/lib/libswscale.a; sourceTree = "<group>"; };
 		18F420CD18E4830200B5F2F8 /* VideoDecodeAcceleration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoDecodeAcceleration.framework; path = System/Library/Frameworks/VideoDecodeAcceleration.framework; sourceTree = SDKROOT; };
-		18F420D518E5BAE200B5F2F8 /* VideoBufGPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoBufGPU.h; sourceTree = "<group>"; };
-		18F420D618E5BAE200B5F2F8 /* VideoBufGPU.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoBufGPU.m; sourceTree = "<group>"; };
-		18F420D818E5BCD400B5F2F8 /* VideoBufCPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoBufCPU.h; sourceTree = "<group>"; };
-		18F420D918E5BCD400B5F2F8 /* VideoBufCPU.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoBufCPU.m; sourceTree = "<group>"; };
-		18F420DB18E7B5A500B5F2F8 /* Queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Queue.h; sourceTree = "<group>"; };
-		18F420DC18E7B5A500B5F2F8 /* Queue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Queue.m; sourceTree = "<group>"; };
-		18F420DE18E7BC0B00B5F2F8 /* VideoFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoFrame.h; sourceTree = "<group>"; };
-		18F420DF18E7BC0B00B5F2F8 /* VideoFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoFrame.m; sourceTree = "<group>"; };
+		18F420D518E5BAE200B5F2F8 /* VideoTrackGPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoTrackGPU.h; sourceTree = "<group>"; };
+		18F420D618E5BAE200B5F2F8 /* VideoTrackGPU.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoTrackGPU.m; sourceTree = "<group>"; };
+		18F420D818E5BCD400B5F2F8 /* VideoTrackCPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoTrackCPU.h; sourceTree = "<group>"; };
+		18F420D918E5BCD400B5F2F8 /* VideoTrackCPU.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoTrackCPU.m; sourceTree = "<group>"; };
+		18F420DB18E7B5A500B5F2F8 /* FlexibleQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FlexibleQueue.h; sourceTree = "<group>"; };
+		18F420DC18E7B5A500B5F2F8 /* FlexibleQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FlexibleQueue.m; sourceTree = "<group>"; };
+		18F420DE18E7BC0B00B5F2F8 /* VideoFrameGPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoFrameGPU.h; sourceTree = "<group>"; };
+		18F420DF18E7BC0B00B5F2F8 /* VideoFrameGPU.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoFrameGPU.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -236,6 +236,49 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		18619F7C18E857AA00781326 /* Track */ = {
+			isa = PBXGroup;
+			children = (
+				181DF7EC18DB164000FF7739 /* AudioTrack.h */,
+				181DF7ED18DB164000FF7739 /* AudioTrack.m */,
+				1816DFB118D6E7CA00FCE287 /* VideoTrack.h */,
+				1816DFB218D6E7CA00FCE287 /* VideoTrack.m */,
+				18F420D818E5BCD400B5F2F8 /* VideoTrackCPU.h */,
+				18F420D918E5BCD400B5F2F8 /* VideoTrackCPU.m */,
+				18F420D518E5BAE200B5F2F8 /* VideoTrackGPU.h */,
+				18F420D618E5BAE200B5F2F8 /* VideoTrackGPU.m */,
+				1897645118DF228B00673BD3 /* SubtitleTrack.h */,
+				1897645218DF228B00673BD3 /* SubtitleTrack.m */,
+			);
+			name = Track;
+			sourceTree = "<group>";
+		};
+		18619F7D18E857C400781326 /* Queue */ = {
+			isa = PBXGroup;
+			children = (
+				18F420DB18E7B5A500B5F2F8 /* FlexibleQueue.h */,
+				18F420DC18E7B5A500B5F2F8 /* FlexibleQueue.m */,
+				18619F7018E81B3400781326 /* CircularQueue.h */,
+				18619F7118E81B3400781326 /* CircularQueue.m */,
+			);
+			name = Queue;
+			sourceTree = "<group>";
+		};
+		18619F7E18E857D700781326 /* Frame */ = {
+			isa = PBXGroup;
+			children = (
+				18F420DE18E7BC0B00B5F2F8 /* VideoFrameGPU.h */,
+				18F420DF18E7BC0B00B5F2F8 /* VideoFrameGPU.m */,
+				18619F7618E82BD800781326 /* VideoFrameCPU.h */,
+				18619F7718E82BD800781326 /* VideoFrameCPU.m */,
+				18619F7918E847DB00781326 /* SubtitleFrame.h */,
+				18619F7A18E847DB00781326 /* SubtitleFrame.m */,
+				18619F7318E828C100781326 /* Packet.h */,
+				18619F7418E828C100781326 /* Packet.m */,
+			);
+			name = Frame;
+			sourceTree = "<group>";
+		};
 		1897644918DE75E500673BD3 /* View */ = {
 			isa = PBXGroup;
 			children = (
@@ -252,28 +295,9 @@
 			children = (
 				1816DFA818D5EA0500FCE287 /* Decoder.h */,
 				1816DFA918D5EA0500FCE287 /* Decoder.m */,
-				181DF7EC18DB164000FF7739 /* AudioBuf.h */,
-				181DF7ED18DB164000FF7739 /* AudioBuf.m */,
-				1816DFB118D6E7CA00FCE287 /* VideoBuf.h */,
-				1816DFB218D6E7CA00FCE287 /* VideoBuf.m */,
-				18F420D818E5BCD400B5F2F8 /* VideoBufCPU.h */,
-				18F420D918E5BCD400B5F2F8 /* VideoBufCPU.m */,
-				18F420D518E5BAE200B5F2F8 /* VideoBufGPU.h */,
-				18F420D618E5BAE200B5F2F8 /* VideoBufGPU.m */,
-				1897645118DF228B00673BD3 /* SubtitleBuf.h */,
-				1897645218DF228B00673BD3 /* SubtitleBuf.m */,
-				18F420DB18E7B5A500B5F2F8 /* Queue.h */,
-				18F420DC18E7B5A500B5F2F8 /* Queue.m */,
-				18619F7018E81B3400781326 /* CircularQueue.h */,
-				18619F7118E81B3400781326 /* CircularQueue.m */,
-				18F420DE18E7BC0B00B5F2F8 /* VideoFrame.h */,
-				18F420DF18E7BC0B00B5F2F8 /* VideoFrame.m */,
-				18619F7618E82BD800781326 /* VideoFrameCPU.h */,
-				18619F7718E82BD800781326 /* VideoFrameCPU.m */,
-				18619F7918E847DB00781326 /* SubtitleFrame.h */,
-				18619F7A18E847DB00781326 /* SubtitleFrame.m */,
-				18619F7318E828C100781326 /* Packet.h */,
-				18619F7418E828C100781326 /* Packet.m */,
+				18619F7C18E857AA00781326 /* Track */,
+				18619F7D18E857C400781326 /* Queue */,
+				18619F7E18E857D700781326 /* Frame */,
 			);
 			name = Decoder;
 			sourceTree = "<group>";
@@ -378,19 +402,19 @@
 			files = (
 				1816DF8518D5D84200FCE287 /* AppDelegate.m in Sources */,
 				18619F7B18E847DB00781326 /* SubtitleFrame.m in Sources */,
-				1816DFB318D6E7CA00FCE287 /* VideoBuf.m in Sources */,
+				1816DFB318D6E7CA00FCE287 /* VideoTrack.m in Sources */,
 				1897645018DE8DC800673BD3 /* MyView.m in Sources */,
-				18F420DD18E7B5A500B5F2F8 /* Queue.m in Sources */,
+				18F420DD18E7B5A500B5F2F8 /* FlexibleQueue.m in Sources */,
 				18619F7818E82BD800781326 /* VideoFrameCPU.m in Sources */,
-				18F420E018E7BC0B00B5F2F8 /* VideoFrame.m in Sources */,
+				18F420E018E7BC0B00B5F2F8 /* VideoFrameGPU.m in Sources */,
 				18619F7518E828C100781326 /* Packet.m in Sources */,
 				1897644D18DE764900673BD3 /* MyOpenGLLayer.m in Sources */,
-				1897645318DF228B00673BD3 /* SubtitleBuf.m in Sources */,
+				1897645318DF228B00673BD3 /* SubtitleTrack.m in Sources */,
 				1816DF7E18D5D84200FCE287 /* main.m in Sources */,
-				181DF7EE18DB164000FF7739 /* AudioBuf.m in Sources */,
-				18F420DA18E5BCD400B5F2F8 /* VideoBufCPU.m in Sources */,
+				181DF7EE18DB164000FF7739 /* AudioTrack.m in Sources */,
+				18F420DA18E5BCD400B5F2F8 /* VideoTrackCPU.m in Sources */,
 				18619F7218E81B3400781326 /* CircularQueue.m in Sources */,
-				18F420D718E5BAE200B5F2F8 /* VideoBufGPU.m in Sources */,
+				18F420D718E5BAE200B5F2F8 /* VideoTrackGPU.m in Sources */,
 				1816DFAA18D5EA0500FCE287 /* Decoder.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

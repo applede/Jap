@@ -13,12 +13,13 @@
 
 #define TEXTURE_COUNT		5
 
-@interface VideoBuf : NSObject
+@interface VideoTrack : NSObject
 {
   BOOL _quit;
   Decoder* _decoder;
   AVStream* _stream;
   dispatch_semaphore_t _sema;
+  
   GLuint _program;
   int _width;
   int _height;

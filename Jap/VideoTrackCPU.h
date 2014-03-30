@@ -7,10 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "VideoBuf.h"
+#import "VideoTrack.h"
 #import "CircularQueue.h"
 
-@interface VideoBufCPU : VideoBuf
+@interface VideoTrackCPU : VideoTrack
 {
   CircularQueue* _frameQue;
   

@@ -8,10 +8,10 @@
 
 #import <Foundation/Foundation.h>
 #import <libavformat/avformat.h>
-#import "VideoBufCPU.h"
-#import "VideoBufGPU.h"
-#import "AudioBuf.h"
-#import "SubtitleBuf.h"
+#import "VideoTrackCPU.h"
+#import "VideoTrackGPU.h"
+#import "AudioTrack.h"
+#import "SubtitleTrack.h"
 #import "CircularQueue.h"
 
 @interface Decoder : NSObject
@@ -27,14 +27,14 @@
   int _audioStream;
   int _subtitleStream;
   
-  AudioBuf* _audioBuf;
-  SubtitleBuf* _subtitleBuf;
+  AudioTrack* _audioTrack;
+  SubtitleTrack* _subtitleTrack;
 }
 
 @property (readonly) CircularQueue* videoQue;
 @property (readonly) CircularQueue* audioQue;
 @property (readonly) CircularQueue* subtitleQue;
-@property (readonly) VideoBuf* videoBuf;
+@property (readonly) VideoTrack* videoTrack;
 @property (weak) CATextLayer* subtitle;
 
 - (void)open:(NSString*)path;
