@@ -33,6 +33,9 @@
 		18E183E318D714C700A35231 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E183E218D714C700A35231 /* libbz2.dylib */; };
 		18E183E618D7238B00A35231 /* PacketQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 18E183E518D7238B00A35231 /* PacketQueue.m */; };
 		18E183E818D743FE00A35231 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 18E183E718D743FE00A35231 /* libswscale.a */; };
+		18F420CE18E4830200B5F2F8 /* VideoDecodeAcceleration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18F420CD18E4830200B5F2F8 /* VideoDecodeAcceleration.framework */; };
+		18F420D718E5BAE200B5F2F8 /* VideoBufGPU.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F420D618E5BAE200B5F2F8 /* VideoBufGPU.m */; };
+		18F420DA18E5BCD400B5F2F8 /* VideoBufCPU.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F420D918E5BCD400B5F2F8 /* VideoBufCPU.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -88,6 +91,11 @@
 		18E183E418D7238B00A35231 /* PacketQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PacketQueue.h; sourceTree = "<group>"; };
 		18E183E518D7238B00A35231 /* PacketQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PacketQueue.m; sourceTree = "<group>"; };
 		18E183E718D743FE00A35231 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswscale.a; path = ../../../../usr/local/lib/libswscale.a; sourceTree = "<group>"; };
+		18F420CD18E4830200B5F2F8 /* VideoDecodeAcceleration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoDecodeAcceleration.framework; path = System/Library/Frameworks/VideoDecodeAcceleration.framework; sourceTree = SDKROOT; };
+		18F420D518E5BAE200B5F2F8 /* VideoBufGPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoBufGPU.h; sourceTree = "<group>"; };
+		18F420D618E5BAE200B5F2F8 /* VideoBufGPU.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoBufGPU.m; sourceTree = "<group>"; };
+		18F420D818E5BCD400B5F2F8 /* VideoBufCPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoBufCPU.h; sourceTree = "<group>"; };
+		18F420D918E5BCD400B5F2F8 /* VideoBufCPU.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoBufCPU.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +111,7 @@
 				1816DFAE18D6E73F00FCE287 /* libavutil.a in Frameworks */,
 				1816DFAC18D6E6B500FCE287 /* libavcodec.a in Frameworks */,
 				18E183DF18D7142300A35231 /* libavformat.a in Frameworks */,
+				18F420CE18E4830200B5F2F8 /* VideoDecodeAcceleration.framework in Frameworks */,
 				1816DF7218D5D84200FCE287 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -150,6 +159,7 @@
 				1816DFAD18D6E73F00FCE287 /* libavutil.a */,
 				1816DFAB18D6E6B500FCE287 /* libavcodec.a */,
 				18E183DE18D7142300A35231 /* libavformat.a */,
+				18F420CD18E4830200B5F2F8 /* VideoDecodeAcceleration.framework */,
 				1816DF7118D5D84200FCE287 /* Cocoa.framework */,
 				1816DF9018D5D84200FCE287 /* XCTest.framework */,
 				1816DF7318D5D84200FCE287 /* Other Frameworks */,
@@ -231,6 +241,10 @@
 				181DF7ED18DB164000FF7739 /* AudioBuf.m */,
 				1816DFB118D6E7CA00FCE287 /* VideoBuf.h */,
 				1816DFB218D6E7CA00FCE287 /* VideoBuf.m */,
+				18F420D818E5BCD400B5F2F8 /* VideoBufCPU.h */,
+				18F420D918E5BCD400B5F2F8 /* VideoBufCPU.m */,
+				18F420D518E5BAE200B5F2F8 /* VideoBufGPU.h */,
+				18F420D618E5BAE200B5F2F8 /* VideoBufGPU.m */,
 				1897645118DF228B00673BD3 /* SubtitleBuf.h */,
 				1897645218DF228B00673BD3 /* SubtitleBuf.m */,
 				18E183E418D7238B00A35231 /* PacketQueue.h */,
@@ -344,6 +358,8 @@
 				1897645318DF228B00673BD3 /* SubtitleBuf.m in Sources */,
 				1816DF7E18D5D84200FCE287 /* main.m in Sources */,
 				181DF7EE18DB164000FF7739 /* AudioBuf.m in Sources */,
+				18F420DA18E5BCD400B5F2F8 /* VideoBufCPU.m in Sources */,
+				18F420D718E5BAE200B5F2F8 /* VideoBufGPU.m in Sources */,
 				1816DFAA18D5EA0500FCE287 /* Decoder.m in Sources */,
 				18E183E618D7238B00A35231 /* PacketQueue.m in Sources */,
 			);

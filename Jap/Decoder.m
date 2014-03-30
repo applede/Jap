@@ -18,16 +18,16 @@
 {
   self = [super init];
   if (self) {
-    _quit = NO;
+    quit_ = NO;
     _videoQue = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
     _audioQue = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
     _subtitleQue = [[PacketQueue alloc] initWithSize:PACKET_Q_SIZE];
-    _videoBuf = [[VideoBuf alloc] init];
-    _audioBuf = [[AudioBuf alloc] init];
-    _subtitleBuf = [[SubtitleBuf alloc] init];
-    _decodeQ = dispatch_queue_create("jap.decode", DISPATCH_QUEUE_SERIAL);
-    _readQ = dispatch_queue_create("jap.read", DISPATCH_QUEUE_SERIAL);
-    _readSema = dispatch_semaphore_create(0);
+//    _videoBuf = [[VideoBuf alloc] init];
+//    audioBuf_ = [[AudioBuf alloc] init];
+//    subtitleBuf_ = [[SubtitleBuf alloc] init];
+    decodeQ_ = dispatch_queue_create("jap.decode", DISPATCH_QUEUE_SERIAL);
+    readQ_ = dispatch_queue_create("jap.read", DISPATCH_QUEUE_SERIAL);
+    readSema_ = dispatch_semaphore_create(0);
     av_register_all();
   }
   return self;
@@ -35,8 +35,8 @@
 
 - (void)open:(NSString *)path
 {
-  _path = path;
-  _quit = NO;
+  path_ = path;
+  quit_ = NO;
   [self readThread];
   while ([_videoQue count] < 16) {  // 16 packets are enough?
     usleep(100000);
@@ -44,25 +44,25 @@
   while ([_audioQue count] < 16) {
     usleep(100000);
   }
-  [_audioBuf start];
-  [_subtitleBuf start];
+  [audioBuf_ start];
+  [subtitleBuf_ start];
 }
 
 - (void)stop
 {
-  _quit = YES;
-  [_audioBuf stop];
+  quit_ = YES;
+  [audioBuf_ stop];
 }
 
 - (double)masterClock
 {
-  return [_audioBuf clock];
+  return [audioBuf_ clock];
 }
 
 - (void)readThread
 {
-  dispatch_async(_readQ, ^{
-    if (![self internalOpen:_path]) {
+  dispatch_async(readQ_, ^{
+    if (![self internalOpen:path_]) {
       [self close];
     }
   });
@@ -70,7 +70,7 @@
 
 - (AVStream*)openStream:(int)i
 {
-  AVCodecContext *avctx = _ic->streams[i]->codec;
+  AVCodecContext *avctx = formatContext_->streams[i]->codec;
   AVCodec *codec = avcodec_find_decoder(avctx->codec_id);
   
   avctx->codec_id = codec->id;
@@ -85,68 +85,73 @@
     NSLog(@"avcodec_open2");
     return nil;
   }
-  _ic->streams[i]->discard = AVDISCARD_DEFAULT;
-  return _ic->streams[i];
+  formatContext_->streams[i]->discard = AVDISCARD_DEFAULT;
+  return formatContext_->streams[i];
 }
 
 - (BOOL)internalOpen:(NSString*)filename
 {
-  _ic = avformat_alloc_context();
-  int err = avformat_open_input(&_ic, [filename UTF8String], NULL, NULL);
+  formatContext_ = NULL;
+  int err = avformat_open_input(&formatContext_, [filename UTF8String], NULL, NULL);
   if (err < 0) {
     NSLog(@"avformat_open_input %d", err);
     return NO;
   }
-  err = avformat_find_stream_info(_ic, NULL);
+  err = avformat_find_stream_info(formatContext_, NULL);
   if (err < 0) {
     NSLog(@"avformat_find_stream_info %d", err);
     return NO;
   }
-  _video_stream = av_find_best_stream(_ic, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
-  [_videoBuf setDecoder:self stream:[self openStream:_video_stream]];
+  video_stream_ = av_find_best_stream(formatContext_, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
+  AVCodecContext* context = formatContext_->streams[video_stream_]->codec;
+  if (context->codec_id == AV_CODEC_ID_H264) {
+    _videoBuf = [[VideoBufGPU alloc] initDecoder:self stream:formatContext_->streams[video_stream_]];
+  } else {
+    _videoBuf = [[VideoBufCPU alloc] initDecoder:self stream:[self openStream:video_stream_]];
+  }
   
-  _audio_stream = av_find_best_stream(_ic, AVMEDIA_TYPE_AUDIO, -1, _video_stream, NULL, 0);
-  [_audioBuf setDecoder:self stream:[self openStream:_audio_stream]];
-  [_audioBuf prepare];
-  
-  _subtitle_stream = av_find_best_stream(_ic, AVMEDIA_TYPE_SUBTITLE, -1,
-                                         (_audio_stream >= 0 ? _audio_stream : _video_stream),
+  audio_stream_ = av_find_best_stream(formatContext_, AVMEDIA_TYPE_AUDIO, -1, video_stream_, NULL, 0);
+  audioBuf_ = [[AudioBuf alloc] initDecoder:self stream:[self openStream:audio_stream_]];
+  [audioBuf_ prepare];
+
+  subtitle_stream_ = av_find_best_stream(formatContext_, AVMEDIA_TYPE_SUBTITLE, -1,
+                                         (audio_stream_ >= 0 ? audio_stream_ : video_stream_),
                                          NULL, 0);
-  [_subtitleBuf setDecoder:self stream:[self openStream:_subtitle_stream]];
+  subtitleBuf_ = [[SubtitleBuf alloc] initDecoder:self stream:[self openStream:subtitle_stream_]];
   
   AVPacket pkt1, *pkt = &pkt1;
-  while (!_quit) {
+  while (!quit_) {
     while (![_videoQue isFull] && ![_audioQue isFull]) {
-      int ret = av_read_frame(_ic, pkt);
+      int ret = av_read_frame(formatContext_, pkt);
       if (ret < 0) {
         NSLog(@"av_read_frame %d", ret);
       }
-      if (pkt->stream_index == _video_stream)
+      if (pkt->stream_index == video_stream_)
         [_videoQue put:pkt];
-      else if (pkt->stream_index == _audio_stream)
+      else if (pkt->stream_index == audio_stream_)
         [_audioQue put:pkt];
-      else if (pkt->stream_index == _subtitle_stream)
+      else if (pkt->stream_index == subtitle_stream_)
         [_subtitleQue put:pkt];
       else
         av_free_packet(pkt);
     }
-    dispatch_semaphore_wait(_readSema, DISPATCH_TIME_FOREVER);
+    dispatch_semaphore_wait(readSema_, DISPATCH_TIME_FOREVER);
   }
   return YES;
 }
 
 - (void)close
 {
-  if (_ic) {
-    avformat_close_input(&_ic);
+  if (formatContext_) {
+    avformat_close_input(&formatContext_);
   }
-  [_audioBuf close];
+  [audioBuf_ close];
 }
 
 - (void)decodeVideoBuffer:(int)i
 {
   [_videoBuf setTime:DBL_MAX of:i];
-  dispatch_async(_decodeQ, ^{
+  dispatch_async(decodeQ_, ^{
     @autoreleasepool {
       [_videoBuf decode:i];
     }
@@ -158,13 +163,13 @@
   if ([_videoQue count] < PACKET_Q_SIZE / 3 ||
       [_audioQue count] < PACKET_Q_SIZE / 3 ||
       [_subtitleQue count] < PACKET_Q_SIZE / 3) {
-    dispatch_semaphore_signal(_readSema);
+    dispatch_semaphore_signal(readSema_);
   }
 }
 
 - (void)displaySubtitle
 {
-  [_subtitleBuf display:_subtitle time:[self masterClock]];
+  [subtitleBuf_ display:_subtitle time:[self masterClock]];
 }
 
 @end

@@ -15,10 +15,14 @@
 
 @implementation AudioBuf
 
-- (void)setDecoder:(Decoder *)decoder stream:(AVStream *)stream
+- (id)initDecoder:(Decoder *)decoder stream:(AVStream *)stream
 {
-  _decoder = decoder;
-	_stream = stream;
+  self = [super init];
+  if (self) {
+    _decoder = decoder;
+    _stream = stream;
+  }
+  return self;
 }
 
 - (void)start

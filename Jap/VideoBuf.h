@@ -11,36 +11,39 @@
 
 @class Decoder;
 
-#define TEXTURE_COUNT		2
+#define TEXTURE_COUNT		5
+
+static inline int mod(int x)
+{
+  assert(x >= 0);
+  return x % TEXTURE_COUNT;
+}
 
 @interface VideoBuf : NSObject
 {
-  BOOL _quit;
-  Decoder* _decoder;
-  AVStream* _stream;
+  BOOL quit_;
+  Decoder* decoder_;
+  AVStream* stream_;
+  GLuint program_;
+  int width_;
+  int height_;
   
-  struct SwsContext *_img_convert_ctx;
-  double _time[TEXTURE_COUNT];
-  AVFrame* _frame[TEXTURE_COUNT];
-  int _frameSize;
+  double time_[TEXTURE_COUNT];
 }
 
-@property (readonly) int size;
-@property (readonly) GLubyte* data;
-@property (readonly) int width;
-@property (readonly) int height;
+- (int)width;
+- (int)height;
 
-- (void)setDecoder:(Decoder*)decoder stream:(AVStream*)stream;
+- (GLuint)program;
+- (void)compileVertex:(const char*)vertexSrc fragment:(const char*)fragmentSrc;
+
+- (void)prepare:(CGLContextObj)cgl;
 
 - (double)time:(int)i;
 - (void)setTime:(double)t of:(int)i;
-- (GLubyte*)dataY:(int)i;
-- (GLubyte*)dataU:(int)i;
-- (GLubyte*)dataV:(int)i;
-- (int)strideY:(int)i;
-- (int)strideU:(int)i;
-- (int)strideV:(int)i;
 
 - (void)decode:(int)i;
+- (void)load:(int)i;
+- (void)draw:(int)i;
 
 @end

@@ -49,7 +49,7 @@ typedef struct {
   int _audio_buf_size;
 }
 
-- (void)setDecoder:(Decoder*)decoder stream:(AVStream *)stream;
+- (id)initDecoder:(Decoder*)decoder stream:(AVStream *)stream;
 
 - (void)start;
 - (void)stop;

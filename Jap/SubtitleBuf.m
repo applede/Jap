@@ -11,7 +11,7 @@
 
 @implementation SubtitleBuf
 
-- (id)init
+- (id)initDecoder:(Decoder *)decoder stream:(AVStream *)stream
 {
   self = [super init];
   if (self) {
@@ -24,6 +24,8 @@
     _time = calloc(_size, sizeof(*_time));
     _lock = [[NSLock alloc] init];
     _sema = dispatch_semaphore_create(0);
+    _decoder = decoder;
+    _stream = stream;
   }
   return self;
 }
@@ -32,12 +34,6 @@
 {
   free(_sub);
   free(_time);
-}
-
-- (void)setDecoder:(Decoder *)decoder stream:(AVStream*)stream
-{
-  _decoder = decoder;
-  _stream = stream;
 }
 
 - (void)start

@@ -19,7 +19,7 @@
       [self setWantsBestResolutionOpenGLSurface:YES];
       [self setLayer:[MyOpenGLLayer layer]];
       [self setWantsLayer:YES];
-      [self setupSubtitleLayer];
+      [self makeSubtitleLayer];
     }
     return self;
 }
@@ -30,7 +30,7 @@
   [super viewDidChangeBackingProperties];
 }
 
-- (void)setupSubtitleLayer
+- (void)makeSubtitleLayer
 {
   _text = [CATextLayer layer];
   _text.delegate = self;

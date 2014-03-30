@@ -8,27 +8,28 @@
 
 #import <Foundation/Foundation.h>
 #import <libavformat/avformat.h>
-#import "VideoBuf.h"
+#import "VideoBufCPU.h"
+#import "VideoBufGPU.h"
 #import "AudioBuf.h"
 #import "SubtitleBuf.h"
 #import "PacketQueue.h"
 
 @interface Decoder : NSObject
 {
-  NSString* _path;
+  NSString* path_;
   
-  BOOL _quit;
-  dispatch_queue_t _decodeQ;
-  dispatch_queue_t _readQ;
-  dispatch_semaphore_t _readSema;
+  BOOL quit_;
+  dispatch_queue_t decodeQ_;
+  dispatch_queue_t readQ_;
+  dispatch_semaphore_t readSema_;
 
-  AVFormatContext *_ic;
-  int _video_stream;
-  int _audio_stream;
-  int _subtitle_stream;
+  AVFormatContext *formatContext_;
+  int video_stream_;
+  int audio_stream_;
+  int subtitle_stream_;
   
-  AudioBuf* _audioBuf;
-  SubtitleBuf* _subtitleBuf;
+  AudioBuf* audioBuf_;
+  SubtitleBuf* subtitleBuf_;
 }
 
 @property (readonly) PacketQueue* videoQue;

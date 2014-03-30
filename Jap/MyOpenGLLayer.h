@@ -11,12 +11,8 @@
 
 @interface MyOpenGLLayer : NSOpenGLLayer
 {
-	GLuint texIds[TEXTURE_COUNT][3];
   int _current;
-  GLuint _vertexShader;
-  GLuint _fragmentShader;
-  GLuint _program;
-  GLuint _buffer;
+  GLuint buffer_;
   NSString* _path;
 }
 
