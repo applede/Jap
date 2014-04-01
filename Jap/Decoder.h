@@ -12,6 +12,8 @@
 #import "VideoTrackGPU.h"
 #import "AudioTrack.h"
 #import "SubtitleTrack.h"
+#import "SubtitleTrackEmbed.h"
+#import "SubtitleTrackSMI.h"
 #import "CircularQueue.h"
 
 @interface Decoder : NSObject

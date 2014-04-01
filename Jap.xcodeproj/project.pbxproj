@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1801EEA218E9C4B80032D204 /* ParserSMI.m in Sources */ = {isa = PBXBuildFile; fileRef = 1801EEA118E9C4B80032D204 /* ParserSMI.m */; };
 		1816DF7218D5D84200FCE287 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1816DF7118D5D84200FCE287 /* Cocoa.framework */; };
 		1816DF7C18D5D84200FCE287 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1816DF7A18D5D84200FCE287 /* InfoPlist.strings */; };
 		1816DF7E18D5D84200FCE287 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1816DF7D18D5D84200FCE287 /* main.m */; };
@@ -29,6 +30,8 @@
 		18619F7518E828C100781326 /* Packet.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F7418E828C100781326 /* Packet.m */; };
 		18619F7818E82BD800781326 /* VideoFrameCPU.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F7718E82BD800781326 /* VideoFrameCPU.m */; };
 		18619F7B18E847DB00781326 /* SubtitleFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F7A18E847DB00781326 /* SubtitleFrame.m */; };
+		18619F8118E9662600781326 /* SubtitleTrackSMI.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F8018E9662600781326 /* SubtitleTrackSMI.m */; };
+		18619F8418E9B31100781326 /* SubtitleTrackEmbed.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F8318E9B31100781326 /* SubtitleTrackEmbed.m */; };
 		1897644D18DE764900673BD3 /* MyOpenGLLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1897644C18DE764900673BD3 /* MyOpenGLLayer.m */; };
 		1897645018DE8DC800673BD3 /* MyView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1897644F18DE8DC800673BD3 /* MyView.m */; };
 		1897645318DF228B00673BD3 /* SubtitleTrack.m in Sources */ = {isa = PBXBuildFile; fileRef = 1897645218DF228B00673BD3 /* SubtitleTrack.m */; };
@@ -54,6 +57,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1801EEA018E9C4B80032D204 /* ParserSMI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParserSMI.h; sourceTree = "<group>"; };
+		1801EEA118E9C4B80032D204 /* ParserSMI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParserSMI.m; sourceTree = "<group>"; };
 		1816DF6E18D5D84200FCE287 /* Jap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Jap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1816DF7118D5D84200FCE287 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		1816DF7418D5D84200FCE287 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -92,6 +97,10 @@
 		18619F7718E82BD800781326 /* VideoFrameCPU.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoFrameCPU.m; sourceTree = "<group>"; };
 		18619F7918E847DB00781326 /* SubtitleFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubtitleFrame.h; sourceTree = "<group>"; };
 		18619F7A18E847DB00781326 /* SubtitleFrame.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SubtitleFrame.m; sourceTree = "<group>"; };
+		18619F7F18E9662600781326 /* SubtitleTrackSMI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubtitleTrackSMI.h; sourceTree = "<group>"; };
+		18619F8018E9662600781326 /* SubtitleTrackSMI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SubtitleTrackSMI.m; sourceTree = "<group>"; };
+		18619F8218E9B31100781326 /* SubtitleTrackEmbed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubtitleTrackEmbed.h; sourceTree = "<group>"; };
+		18619F8318E9B31100781326 /* SubtitleTrackEmbed.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SubtitleTrackEmbed.m; sourceTree = "<group>"; };
 		1897644B18DE764900673BD3 /* MyOpenGLLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyOpenGLLayer.h; sourceTree = "<group>"; };
 		1897644C18DE764900673BD3 /* MyOpenGLLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyOpenGLLayer.m; sourceTree = "<group>"; };
 		1897644E18DE8DC800673BD3 /* MyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyView.h; sourceTree = "<group>"; };
@@ -143,6 +152,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1801EE9F18E9C4920032D204 /* Parser */ = {
+			isa = PBXGroup;
+			children = (
+				1801EEA018E9C4B80032D204 /* ParserSMI.h */,
+				1801EEA118E9C4B80032D204 /* ParserSMI.m */,
+			);
+			name = Parser;
+			sourceTree = "<group>";
+		};
 		1816DF6518D5D84200FCE287 = {
 			isa = PBXGroup;
 			children = (
@@ -249,6 +267,11 @@
 				18F420D618E5BAE200B5F2F8 /* VideoTrackGPU.m */,
 				1897645118DF228B00673BD3 /* SubtitleTrack.h */,
 				1897645218DF228B00673BD3 /* SubtitleTrack.m */,
+				18619F8218E9B31100781326 /* SubtitleTrackEmbed.h */,
+				18619F8318E9B31100781326 /* SubtitleTrackEmbed.m */,
+				18619F7F18E9662600781326 /* SubtitleTrackSMI.h */,
+				18619F8018E9662600781326 /* SubtitleTrackSMI.m */,
+				1801EE9F18E9C4920032D204 /* Parser */,
 			);
 			name = Track;
 			sourceTree = "<group>";
@@ -411,8 +434,11 @@
 				1897644D18DE764900673BD3 /* MyOpenGLLayer.m in Sources */,
 				1897645318DF228B00673BD3 /* SubtitleTrack.m in Sources */,
 				1816DF7E18D5D84200FCE287 /* main.m in Sources */,
+				1801EEA218E9C4B80032D204 /* ParserSMI.m in Sources */,
 				181DF7EE18DB164000FF7739 /* AudioTrack.m in Sources */,
+				18619F8418E9B31100781326 /* SubtitleTrackEmbed.m in Sources */,
 				18F420DA18E5BCD400B5F2F8 /* VideoTrackCPU.m in Sources */,
+				18619F8118E9662600781326 /* SubtitleTrackSMI.m in Sources */,
 				18619F7218E81B3400781326 /* CircularQueue.m in Sources */,
 				18F420D718E5BAE200B5F2F8 /* VideoTrackGPU.m in Sources */,
 				1816DFAA18D5EA0500FCE287 /* Decoder.m in Sources */,

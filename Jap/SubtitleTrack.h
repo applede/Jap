@@ -13,6 +13,8 @@
 
 @class Decoder;
 
+/// @note _frameQue should be initialized by subclass
+
 @interface SubtitleTrack : NSObject
 {
   BOOL _quit;

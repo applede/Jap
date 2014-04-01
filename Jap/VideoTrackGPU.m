@@ -23,7 +23,7 @@ static void OnFrameReadyCallback(void *callback_data,
     assert(status == 0);
     assert(image_buffer);
     assert(CVPixelBufferGetPixelFormatType(image_buffer) == '2vuy');
-//    CGSize size = CVImageBufferGetDisplaySize(image_buffer);
+
     NSDictionary* info = (__bridge NSDictionary*)frame_info;
     VideoTrackGPU* videoTrack = (__bridge VideoTrackGPU*)callback_data;
     [videoTrack onFrameReady:image_buffer time:[info[kDisplayTimeKey] doubleValue]];
@@ -77,7 +77,7 @@ static void OnFrameReadyCallback(void *callback_data,
   _cglCtx = cgl;
   glEnable(GL_TEXTURE_RECTANGLE_ARB);
   glGenTextures(1, &_texture);
-#if 1
+
   [self compileVertex:
    "#version 120\n"
    "attribute vec2 Position;\n"
@@ -111,7 +111,6 @@ static void OnFrameReadyCallback(void *callback_data,
   assert(texcoord >= 0);
   glVertexAttribPointer(texcoord, 2, GL_FLOAT, GL_FALSE, 0, (char*)0 + 8 * sizeof(GLfloat));
   glEnableVertexAttribArray(texcoord);
-#endif
 }
 
 - (double)frontTime
@@ -152,34 +151,16 @@ static void OnFrameReadyCallback(void *callback_data,
   CGLTexImageIOSurface2D(_cglCtx, GL_TEXTURE_RECTANGLE_ARB, GL_RGB8,
                          width, height,
                          GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, surface, 0);
-  //		CGLTexImageIOSurface2D(cgl_ctx, GL_TEXTURE_RECTANGLE_ARB, GL_RGBA8,
-  //							   _texWidth, _texHeight,
-  //							   GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, _surface, 0);
   glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
   glDisable(GL_TEXTURE_RECTANGLE_ARB);
   
   glFlush();
 
-#if 1
   glUseProgram(_program);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_RECTANGLE_ARB, _texture);
   glDrawArrays(GL_QUADS, 0, 4);
-#else
-  glEnable(GL_TEXTURE_RECTANGLE_ARB);
-  glBindTexture(GL_TEXTURE_RECTANGLE_ARB, texIds_[mod(i)]);
-  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	glBegin(GL_QUADS);
-		glTexCoord2f(0.0, 0.0);
-		glVertex3f(-1.0, -1.0, 0.0);
-		glTexCoord2f(width_, 0.0);
-		glVertex3f(1.0, -1.0, 0.0);
-		glTexCoord2f(width_, height_);
-		glVertex3f(1.0, 1.0, 0.0);
-		glTexCoord2f(0.0, height_);
-		glVertex3f(-1.0, 1.0, 0.0);
-	glEnd();
-#endif
+  
   [self signal];
 }
 

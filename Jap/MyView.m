@@ -37,8 +37,8 @@
   _text.alignmentMode = kCAAlignmentCenter;
   _text.font = (__bridge CFTypeRef)@"HelveticaNeue-Light";
   _text.shadowOpacity = 1.0;
-  _text.shadowOffset = CGSizeMake(1.0, -2.0);
-  _text.shadowRadius = 2.0;
+  _text.shadowOffset = CGSizeMake(1.0, -1.0);
+  _text.shadowRadius = 3.0;
   self.layer.layoutManager = [CAConstraintLayoutManager layoutManager];
   [self.layer addSublayer:_text];
 }

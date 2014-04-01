@@ -87,6 +87,20 @@
   return _formatContext->streams[i];
 }
 
+/// @return nil if smi file does not exist
+
+NSString* smiPath(NSString* path)
+{
+  NSString* filename = [path stringByDeletingPathExtension];
+  NSString* smiPath = [filename stringByAppendingPathExtension:@"smi"];
+  BOOL dir;
+  BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:smiPath isDirectory:&dir];
+  if (!exists || dir) {
+    smiPath = nil;
+  }
+  return smiPath;
+}
+
 - (BOOL)internalOpen:(NSString*)filename
 {
   _formatContext = NULL;
@@ -112,11 +126,18 @@
   _audioTrack = [[AudioTrack alloc] initDecoder:self stream:[self openStream:_audioStream]];
   [_audioTrack prepare];
 
-  _subtitleStream = av_find_best_stream(_formatContext, AVMEDIA_TYPE_SUBTITLE, -1,
-                                         (_audioStream >= 0 ? _audioStream : _videoStream),
-                                         NULL, 0);
-  _subtitleTrack = [[SubtitleTrack alloc] initDecoder:self stream:[self openStream:_subtitleStream]];
-  
+  NSString* smiP = smiPath(_path);
+  _subtitleTrack = [[SubtitleTrackSMI alloc] initDecoder:self
+                                                  stream:_formatContext->streams[_videoStream] path:smiP];
+  if (_subtitleTrack) {
+    _subtitleStream = -1;
+  } else {
+    _subtitleStream = av_find_best_stream(_formatContext, AVMEDIA_TYPE_SUBTITLE, -1,
+                                          (_audioStream >= 0 ? _audioStream : _videoStream),
+                                          NULL, 0);
+    _subtitleTrack = [[SubtitleTrackEmbed alloc] initDecoder:self stream:[self openStream:_subtitleStream]];
+  }
+ 
   while (!_quit) {
     while (![_videoQue isFull] && ![_audioQue isFull]) {
       Packet* packet = [[Packet alloc] init];
