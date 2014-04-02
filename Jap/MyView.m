@@ -9,6 +9,31 @@
 #import "MyView.h"
 #import "MyOpenGLLayer.h"
 
+void resetFilters(CALayer* layer)
+{
+  layer.masksToBounds = YES;
+  layer.backgroundColor = [[NSColor colorWithCalibratedWhite:0.5 alpha:0.6] CGColor];
+  layer.needsDisplayOnBoundsChange = YES;
+  CIFilter* saturationFilter = [CIFilter filterWithName:@"CIColorControls"];
+  [saturationFilter setDefaults];
+  [saturationFilter setValue:@2.0 forKey:@"inputSaturation"];
+  CIFilter* clampFilter = [CIFilter filterWithName:@"CIAffineClamp"];
+  [clampFilter setDefaults];
+  [clampFilter setValue:[NSValue valueWithBytes:&CGAffineTransformIdentity objCType:@encode(CGAffineTransform)] forKey:@"inputTransform"];
+  CIFilter* blurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];
+  [blurFilter setDefaults];
+  [blurFilter setValue:@20.0 forKey:@"inputRadius"];
+  layer.backgroundFilters = @[saturationFilter, clampFilter, blurFilter];
+  [layer setNeedsDisplay];
+}
+
+CALayer* makeBlurLayer()
+{
+  CALayer* layer = [CALayer layer];
+  resetFilters(layer);
+  return layer;
+}
+
 @implementation MyView
 
 - (id)initWithFrame:(NSRect)frame
@@ -19,28 +44,37 @@
       [self setWantsBestResolutionOpenGLSurface:YES];
       [self setLayer:[MyOpenGLLayer layer]];
       [self setWantsLayer:YES];
-      [self makeSubtitleLayer];
+      [self setLayerUsesCoreImageFilters:YES];
+      [self makeSublayers];
+      _menuHidden = YES;
     }
     return self;
 }
 
 - (void)viewDidChangeBackingProperties
 {
-  _text.contentsScale = [self.window backingScaleFactor];
+  CGFloat f = [self.window backingScaleFactor];
+  _subtitle.contentsScale = f;
+  _menu.contentsScale = f;
   [super viewDidChangeBackingProperties];
 }
 
-- (void)makeSubtitleLayer
+- (void)makeSublayers
 {
-  _text = [CATextLayer layer];
-  _text.delegate = self;
-  _text.alignmentMode = kCAAlignmentCenter;
-  _text.font = (__bridge CFTypeRef)@"HelveticaNeue-Light";
-  _text.shadowOpacity = 1.0;
-  _text.shadowOffset = CGSizeMake(0.0, -1.0);
+  _subtitle = [CATextLayer layer];
+  _subtitle.delegate = self;
+  _subtitle.alignmentMode = kCAAlignmentCenter;
+  _subtitle.font = (__bridge CFTypeRef)@"HelveticaNeue-Light";
+  _subtitle.shadowOpacity = 1.0;
+  _subtitle.shadowOffset = CGSizeMake(0.0, -1.0);
 //  _text.shadowRadius = 1.0;
+
+  _menu = makeBlurLayer();
+  _menu.anchorPoint = CGPointMake(0, 0);
+
   self.layer.layoutManager = [CAConstraintLayoutManager layoutManager];
-  [self.layer addSublayer:_text];
+  [self.layer addSublayer:_subtitle];
+  [self.layer addSublayer:_menu];
 }
 
 - (id<CAAction>)actionForLayer:(CALayer *)layer forKey:(NSString *)event
@@ -56,19 +90,26 @@
     CGFloat h = layer.movieRect.size.height / s;
     CGFloat y = layer.movieRect.origin.y / s;
     
-    CGFloat fontSize = h * 0.09;
+    CGFloat fontSize = h * 0.08;
     _subtitleFont = [NSFont fontWithName:@"Apple SD Gothic Neo Medium"
                                     size:fontSize];
     if (!_subtitleFont) {
       _subtitleFont = [NSFont fontWithName:@"Helvetica Neue Medium"
                                       size:fontSize];
     }
-    [_text setConstraints:@[[CAConstraint constraintWithAttribute:kCAConstraintMidX
+    [_subtitle setConstraints:@[[CAConstraint constraintWithAttribute:kCAConstraintMidX
                                                   relativeTo:@"superlayer"
                                                    attribute:kCAConstraintMidX],
                             [CAConstraint constraintWithAttribute:kCAConstraintMinY
                                                     relativeTo:@"superlayer"
                                                      attribute:kCAConstraintMinY offset:y]]];
+    _menuHeight = self.bounds.size.height * 0.1;
+    _menu.bounds = CGRectMake(0, 0, self.bounds.size.width, _menuHeight);
+    if (_menuHidden) {
+      _menu.position = CGPointMake(0, -_menuHeight);
+    } else {
+      _menu.position = CGPointMake(0, 0);
+    }
     [self.layer setNeedsLayout];
   }
 }
@@ -99,8 +140,42 @@
     NSAttributedString* str = [[NSAttributedString alloc] initWithString:newString
                                                               attributes:attrs];
     
-    _text.string = str;
+    _subtitle.string = str;
   }
+}
+
+- (void)keyDown:(NSEvent *)theEvent
+{
+  NSString* chars = [theEvent charactersIgnoringModifiers];
+  switch ([chars characterAtIndex:0]) {
+    case 'm':
+      [self menuPressed];
+      break;
+      
+    default:
+      break;
+  }
+}
+
+- (void)menuPressed
+{
+  if (_menuHidden) {
+    [self.layer addSublayer:_menu];
+    _menu.position = CGPointMake(0, 0);
+    _menuHidden = NO;
+  } else {
+    [NSAnimationContext runAnimationGroup:^(NSAnimationContext* ctx) {
+      _menu.position = CGPointMake(0, -_menuHeight);
+    } completionHandler:^{
+      [_menu removeFromSuperlayer];
+      _menuHidden = YES;
+    }];
+  }
+}
+
+- (BOOL)acceptsFirstResponder
+{
+  return YES;
 }
 
 @end

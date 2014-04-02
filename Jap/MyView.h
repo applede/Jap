@@ -12,8 +12,12 @@
 
 @interface MyView : NSView <SubtitleDelegate>
 {
-  CATextLayer* _text;
+  CATextLayer* _subtitle;
   NSFont* _subtitleFont;
+  
+  CALayer* _menu;
+  CGFloat _menuHeight;
+  BOOL _menuHidden;
 }
 
 - (void)open:(NSString*)path;
