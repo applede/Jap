@@ -26,20 +26,16 @@
   return nil;
 }
 
-- (void)display:(CATextLayer*)layer time:(double)t
+- (NSString*)stringForTime:(double)t
 {
+  NSString* ret = nil;
   Node* node = [_nodes objectAtIndex:_current];
   double time = av_q2d(_stream->time_base) * [node time];
   if (time <= t) {
-    NSAttributedString* str =
-    [[NSAttributedString alloc] initWithString:[node string]
-                                    attributes:@{ NSFontAttributeName:[NSFont fontWithName:@"Helvetica Neue" size:24.0], NSForegroundColorAttributeName:[NSColor whiteColor],
-                                          NSStrokeWidthAttributeName:@(-1.0),
-                                          NSStrokeColorAttributeName:[NSColor blackColor]}];
-    
-    layer.string = str;
+    ret = [node string];
     _current++;
   }
+  return ret;
 }
 
 @end

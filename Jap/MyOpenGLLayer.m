@@ -56,7 +56,7 @@
 {
   @autoreleasepool {
     [self draw];
-    [_decoder displaySubtitle];
+    [_subtitleDelegate displaySubtitle];
   }
 }
 

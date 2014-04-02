@@ -37,8 +37,8 @@
   _text.alignmentMode = kCAAlignmentCenter;
   _text.font = (__bridge CFTypeRef)@"HelveticaNeue-Light";
   _text.shadowOpacity = 1.0;
-  _text.shadowOffset = CGSizeMake(1.0, -1.0);
-  _text.shadowRadius = 3.0;
+  _text.shadowOffset = CGSizeMake(0.0, -1.0);
+//  _text.shadowRadius = 1.0;
   self.layer.layoutManager = [CAConstraintLayoutManager layoutManager];
   [self.layer addSublayer:_text];
 }
@@ -56,7 +56,14 @@
     CGFloat h = layer.movieRect.size.height / s;
     CGFloat y = layer.movieRect.origin.y / s;
     
-    _text.fontSize = h * 0.08;
+//    _text.fontSize = h * 0.08;
+    CGFloat fontSize = h * 0.09;
+    _subtitleFont = [NSFont fontWithName:@"Apple SD Gothic Neo Medium"
+                                    size:fontSize];
+    if (!_subtitleFont) {
+      _subtitleFont = [NSFont fontWithName:@"Helvetica Neue Medium"
+                                      size:fontSize];
+    }
     [_text setConstraints:@[[CAConstraint constraintWithAttribute:kCAConstraintMidX
                                                   relativeTo:@"superlayer"
                                                    attribute:kCAConstraintMidX],
@@ -70,7 +77,7 @@
 - (void)open:(NSString *)path
 {
   MyOpenGLLayer* layer = (MyOpenGLLayer*)self.layer;
-  layer.decoder.subtitle = _text;
+  layer.subtitleDelegate = self;
   [layer open:path];
   [self frameChanged];
 }
@@ -78,6 +85,23 @@
 - (void)windowDidResize:(NSNotification*)notification
 {
   [self frameChanged];
+}
+
+- (void)displaySubtitle
+{
+  MyOpenGLLayer* layer = (MyOpenGLLayer*)self.layer;
+  NSString* newString = [layer.decoder subtitleString];
+  if (newString) {
+    NSDictionary* attrs = @{NSFontAttributeName:_subtitleFont,
+                            NSForegroundColorAttributeName:[NSColor whiteColor],
+                            NSStrokeWidthAttributeName:@(-1.0),
+                            NSStrokeColorAttributeName:[NSColor blackColor]
+                            };
+    NSAttributedString* str = [[NSAttributedString alloc] initWithString:newString
+                                                              attributes:attrs];
+    
+    _text.string = str;
+  }
 }
 
 @end

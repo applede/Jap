@@ -175,9 +175,9 @@ NSString* smiPath(NSString* path)
   }
 }
 
-- (void)displaySubtitle
+- (NSString *)subtitleString
 {
-  [_subtitleTrack display:_subtitle time:[self masterClock]];
+  return [_subtitleTrack stringForTime:[self masterClock]];
 }
 
 @end

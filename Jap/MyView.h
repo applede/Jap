@@ -8,12 +8,15 @@
 
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/QuartzCore.h>
+#import "MyOpenGLLayer.h"
 
-@interface MyView : NSView
+@interface MyView : NSView <SubtitleDelegate>
 {
   CATextLayer* _text;
+  NSFont* _subtitleFont;
 }
 
 - (void)open:(NSString*)path;
+- (void)displaySubtitle;
 
 @end

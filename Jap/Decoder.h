@@ -37,11 +37,10 @@
 @property (readonly) CircularQueue* audioQue;
 @property (readonly) CircularQueue* subtitleQue;
 @property (readonly) VideoTrack* videoTrack;
-@property (weak) CATextLayer* subtitle;
 
 - (void)open:(NSString*)path;
 - (void)checkQueue;
 - (double)masterClock;
-- (void)displaySubtitle;
+- (NSString*)subtitleString;
 
 @end

@@ -26,6 +26,8 @@
 
 - (id)initDecoder:(Decoder*)decoder stream:(AVStream*)stream;
 - (void)start;
-- (void)display:(CATextLayer*)layer time:(double)t;
+
+/// @return nil means no change needed
+- (NSString*)stringForTime:(double)t;
 
 @end

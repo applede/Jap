@@ -103,26 +103,28 @@ static int convert(const char* src, char* dst)
   return n;
 }
 
-- (void)display:(CATextLayer *)layer time:(double)t
+- (NSString*)stringForTime:(double)t
 {
+  NSString* ret = nil;
   if ([_frameQue isEmpty]) {
-    return;
+    return @"";
   }
   SubtitleFrame* s = [self get:t];
   if (s) {
     if (s.endTime <= t) {
-      layer.string = @"";
+      ret = @"";
       avsubtitle_free(s.sub);
       [_frameQue get];
+      if ([_frameQue count] < QSIZE / 3) {
+        dispatch_semaphore_signal(_sema);
+      }
     } else {
       char buf[2048];
       convert(findSub(s.ass), buf);
-      layer.string = [NSString stringWithUTF8String:buf];
+      ret = [NSString stringWithUTF8String:buf];
     }
   }
-  if ([_frameQue count] < QSIZE / 3) {
-    dispatch_semaphore_signal(_sema);
-  }
+  return ret;
 }
 
 @end

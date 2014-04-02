@@ -26,8 +26,9 @@
 {
 }
 
-- (void)display:(CATextLayer *)layer time:(double)t
+- (NSString*)stringForTime:(double)t
 {
+  return nil;
 }
 
 @end
