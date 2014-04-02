@@ -19,6 +19,7 @@
 {
   self = [super initDecoder:decoder stream:stream];
   if (self) {
+    _sema = dispatch_semaphore_create(0);
     _frameQue = [[CircularQueue alloc] initSize:QSIZE];
     for (int i = 0; i < QSIZE; i++) {
       _frameQue[i] = [[SubtitleFrame alloc] init];

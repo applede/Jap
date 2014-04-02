@@ -13,13 +13,12 @@
 
 - (id)initDecoder:(Decoder *)decoder stream:(AVStream*)stream path:(NSString *)path
 {
-  self = [super init];
+  self = [super initDecoder:decoder stream:stream];
   if (self) {
     ParserSMI* parser = [[ParserSMI alloc] initPath:path];
     if (parser) {
       _nodes = [parser nodes];
       _current = 0;
-      _stream = stream;
       return self;
     }
   }

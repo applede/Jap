@@ -9,8 +9,6 @@
 #import <OpenGL/gl.h>
 #import "MyOpenGLLayer.h"
 
-#define ADVANCE (TEXTURE_COUNT - 1)
-
 @implementation MyOpenGLLayer
 
 - (NSOpenGLContext *)openGLContextForPixelFormat:(NSOpenGLPixelFormat *)pixelFormat

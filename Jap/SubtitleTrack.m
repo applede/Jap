@@ -17,7 +17,6 @@
   if (self) {
     _decoder = decoder;
     _stream = stream;
-    _sema = dispatch_semaphore_create(0);
   }
   return self;
 }

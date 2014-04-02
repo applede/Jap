@@ -13,15 +13,10 @@
 
 @class Decoder;
 
-/// @note _frameQue should be initialized by subclass
-
 @interface SubtitleTrack : NSObject
 {
-  BOOL _quit;
   Decoder* _decoder;
   AVStream* _stream;
-  dispatch_semaphore_t _sema;
-  CircularQueue* _frameQue;
 }
 
 - (id)initDecoder:(Decoder*)decoder stream:(AVStream*)stream;

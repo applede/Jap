@@ -56,7 +56,6 @@
     CGFloat h = layer.movieRect.size.height / s;
     CGFloat y = layer.movieRect.origin.y / s;
     
-//    _text.fontSize = h * 0.08;
     CGFloat fontSize = h * 0.09;
     _subtitleFont = [NSFont fontWithName:@"Apple SD Gothic Neo Medium"
                                     size:fontSize];

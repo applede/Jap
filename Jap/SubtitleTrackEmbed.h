@@ -10,5 +10,10 @@
 #import "SubtitleTrack.h"
 
 @interface SubtitleTrackEmbed : SubtitleTrack
+{
+  BOOL _quit;
+  CircularQueue* _frameQue;
+  dispatch_semaphore_t _sema;
+}
 
 @end
