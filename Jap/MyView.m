@@ -15,7 +15,7 @@
 void resetFilters(CALayer* layer)
 {
   layer.masksToBounds = YES;
-  layer.backgroundColor = [[NSColor colorWithCalibratedWhite:0.5 alpha:0.6] CGColor];
+  layer.backgroundColor = [[NSColor colorWithCalibratedWhite:0.6 alpha:0.7] CGColor];
   layer.needsDisplayOnBoundsChange = YES;
   CIFilter* saturationFilter = [CIFilter filterWithName:@"CIColorControls"];
   [saturationFilter setDefaults];
@@ -80,8 +80,12 @@ CALayer* makeBlurLayer()
   _menu.anchorPoint = CGPointMake(0, 0);
   
   static NSString* imageNames[][2] = {
+    {@"skip-to-start-128-black.png", @"skip-to-start-128-white.png"},
+    {@"rewind-128-black.png", @"rewind-128-white.png"},
     {@"pause-128-black.png", @"pause-128-white.png"},
-    {@"stop-128-black.png", @"stop-128-white.png"}
+    {@"stop-128-black.png", @"stop-128-white.png"},
+    {@"fast-forward-128-black.png", @"fast-forward-128-white.png"},
+    {@"end-128-black.png", @"end-128-white.png"},
   };
   for (int i = 0; i < BUTTON_COUNT; i++) {
     _images[i][OFF] = [NSImage imageNamed:imageNames[i][OFF]];
@@ -92,6 +96,8 @@ CALayer* makeBlurLayer()
     _buttons[i].anchorPoint = CGPointMake(0, 0);
     [_menu addSublayer:_buttons[i]];
   }
+  _current = 2;
+  [self selectMenu:_current];
 
   self.layer.layoutManager = [CAConstraintLayoutManager layoutManager];
   [self.layer addSublayer:_subtitle];
@@ -135,7 +141,7 @@ CALayer* makeBlurLayer()
     } else {
       _menu.position = CGPointMake(0, 0);
     }
-    CGFloat x = self.bounds.size.width / 2 - _menuHeight / 2;
+    CGFloat x = (self.bounds.size.width - _menuHeight * BUTTON_COUNT) / 2;
     for (int i = 0; i < BUTTON_COUNT; i++) {
       _buttons[i].bounds = CGRectMake(0, 0, _menuHeight, _menuHeight);
       _buttons[i].position = CGPointMake(x, 0);
@@ -195,7 +201,15 @@ CALayer* makeBlurLayer()
     case 'm':
       [self menuPressed];
       break;
-      
+    case '\r':
+      [self enterPressed];
+      break;
+    case NSLeftArrowFunctionKey:
+      [self leftPressed];
+      break;
+    case NSRightArrowFunctionKey:
+      [self rightPressed];
+      break;
     default:
       break;
   }
@@ -215,6 +229,50 @@ CALayer* makeBlurLayer()
       _menuHidden = YES;
     }];
   }
+}
+
+- (void)enterPressed
+{
+  if (_menuHidden) {
+    
+  }
+}
+
+- (void)leftPressed
+{
+  if (_menuHidden) {
+  } else {
+    [self moveCurrentMenu:-1];
+  }
+}
+
+- (void)rightPressed
+{
+  if (_menuHidden) {
+  } else {
+    [self moveCurrentMenu:1];
+  }
+}
+
+- (void)moveCurrentMenu:(int)dir
+{
+  [self unselectMenu:_current];
+  _current = (_current + BUTTON_COUNT + dir) % BUTTON_COUNT;
+  [self selectMenu:_current];
+}
+
+- (void)selectMenu:(int)i
+{
+  _buttons[i].contents = _images[i][ON];
+  _buttons[i].shadowColor = [NSColor whiteColor].CGColor;
+  _buttons[i].shadowOpacity = 1.0;
+  _buttons[i].shadowOffset = CGSizeMake(0, 0);
+}
+
+- (void)unselectMenu:(int)i
+{
+  _buttons[i].contents = _images[i][OFF];
+  _buttons[i].shadowOpacity = 0.0;
 }
 
 - (BOOL)acceptsFirstResponder

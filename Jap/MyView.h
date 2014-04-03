@@ -10,7 +10,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "MyOpenGLLayer.h"
 
-#define BUTTON_COUNT 2
+#define BUTTON_COUNT 6
 
 @interface MyView : NSView <SubtitleDelegate>
 {
@@ -23,6 +23,7 @@
  
   CALayer* _buttons[BUTTON_COUNT];
   NSImage* _images[BUTTON_COUNT][2];
+  int _current;
   
   BOOL _resizing;
 }
