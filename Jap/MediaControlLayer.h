@@ -25,7 +25,9 @@
 {
   int _current;
   CALayer* _buttons[BUTTON_COUNT];
-  NSImage* _images[BUTTON_COUNT][2];
+  /// we need one more image for play icon.
+  NSImage* _images[BUTTON_COUNT + 1][2];
+  BOOL _playing;
 }
 
 @property (weak) MyView* view;

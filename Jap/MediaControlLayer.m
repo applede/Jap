@@ -11,6 +11,8 @@
 
 #define OFF 0
 #define ON  1
+#define PAUSE 2
+#define PLAY  6
 
 @implementation MediaControlLayer
 
@@ -18,18 +20,20 @@
 {
   self = [super init];
   if (self) {
-    static NSString* imageNames[][2] = {
+    static NSString* imageNames[BUTTON_COUNT+1][2] = {
       {@"skip-to-start-128-black.png", @"skip-to-start-128-white.png"},
       {@"rewind-128-black.png", @"rewind-128-white.png"},
       {@"pause-128-black.png", @"pause-128-white.png"},
       {@"stop-128-black.png", @"stop-128-white.png"},
       {@"fast-forward-128-black.png", @"fast-forward-128-white.png"},
       {@"end-128-black.png", @"end-128-white.png"},
+      {@"play-128-black.png", @"play-128-white.png"},
     };
-    for (int i = 0; i < BUTTON_COUNT; i++) {
+    for (int i = 0; i < BUTTON_COUNT + 1; i++) {
       _images[i][OFF] = [NSImage imageNamed:imageNames[i][OFF]];
       _images[i][ON] = [NSImage imageNamed:imageNames[i][ON]];
-      
+    }
+    for (int i = 0; i < BUTTON_COUNT; i++) {
       _buttons[i] = [CALayer layer];
       _buttons[i].contents = _images[i][OFF];
       _buttons[i].anchorPoint = CGPointMake(0, 0);
@@ -37,6 +41,7 @@
     }
     _current = 2;
     [self select:_current];
+    _playing = YES;
   }
   return self;
 }
@@ -73,6 +78,14 @@
 
 - (void)enterPressed
 {
+  if (_current == PAUSE) {
+    _playing = !_playing;
+    if (_playing) {
+      _buttons[PAUSE].contents = _images[PAUSE][ON];
+    } else {
+      _buttons[PAUSE].contents = _images[PLAY][ON];
+    }
+  }
 }
 
 - (void)leftPressed

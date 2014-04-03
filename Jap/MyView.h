@@ -20,7 +20,6 @@
 
   id<KeyHandler> _handler;
   MediaControlLayer* _mediaControl;
-  CGFloat _mediaControlHeight;
 }
 
 - (void)open:(NSString*)path;
