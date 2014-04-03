@@ -13,7 +13,7 @@
         <customObject id="-3" userLabel="Application"/>
         <customObject id="Voe-Tx-rLC" customClass="AppDelegate">
             <connections>
-                <outlet property="view" destination="d9m-pC-URy" id="c7d-7m-ouZ"/>
+                <outlet property="view" destination="lB1-Ks-01C" id="NFa-kN-30q"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="gIp-Ho-8D9"/>
             </connections>
         </customObject>
@@ -677,16 +677,16 @@
                 <rect key="frame" x="0.0" y="0.0" width="480" height="360"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="d9m-pC-URy" customClass="MyView">
+                    <customView wantsLayer="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lB1-Ks-01C" customClass="MyView">
                         <rect key="frame" x="0.0" y="0.0" width="480" height="360"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     </customView>
                 </subviews>
                 <constraints>
-                    <constraint firstAttribute="bottom" secondItem="d9m-pC-URy" secondAttribute="bottom" id="9gU-5k-vdS"/>
-                    <constraint firstItem="d9m-pC-URy" firstAttribute="leading" secondItem="EiT-Mj-1SZ" secondAttribute="leading" id="Ldo-V3-RkQ"/>
-                    <constraint firstItem="d9m-pC-URy" firstAttribute="top" secondItem="EiT-Mj-1SZ" secondAttribute="top" id="nf5-MI-AnQ"/>
-                    <constraint firstAttribute="trailing" secondItem="d9m-pC-URy" secondAttribute="trailing" id="yFl-io-bOt"/>
+                    <constraint firstItem="lB1-Ks-01C" firstAttribute="top" secondItem="EiT-Mj-1SZ" secondAttribute="top" id="2b9-7z-lUq"/>
+                    <constraint firstAttribute="trailing" secondItem="lB1-Ks-01C" secondAttribute="trailing" id="FO6-7p-Tvg"/>
+                    <constraint firstItem="lB1-Ks-01C" firstAttribute="leading" secondItem="EiT-Mj-1SZ" secondAttribute="leading" id="jJE-9O-MLs"/>
+                    <constraint firstAttribute="bottom" secondItem="lB1-Ks-01C" secondAttribute="bottom" id="vtL-lg-5yK"/>
                 </constraints>
             </view>
         </window>

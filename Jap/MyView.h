@@ -18,7 +18,14 @@
   CALayer* _menu;
   CGFloat _menuHeight;
   BOOL _menuHidden;
+  
+  NSImage* _playImage;
+  CALayer* _play;
+  
+  CALayer* _stop;
 }
+
+@property (assign) IBOutlet NSView *menuView;
 
 - (void)open:(NSString*)path;
 - (void)displaySubtitle;

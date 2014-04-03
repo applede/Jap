@@ -38,17 +38,17 @@ CALayer* makeBlurLayer()
 
 - (id)initWithFrame:(NSRect)frame
 {
-    self = [super initWithFrame:frame];
-    if (self) {
-        // Initialization code here.
-      [self setWantsBestResolutionOpenGLSurface:YES];
-      [self setLayer:[MyOpenGLLayer layer]];
-      [self setWantsLayer:YES];
-      [self setLayerUsesCoreImageFilters:YES];
-      [self makeSublayers];
-      _menuHidden = YES;
-    }
-    return self;
+  self = [super initWithFrame:frame];
+  if (self) {
+    // Initialization code here.
+    [self setWantsBestResolutionOpenGLSurface:YES];
+    [self setLayer:[MyOpenGLLayer layer]];
+    [self setWantsLayer:YES];
+    [self setLayerUsesCoreImageFilters:YES];
+    [self makeSublayers];
+    _menuHidden = YES;
+  }
+  return self;
 }
 
 - (void)viewDidChangeBackingProperties
@@ -56,6 +56,8 @@ CALayer* makeBlurLayer()
   CGFloat f = [self.window backingScaleFactor];
   _subtitle.contentsScale = f;
   _menu.contentsScale = f;
+  _play.contentsScale = f;
+  _stop.contentsScale = f;
   [super viewDidChangeBackingProperties];
 }
 
@@ -71,10 +73,20 @@ CALayer* makeBlurLayer()
 
   _menu = makeBlurLayer();
   _menu.anchorPoint = CGPointMake(0, 0);
+  
+  _play = [CALayer layer];
+  _play.contents = [NSImage imageNamed:@"pause-128-black.png"];
+  _play.anchorPoint = CGPointMake(0, 0);
+  
+  _stop = [CALayer layer];
+  _stop.contents = [NSImage imageNamed:@"stop-128-black.png"];
+  _stop.anchorPoint = CGPointMake(0, 0);
 
   self.layer.layoutManager = [CAConstraintLayoutManager layoutManager];
   [self.layer addSublayer:_subtitle];
   [self.layer addSublayer:_menu];
+  [_menu addSublayer:_play];
+  [_menu addSublayer:_stop];
 }
 
 - (id<CAAction>)actionForLayer:(CALayer *)layer forKey:(NSString *)event
@@ -103,13 +115,19 @@ CALayer* makeBlurLayer()
                             [CAConstraint constraintWithAttribute:kCAConstraintMinY
                                                     relativeTo:@"superlayer"
                                                      attribute:kCAConstraintMinY offset:y]]];
-    _menuHeight = self.bounds.size.height * 0.1;
+    _menuHeight = self.bounds.size.height * 128.0 / 1080.0;
     _menu.bounds = CGRectMake(0, 0, self.bounds.size.width, _menuHeight);
     if (_menuHidden) {
       _menu.position = CGPointMake(0, -_menuHeight);
     } else {
       _menu.position = CGPointMake(0, 0);
     }
+    _play.bounds = CGRectMake(0, 0, _menuHeight, _menuHeight);
+    CGFloat x = self.bounds.size.width / 2 - _menuHeight / 2;
+    _play.position = CGPointMake(x, 0);
+    x += _menuHeight;
+    _stop.bounds = CGRectMake(0, 0, _menuHeight, _menuHeight);
+    _stop.position = CGPointMake(x, 0);
     [self.layer setNeedsLayout];
   }
 }
