@@ -46,6 +46,16 @@
   [_subtitleTrack start];
 }
 
+- (void)play
+{
+  [_audioTrack play];
+}
+
+- (void)pause
+{
+  [_audioTrack pause];
+}
+
 - (void)stop
 {
   _quit = YES;

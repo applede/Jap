@@ -36,7 +36,8 @@ CALayer* setBlurFilters(CALayer* layer)
   if (self) {
     // Initialization code here.
     [self setWantsBestResolutionOpenGLSurface:YES];
-    [self setLayer:[MyOpenGLLayer layer]];
+    _glLayer = [MyOpenGLLayer layer];
+    [self setLayer:_glLayer];
     [self setWantsLayer:YES];
     [self setLayerUsesCoreImageFilters:YES];
     [self setLayerContentsRedrawPolicy:NSViewLayerContentsRedrawDuringViewResize];
@@ -62,7 +63,6 @@ CALayer* setBlurFilters(CALayer* layer)
   _subtitle.font = (__bridge CFTypeRef)@"HelveticaNeue-Light";
   _subtitle.shadowOpacity = 1.0;
   _subtitle.shadowOffset = CGSizeMake(0.0, -1.0);
-//  _text.shadowRadius = 1.0;
 
   _mediaControl = (MediaControlLayer*)setBlurFilters([MediaControlLayer layer]);
   _mediaControl.view = self;
@@ -81,11 +81,10 @@ CALayer* setBlurFilters(CALayer* layer)
 
 - (void)frameChanged
 {
-  MyOpenGLLayer* layer = (MyOpenGLLayer*)self.layer;
-  if ([layer frameChanged]) {
-    CGFloat s = layer.contentsScale;
-    CGFloat h = layer.movieRect.size.height / s;
-    CGFloat y = layer.movieRect.origin.y / s;
+  if ([_glLayer frameChanged]) {
+    CGFloat s = _glLayer.contentsScale;
+    CGFloat h = _glLayer.movieRect.size.height / s;
+    CGFloat y = _glLayer.movieRect.origin.y / s;
     
     CGFloat fontSize = h * 0.08;
     _subtitleFont = [NSFont fontWithName:@"Apple SD Gothic Neo Medium"
@@ -119,9 +118,8 @@ CALayer* setBlurFilters(CALayer* layer)
 
 - (void)open:(NSString *)path
 {
-  MyOpenGLLayer* layer = (MyOpenGLLayer*)self.layer;
-  layer.subtitleDelegate = self;
-  [layer open:path];
+  _glLayer.subtitleDelegate = self;
+  [_glLayer open:path];
   [self frameChanged];
 }
 
@@ -143,8 +141,7 @@ CALayer* setBlurFilters(CALayer* layer)
   if (_resizing) {
     return;
   }
-  MyOpenGLLayer* layer = (MyOpenGLLayer*)self.layer;
-  NSString* newString = [layer.decoder subtitleString];
+  NSString* newString = [_glLayer.decoder subtitleString];
   if (newString) {
     NSDictionary* attrs = @{NSFontAttributeName:_subtitleFont,
                             NSForegroundColorAttributeName:[NSColor whiteColor],
@@ -208,8 +205,14 @@ CALayer* setBlurFilters(CALayer* layer)
   _handler = self;
 }
 
-- (void)resize:(CGSize)size
+- (void)pause
 {
+  [_glLayer.decoder pause];
+}
+
+- (void)play
+{
+  [_glLayer.decoder play];
 }
 
 @end

@@ -53,6 +53,8 @@ typedef struct {
 
 - (void)start;
 - (void)stop;
+- (void)play;
+- (void)pause;
 - (BOOL)prepare;
 - (void)close;
 

@@ -81,8 +81,10 @@
   if (_current == PAUSE) {
     _playing = !_playing;
     if (_playing) {
+      [_view play];
       _buttons[PAUSE].contents = _images[PAUSE][ON];
     } else {
+      [_view pause];
       _buttons[PAUSE].contents = _images[PLAY][ON];
     }
   }

@@ -36,6 +36,16 @@
   AudioOutputUnitStop(_audioC);
 }
 
+- (void)play
+{
+  AudioOutputUnitStart(_audioC);
+}
+
+- (void)pause
+{
+  AudioOutputUnitStop(_audioC);
+}
+
 static OSStatus audioCallback(void *inRefCon,
                               AudioUnitRenderActionFlags *ioActionFlags,
                               const AudioTimeStamp *inTimeStamp,

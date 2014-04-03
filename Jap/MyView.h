@@ -13,6 +13,8 @@
 
 @interface MyView : NSView <SubtitleDelegate, KeyHandler>
 {
+  MyOpenGLLayer* _glLayer;
+
   CATextLayer* _subtitle;
   NSFont* _subtitleFont;
   
@@ -25,5 +27,7 @@
 - (void)open:(NSString*)path;
 - (void)displaySubtitle;
 - (void)takeFocus;
+- (void)play;
+- (void)pause;
 
 @end
