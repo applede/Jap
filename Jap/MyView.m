@@ -9,10 +9,7 @@
 #import "MyView.h"
 #import "MyOpenGLLayer.h"
 
-#define OFF 0
-#define ON  1
-
-void resetFilters(CALayer* layer)
+CALayer* setBlurFilters(CALayer* layer)
 {
   layer.masksToBounds = YES;
   layer.backgroundColor = [[NSColor colorWithCalibratedWhite:0.6 alpha:0.7] CGColor];
@@ -28,12 +25,6 @@ void resetFilters(CALayer* layer)
   [blurFilter setValue:@20.0 forKey:@"inputRadius"];
   layer.backgroundFilters = @[saturationFilter, clampFilter, blurFilter];
   [layer setNeedsDisplay];
-}
-
-CALayer* makeBlurLayer()
-{
-  CALayer* layer = [CALayer layer];
-  resetFilters(layer);
   return layer;
 }
 
@@ -50,7 +41,7 @@ CALayer* makeBlurLayer()
     [self setLayerUsesCoreImageFilters:YES];
     [self setLayerContentsRedrawPolicy:NSViewLayerContentsRedrawDuringViewResize];
     [self makeSublayers];
-    _menuHidden = YES;
+    _handler = self;
   }
   return self;
 }
@@ -59,10 +50,7 @@ CALayer* makeBlurLayer()
 {
   CGFloat f = [self.window backingScaleFactor];
   _subtitle.contentsScale = f;
-  _menu.contentsScale = f;
-  for (int i = 0; i < BUTTON_COUNT; i++) {
-    _buttons[i].contentsScale = f;
-  }
+  [_mediaControl setContentsScale:f];
   [super viewDidChangeBackingProperties];
 }
 
@@ -76,32 +64,14 @@ CALayer* makeBlurLayer()
   _subtitle.shadowOffset = CGSizeMake(0.0, -1.0);
 //  _text.shadowRadius = 1.0;
 
-  _menu = makeBlurLayer();
-  _menu.anchorPoint = CGPointMake(0, 0);
-  
-  static NSString* imageNames[][2] = {
-    {@"skip-to-start-128-black.png", @"skip-to-start-128-white.png"},
-    {@"rewind-128-black.png", @"rewind-128-white.png"},
-    {@"pause-128-black.png", @"pause-128-white.png"},
-    {@"stop-128-black.png", @"stop-128-white.png"},
-    {@"fast-forward-128-black.png", @"fast-forward-128-white.png"},
-    {@"end-128-black.png", @"end-128-white.png"},
-  };
-  for (int i = 0; i < BUTTON_COUNT; i++) {
-    _images[i][OFF] = [NSImage imageNamed:imageNames[i][OFF]];
-    _images[i][ON] = [NSImage imageNamed:imageNames[i][ON]];
-    
-    _buttons[i] = [CALayer layer];
-    _buttons[i].contents = _images[i][OFF];
-    _buttons[i].anchorPoint = CGPointMake(0, 0);
-    [_menu addSublayer:_buttons[i]];
-  }
-  _current = 2;
-  [self selectMenu:_current];
+  _mediaControl = (MediaControlLayer*)setBlurFilters([MediaControlLayer layer]);
+  _mediaControl.view = self;
+  _mediaControl.anchorPoint = CGPointMake(0, 0);
+
 
   self.layer.layoutManager = [CAConstraintLayoutManager layoutManager];
   [self.layer addSublayer:_subtitle];
-  [self.layer addSublayer:_menu];
+  [self.layer addSublayer:_mediaControl];
 }
 
 - (id<CAAction>)actionForLayer:(CALayer *)layer forKey:(NSString *)event
@@ -134,18 +104,12 @@ CALayer* makeBlurLayer()
                             [CAConstraint constraintWithAttribute:kCAConstraintMinY
                                                     relativeTo:@"superlayer"
                                                      attribute:kCAConstraintMinY offset:y]]];
-    _menuHeight = self.bounds.size.height * 128.0 / 1080.0;
-    _menu.bounds = CGRectMake(0, 0, self.bounds.size.width, _menuHeight);
-    if (_menuHidden) {
-      _menu.position = CGPointMake(0, -_menuHeight);
+    CGFloat mh = self.bounds.size.height * 128.0 / 1080.0;
+    _mediaControl.bounds = CGRectMake(0, 0, self.bounds.size.width, mh);
+    if (_handler == _mediaControl) {
+      _mediaControl.position = CGPointMake(0, 0);
     } else {
-      _menu.position = CGPointMake(0, 0);
-    }
-    CGFloat x = (self.bounds.size.width - _menuHeight * BUTTON_COUNT) / 2;
-    for (int i = 0; i < BUTTON_COUNT; i++) {
-      _buttons[i].bounds = CGRectMake(0, 0, _menuHeight, _menuHeight);
-      _buttons[i].position = CGPointMake(x, 0);
-      x += _menuHeight;
+      _mediaControl.position = CGPointMake(0, -mh);
     }
     [self.layer setNeedsLayout];
     
@@ -199,16 +163,16 @@ CALayer* makeBlurLayer()
   NSString* chars = [theEvent charactersIgnoringModifiers];
   switch ([chars characterAtIndex:0]) {
     case 'm':
-      [self menuPressed];
+      [_handler menuPressed];
       break;
     case '\r':
-      [self enterPressed];
+      [_handler enterPressed];
       break;
     case NSLeftArrowFunctionKey:
-      [self leftPressed];
+      [_handler leftPressed];
       break;
     case NSRightArrowFunctionKey:
-      [self rightPressed];
+      [_handler rightPressed];
       break;
     default:
       break;
@@ -217,67 +181,35 @@ CALayer* makeBlurLayer()
 
 - (void)menuPressed
 {
-  if (_menuHidden) {
-    [self.layer addSublayer:_menu];
-    _menu.position = CGPointMake(0, 0);
-    _menuHidden = NO;
-  } else {
-    [NSAnimationContext runAnimationGroup:^(NSAnimationContext* ctx) {
-      _menu.position = CGPointMake(0, -_menuHeight);
-    } completionHandler:^{
-      [_menu removeFromSuperlayer];
-      _menuHidden = YES;
-    }];
-  }
+  [self.layer addSublayer:_mediaControl];
+  _mediaControl.position = CGPointMake(0, 0);
+  _handler = _mediaControl;
 }
 
 - (void)enterPressed
 {
-  if (_menuHidden) {
-    
-  }
 }
 
 - (void)leftPressed
 {
-  if (_menuHidden) {
-  } else {
-    [self moveCurrentMenu:-1];
-  }
 }
 
 - (void)rightPressed
 {
-  if (_menuHidden) {
-  } else {
-    [self moveCurrentMenu:1];
-  }
-}
-
-- (void)moveCurrentMenu:(int)dir
-{
-  [self unselectMenu:_current];
-  _current = (_current + BUTTON_COUNT + dir) % BUTTON_COUNT;
-  [self selectMenu:_current];
-}
-
-- (void)selectMenu:(int)i
-{
-  _buttons[i].contents = _images[i][ON];
-  _buttons[i].shadowColor = [NSColor whiteColor].CGColor;
-  _buttons[i].shadowOpacity = 1.0;
-  _buttons[i].shadowOffset = CGSizeMake(0, 0);
-}
-
-- (void)unselectMenu:(int)i
-{
-  _buttons[i].contents = _images[i][OFF];
-  _buttons[i].shadowOpacity = 0.0;
 }
 
 - (BOOL)acceptsFirstResponder
 {
   return YES;
+}
+
+- (void)takeFocus
+{
+  _handler = self;
+}
+
+- (void)resize:(CGSize)size
+{
 }
 
 @end

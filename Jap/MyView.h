@@ -9,26 +9,22 @@
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/QuartzCore.h>
 #import "MyOpenGLLayer.h"
+#import "MediaControlLayer.h"
 
-#define BUTTON_COUNT 6
-
-@interface MyView : NSView <SubtitleDelegate>
+@interface MyView : NSView <SubtitleDelegate, KeyHandler>
 {
   CATextLayer* _subtitle;
   NSFont* _subtitleFont;
   
-  CALayer* _menu;
-  CGFloat _menuHeight;
-  BOOL _menuHidden;
- 
-  CALayer* _buttons[BUTTON_COUNT];
-  NSImage* _images[BUTTON_COUNT][2];
-  int _current;
-  
   BOOL _resizing;
+
+  id<KeyHandler> _handler;
+  MediaControlLayer* _mediaControl;
+  CGFloat _mediaControlHeight;
 }
 
 - (void)open:(NSString*)path;
 - (void)displaySubtitle;
+- (void)takeFocus;
 
 @end

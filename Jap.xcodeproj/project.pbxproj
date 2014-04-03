@@ -40,6 +40,7 @@
 		1857550418ED951C008B8CC7 /* end-128-white.png in Resources */ = {isa = PBXBuildFile; fileRef = 1857550218ED951C008B8CC7 /* end-128-white.png */; };
 		1857550718ED9550008B8CC7 /* skip-to-start-128-white.png in Resources */ = {isa = PBXBuildFile; fileRef = 1857550518ED9550008B8CC7 /* skip-to-start-128-white.png */; };
 		1857550818ED9550008B8CC7 /* skip-to-start-128-black.png in Resources */ = {isa = PBXBuildFile; fileRef = 1857550618ED9550008B8CC7 /* skip-to-start-128-black.png */; };
+		1857550B18EDAF18008B8CC7 /* MediaControlLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1857550A18EDAF18008B8CC7 /* MediaControlLayer.m */; };
 		18619F7218E81B3400781326 /* CircularQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F7118E81B3400781326 /* CircularQueue.m */; };
 		18619F7518E828C100781326 /* Packet.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F7418E828C100781326 /* Packet.m */; };
 		18619F7818E82BD800781326 /* VideoFrameCPU.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F7718E82BD800781326 /* VideoFrameCPU.m */; };
@@ -117,6 +118,8 @@
 		1857550218ED951C008B8CC7 /* end-128-white.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "end-128-white.png"; sourceTree = "<group>"; };
 		1857550518ED9550008B8CC7 /* skip-to-start-128-white.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "skip-to-start-128-white.png"; sourceTree = "<group>"; };
 		1857550618ED9550008B8CC7 /* skip-to-start-128-black.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "skip-to-start-128-black.png"; sourceTree = "<group>"; };
+		1857550918EDAF18008B8CC7 /* MediaControlLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaControlLayer.h; sourceTree = "<group>"; };
+		1857550A18EDAF18008B8CC7 /* MediaControlLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediaControlLayer.m; sourceTree = "<group>"; };
 		18619F7018E81B3400781326 /* CircularQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CircularQueue.h; sourceTree = "<group>"; };
 		18619F7118E81B3400781326 /* CircularQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CircularQueue.m; sourceTree = "<group>"; };
 		18619F7318E828C100781326 /* Packet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Packet.h; sourceTree = "<group>"; };
@@ -359,6 +362,8 @@
 				1897644C18DE764900673BD3 /* MyOpenGLLayer.m */,
 				1897644E18DE8DC800673BD3 /* MyView.h */,
 				1897644F18DE8DC800673BD3 /* MyView.m */,
+				1857550918EDAF18008B8CC7 /* MediaControlLayer.h */,
+				1857550A18EDAF18008B8CC7 /* MediaControlLayer.m */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -499,6 +504,7 @@
 				1897645318DF228B00673BD3 /* SubtitleTrack.m in Sources */,
 				1816DF7E18D5D84200FCE287 /* main.m in Sources */,
 				1801EEA218E9C4B80032D204 /* ParserSMI.m in Sources */,
+				1857550B18EDAF18008B8CC7 /* MediaControlLayer.m in Sources */,
 				181DF7EE18DB164000FF7739 /* AudioTrack.m in Sources */,
 				18619F8418E9B31100781326 /* SubtitleTrackEmbed.m in Sources */,
 				18F420DA18E5BCD400B5F2F8 /* VideoTrackCPU.m in Sources */,
