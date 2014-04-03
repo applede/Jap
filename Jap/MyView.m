@@ -9,6 +9,9 @@
 #import "MyView.h"
 #import "MyOpenGLLayer.h"
 
+#define OFF 0
+#define ON  1
+
 void resetFilters(CALayer* layer)
 {
   layer.masksToBounds = YES;
@@ -45,6 +48,7 @@ CALayer* makeBlurLayer()
     [self setLayer:[MyOpenGLLayer layer]];
     [self setWantsLayer:YES];
     [self setLayerUsesCoreImageFilters:YES];
+    [self setLayerContentsRedrawPolicy:NSViewLayerContentsRedrawDuringViewResize];
     [self makeSublayers];
     _menuHidden = YES;
   }
@@ -56,8 +60,9 @@ CALayer* makeBlurLayer()
   CGFloat f = [self.window backingScaleFactor];
   _subtitle.contentsScale = f;
   _menu.contentsScale = f;
-  _play.contentsScale = f;
-  _stop.contentsScale = f;
+  for (int i = 0; i < BUTTON_COUNT; i++) {
+    _buttons[i].contentsScale = f;
+  }
   [super viewDidChangeBackingProperties];
 }
 
@@ -74,19 +79,23 @@ CALayer* makeBlurLayer()
   _menu = makeBlurLayer();
   _menu.anchorPoint = CGPointMake(0, 0);
   
-  _play = [CALayer layer];
-  _play.contents = [NSImage imageNamed:@"pause-128-black.png"];
-  _play.anchorPoint = CGPointMake(0, 0);
-  
-  _stop = [CALayer layer];
-  _stop.contents = [NSImage imageNamed:@"stop-128-black.png"];
-  _stop.anchorPoint = CGPointMake(0, 0);
+  static NSString* imageNames[][2] = {
+    {@"pause-128-black.png", @"pause-128-white.png"},
+    {@"stop-128-black.png", @"stop-128-white.png"}
+  };
+  for (int i = 0; i < BUTTON_COUNT; i++) {
+    _images[i][OFF] = [NSImage imageNamed:imageNames[i][OFF]];
+    _images[i][ON] = [NSImage imageNamed:imageNames[i][ON]];
+    
+    _buttons[i] = [CALayer layer];
+    _buttons[i].contents = _images[i][OFF];
+    _buttons[i].anchorPoint = CGPointMake(0, 0);
+    [_menu addSublayer:_buttons[i]];
+  }
 
   self.layer.layoutManager = [CAConstraintLayoutManager layoutManager];
   [self.layer addSublayer:_subtitle];
   [self.layer addSublayer:_menu];
-  [_menu addSublayer:_play];
-  [_menu addSublayer:_stop];
 }
 
 - (id<CAAction>)actionForLayer:(CALayer *)layer forKey:(NSString *)event
@@ -109,6 +118,10 @@ CALayer* makeBlurLayer()
       _subtitleFont = [NSFont fontWithName:@"Helvetica Neue Medium"
                                       size:fontSize];
     }
+    
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
+    
     [_subtitle setConstraints:@[[CAConstraint constraintWithAttribute:kCAConstraintMidX
                                                   relativeTo:@"superlayer"
                                                    attribute:kCAConstraintMidX],
@@ -122,13 +135,15 @@ CALayer* makeBlurLayer()
     } else {
       _menu.position = CGPointMake(0, 0);
     }
-    _play.bounds = CGRectMake(0, 0, _menuHeight, _menuHeight);
     CGFloat x = self.bounds.size.width / 2 - _menuHeight / 2;
-    _play.position = CGPointMake(x, 0);
-    x += _menuHeight;
-    _stop.bounds = CGRectMake(0, 0, _menuHeight, _menuHeight);
-    _stop.position = CGPointMake(x, 0);
+    for (int i = 0; i < BUTTON_COUNT; i++) {
+      _buttons[i].bounds = CGRectMake(0, 0, _menuHeight, _menuHeight);
+      _buttons[i].position = CGPointMake(x, 0);
+      x += _menuHeight;
+    }
     [self.layer setNeedsLayout];
+    
+    [CATransaction commit];
   }
 }
 
@@ -140,13 +155,24 @@ CALayer* makeBlurLayer()
   [self frameChanged];
 }
 
+- (NSSize)windowWillResize:(NSWindow *)sender toSize:(NSSize)frameSize
+{
+  _resizing = YES;
+  _subtitle.string = @"";
+  return frameSize;
+}
+
 - (void)windowDidResize:(NSNotification*)notification
 {
+  _resizing = NO;
   [self frameChanged];
 }
 
 - (void)displaySubtitle
 {
+  if (_resizing) {
+    return;
+  }
   MyOpenGLLayer* layer = (MyOpenGLLayer*)self.layer;
   NSString* newString = [layer.decoder subtitleString];
   if (newString) {

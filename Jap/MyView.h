@@ -10,6 +10,8 @@
 #import <QuartzCore/QuartzCore.h>
 #import "MyOpenGLLayer.h"
 
+#define BUTTON_COUNT 2
+
 @interface MyView : NSView <SubtitleDelegate>
 {
   CATextLayer* _subtitle;
@@ -18,14 +20,12 @@
   CALayer* _menu;
   CGFloat _menuHeight;
   BOOL _menuHidden;
+ 
+  CALayer* _buttons[BUTTON_COUNT];
+  NSImage* _images[BUTTON_COUNT][2];
   
-  NSImage* _playImage;
-  CALayer* _play;
-  
-  CALayer* _stop;
+  BOOL _resizing;
 }
-
-@property (assign) IBOutlet NSView *menuView;
 
 - (void)open:(NSString*)path;
 - (void)displaySubtitle;
