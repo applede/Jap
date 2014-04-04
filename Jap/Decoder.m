@@ -67,6 +67,31 @@
   [_audioTrack stop];
 }
 
+- (void)seek:(double)inc
+{
+
+  double pos = [self masterClock];
+  pos += inc;
+
+  double startTime = (double)_formatContext->start_time / AV_TIME_BASE;
+  if (_formatContext->start_time != AV_NOPTS_VALUE && pos < startTime) {
+    pos = startTime;
+  }
+
+  if (!_seekReq) {
+    _seekPos = (int64_t)(pos * AV_TIME_BASE);
+    _seekInc = (int64_t)(inc * AV_TIME_BASE);
+    _seekReq = YES;
+    dispatch_semaphore_signal(_readSema);
+  }
+}
+
+- (BOOL)supportsSeek
+{
+  // negate (doesNotSupportSeek)
+  return !((_formatContext->iformat->flags & (AVFMT_NOBINSEARCH | AVFMT_NOGENSEARCH | AVFMT_NO_BYTE_SEEK)) && !_formatContext->iformat->read_seek);
+}
+
 - (double)masterClock
 {
   return [_audioTrack clock];
@@ -154,19 +179,34 @@ NSString* smiPath(NSString* path)
   }
  
   while (!_quit) {
+    if (_seekReq) {
+      int64_t seekTarget = _seekPos;
+      int64_t seekMin = _seekInc > 0 ? seekTarget - _seekInc + 2 : INT64_MIN;
+      int64_t seekMax = _seekInc < 0 ? seekTarget - _seekInc - 2 : INT64_MAX;
+      int ret = avformat_seek_file(_formatContext, -1, seekMin, seekTarget, seekMax, 0);
+      if (ret < 0) {
+        NSLog(@"avformat_seek_file %d", ret);
+      } else {
+        [_videoQue flush];
+        [_videoQue put:[Packet flushPacket]];
+        [_audioQue flush];
+        [_subtitleQue flush];
+      }
+      _seekReq = NO;
+    }
     while (![_videoQue isFull] && ![_audioQue isFull]) {
       Packet* packet = [[Packet alloc] init];
       int ret = av_read_frame(_formatContext, packet.packet);
       if (ret < 0) {
         NSLog(@"av_read_frame %d", ret);
+      } else {
+        if (packet.streamIndex == _videoStream)
+          [_videoQue put:packet];
+        else if (packet.streamIndex == _audioStream)
+          [_audioQue put:packet];
+        else if (packet.streamIndex == _subtitleStream)
+          [_subtitleQue put:packet];
       }
-      if (packet.streamIndex == _videoStream)
-        [_videoQue put:packet];
-      else if (packet.streamIndex == _audioStream)
-        [_audioQue put:packet];
-      else if (packet.streamIndex == _subtitleStream)
-        [_subtitleQue put:packet];
-      // packet will be freed here as it goes out of scope
     }
     dispatch_semaphore_wait(_readSema, DISPATCH_TIME_FOREVER);
   }

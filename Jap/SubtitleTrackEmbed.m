@@ -39,6 +39,10 @@
       @autoreleasepool {
         while (!_quit && ![_decoder.subtitleQue isEmpty] && ![_frameQue isFull]) {
           Packet* packet = [_decoder.subtitleQue get];
+          if ([packet isFlush]) {
+            avcodec_flush_buffers(_stream->codec);
+            continue;
+          }
           pts = 0;
           if (packet.pts != AV_NOPTS_VALUE)
             pts = av_q2d(_stream->time_base) * packet.pts;

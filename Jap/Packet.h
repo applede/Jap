@@ -14,11 +14,14 @@
   AVPacket _packet;
 }
 
++ (Packet*)flushPacket;
+
 - initPacket:(AVPacket*)packet;
 - (AVPacket*)packet;
 - (int)streamIndex;
 - (uint8_t*)data;
 - (int)size;
 - (int64_t)pts;
+- (BOOL)isFlush;
 
 @end

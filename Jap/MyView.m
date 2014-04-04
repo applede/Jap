@@ -209,10 +209,12 @@ CALayer* setBlurFilters(CALayer* layer)
 }
 - (void)leftPressed
 {
+  [_glLayer.decoder seek:-10.0];
 }
 
 - (void)rightPressed
 {
+  [_glLayer.decoder seek:10.0];
 }
 
 - (BOOL)acceptsFirstResponder

@@ -40,6 +40,7 @@ typedef struct {
   AudioParams _audio_src;
   AudioParams _audio_tgt;
   struct SwrContext *_swr_ctx;
+  uint8_t _silence[1024];
   uint8_t *_audio_buf;
   uint8_t *_audio_buf1;
   unsigned int _audio_buf1_size;

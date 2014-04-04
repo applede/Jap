@@ -197,6 +197,10 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
 - (BOOL)getVideoFrame:(VideoFrameCPU*)v
 {
   Packet* pkt = [_decoder.videoQue get];
+  if ([pkt isFlush]) {
+    avcodec_flush_buffers(_stream->codec);
+    return NO;
+  }
   int got_picture = NO;
   if (avcodec_decode_video2(_stream->codec, v.frame, &got_picture, pkt.packet) < 0) {
     NSLog(@"avcodec_decode_video2");

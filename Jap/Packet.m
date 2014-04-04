@@ -8,7 +8,18 @@
 
 #import "Packet.h"
 
+static Packet* _flushPacket;
+
 @implementation Packet
+
++ (Packet*)flushPacket
+{
+  if (!_flushPacket) {
+    AVPacket empty = { 0 };
+    _flushPacket = [[Packet alloc] initPacket:&empty];
+  }
+  return _flushPacket;
+}
 
 - (id)initPacket:(AVPacket *)packet
 {
@@ -49,6 +60,11 @@
 - (int64_t)pts
 {
   return _packet.pts;
+}
+
+- (BOOL)isFlush
+{
+  return self == _flushPacket;
 }
 
 @end

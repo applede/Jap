@@ -32,6 +32,7 @@
 - (void)put:obj;
 - (void)advance;
 - get;
+- (void)flush;
 
 - objectAtIndexedSubscript:(NSUInteger)idx;
 - (void)setObject:obj atIndexedSubscript:(NSUInteger)idx;

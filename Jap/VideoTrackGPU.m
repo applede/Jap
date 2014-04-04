@@ -127,6 +127,9 @@ static void OnFrameReadyCallback(void *callback_data,
  
   while (!_quit && ![_decoder.videoQue isEmpty] && ![_frameQue isFull]) {
     Packet* pkt = [_decoder.videoQue get];
+    if ([pkt isFlush]) {
+      continue;
+    }
     assert(pkt.data);
     
     NSData* data = [NSData dataWithBytes:pkt.data length:pkt.size];

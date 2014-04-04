@@ -91,13 +91,24 @@
 - get
 {
   assert(_count > 0);
-  id r;
+  id obj;
   [_lock lock];
-  r = _objs[_front];
+  obj = _objs[_front];
   _front = (_front + 1) % _size;
   _count--;
   [_lock unlock];
-  return r;
+  return obj;
+}
+
+- (void)flush
+{
+  [_lock lock];
+  while (_count > 0) {
+    _objs[_front] = nil;
+    _front = (_front + 1) % _size;
+    _count--;
+  }
+  [_lock unlock];
 }
 
 - (void)setObject:(id)obj atIndexedSubscript:(NSUInteger)i

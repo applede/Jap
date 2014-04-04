@@ -167,8 +167,9 @@ static OSStatus audioCallback(void *inRefCon,
       if (_audio_buf_index >= _audio_buf_size) {
         audio_size = [self decodeAudio:ioData];
         if (audio_size < 0) {
-          NSLog(@"error");
           /* if error, just output silence */
+          _audio_buf = _silence;
+          _audio_buf_size = sizeof(_silence);
         } else {
           _audio_buf_size = audio_size;
         }
@@ -343,22 +344,22 @@ static OSStatus audioCallback(void *inRefCon,
 //      SDL_CondSignal(_continue_read_thread);
     
     /* read next packet */
-//    if ((packet_queue_get(&_audioq, pkt, 1, &_audio_pkt_temp_serial)) < 0)
-//      return -1;
     if ([_decoder.audioQue isEmpty]) {
       return -1;
     }
-    Packet* pkt = [_decoder.audioQue get];
-    
-//    if (pkt->data == flush_pkt.data) {
-//      avcodec_flush_buffers(dec);
-//      _audio_buf_frames_pending = 0;
-//      _audio_frame_next_pts = AV_NOPTS_VALUE;
-//      if ((_ic->iformat->flags & (AVFMT_NOBINSEARCH | AVFMT_NOGENSEARCH | AVFMT_NO_BYTE_SEEK)) && !_ic->iformat->read_seek)
-//        _audio_frame_next_pts = _stream->start_time;
-//    }
-    
-    *pkt_temp = *pkt.packet;
+    Packet* packet = [_decoder.audioQue get];
+    pkt = packet.packet;
+
+    if ([packet isFlush]) {
+      avcodec_flush_buffers(_stream->codec);
+      _audio_buf_frames_pending = 0;
+      _audio_frame_next_pts = AV_NOPTS_VALUE;
+      if (![_decoder supportsSeek]) {
+        _audio_frame_next_pts = _stream->start_time;
+      }
+    }
+
+    *pkt_temp = *pkt;
   }
 }
 

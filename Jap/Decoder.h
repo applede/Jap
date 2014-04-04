@@ -31,6 +31,10 @@
   
   AudioTrack* _audioTrack;
   SubtitleTrack* _subtitleTrack;
+
+  int64_t _seekPos;
+  int64_t _seekInc;
+  BOOL _seekReq;
 }
 
 @property (readonly) CircularQueue* videoQue;
@@ -43,6 +47,9 @@
 - (BOOL)isPlaying;
 - (void)play;
 - (void)pause;
+
+- (void)seek:(double)inc;
+- (BOOL)supportsSeek;
 
 - (void)checkQueue;
 - (double)masterClock;
