@@ -26,24 +26,26 @@
   return self;
 }
 
-- (void)start
-{
-  AudioOutputUnitStart(_audioC);
-}
-
 - (void)stop
 {
-  AudioOutputUnitStop(_audioC);
+  [self pause];
 }
 
 - (void)play
 {
+  _playing = YES;
   AudioOutputUnitStart(_audioC);
 }
 
 - (void)pause
 {
+  _playing = NO;
   AudioOutputUnitStop(_audioC);
+}
+
+- (BOOL)isPlaying
+{
+  return _playing;
 }
 
 static OSStatus audioCallback(void *inRefCon,

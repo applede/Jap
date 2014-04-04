@@ -42,8 +42,13 @@
     usleep(100000);
   }
   [_videoTrack start];
-  [_audioTrack start];
+  [_audioTrack play];
   [_subtitleTrack start];
+}
+
+- (BOOL)isPlaying
+{
+  return [_audioTrack isPlaying];
 }
 
 - (void)play

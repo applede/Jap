@@ -47,14 +47,17 @@ typedef struct {
   int _audio_clock_serial;
   int _audio_buf_index;
   int _audio_buf_size;
+
+  BOOL _playing;
 }
 
 - (id)initDecoder:(Decoder*)decoder stream:(AVStream *)stream;
 
-- (void)start;
 - (void)stop;
+- (BOOL)isPlaying;
 - (void)play;
 - (void)pause;
+
 - (BOOL)prepare;
 - (void)close;
 

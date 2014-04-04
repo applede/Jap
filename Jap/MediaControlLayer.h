@@ -16,6 +16,8 @@
 
 - (void)menuPressed;
 - (void)enterPressed;
+- (void)spacePressed;
+- (void)escPressed;
 - (void)leftPressed;
 - (void)rightPressed;
 

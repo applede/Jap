@@ -39,8 +39,11 @@
 @property (readonly) VideoTrack* videoTrack;
 
 - (void)open:(NSString*)path;
+
+- (BOOL)isPlaying;
 - (void)play;
 - (void)pause;
+
 - (void)checkQueue;
 - (double)masterClock;
 - (NSString*)subtitleString;

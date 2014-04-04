@@ -90,6 +90,15 @@
   }
 }
 
+- (void)escPressed
+{
+  [self menuPressed];
+}
+
+- (void)spacePressed
+{
+}
+
 - (void)leftPressed
 {
   [self moveCurrent:-1];

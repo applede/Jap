@@ -165,11 +165,17 @@ CALayer* setBlurFilters(CALayer* layer)
     case '\r':
       [_handler enterPressed];
       break;
+    case ' ':
+      [self spacePressed];
+      break;
     case NSLeftArrowFunctionKey:
       [_handler leftPressed];
       break;
     case NSRightArrowFunctionKey:
       [_handler rightPressed];
+      break;
+    case 27:
+      [_handler escPressed];
       break;
     default:
       break;
@@ -185,8 +191,22 @@ CALayer* setBlurFilters(CALayer* layer)
 
 - (void)enterPressed
 {
+  [[self window] toggleFullScreen:self];
 }
 
+- (void)escPressed
+{
+  [[self window] toggleFullScreen:self];
+}
+
+- (void)spacePressed
+{
+  if ([_glLayer.decoder isPlaying]) {
+    [_glLayer.decoder pause];
+  } else {
+    [_glLayer.decoder play];
+  }
+}
 - (void)leftPressed
 {
 }
