@@ -19,7 +19,7 @@
   Decoder* _decoder;
   AVStream* _stream;
   dispatch_semaphore_t _sema;
-  
+
   GLuint _program;
   int _width;
   int _height;
@@ -35,11 +35,14 @@
 - (void)compileVertex:(const char*)vertexSrc fragment:(const char*)fragmentSrc;
 - (void)prepare:(CGLContextObj)cgl;
 - (void)viewWidth:(GLfloat)width height:(GLfloat)height;
-- (void)start;
-- (void)signal;
 
 - (double)frontTime;
-- (void)decodeLoop;
+- (void)decode;
 - (void)draw;
+
+- (void)start;
+- (void)checkQue;
+- (BOOL)canContinue;
+- (void)flush;
 
 @end

@@ -45,6 +45,7 @@
                   forLayerTime:(CFTimeInterval)lt displayTime:(const CVTimeStamp *)ts
 {
   double t = [_decoder masterClock];
+//  NSLog(@"master %f video front %f", t, [_decoder.videoTrack frontTime]);
   return _decoder.videoTrack && [_decoder.videoTrack frontTime] <= t;
 }
 

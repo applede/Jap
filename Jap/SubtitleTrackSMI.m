@@ -28,12 +28,18 @@
 - (NSString*)stringForTime:(double)t
 {
   NSString* ret = nil;
-  Node* node = [_nodes objectAtIndex:_current];
-  double time = av_q2d(_stream->time_base) * [node time];
-  if (time <= t) {
-    ret = [node string];
-    _current++;
+  int i = _current;
+  while (YES) {
+    Node* node = [_nodes objectAtIndex:i];
+    double time = av_q2d(_stream->time_base) * [node time];
+    if (time <= t) {
+      ret = [node string];
+      i++;
+    } else {
+      break;
+    }
   }
+  _current = i;
   return ret;
 }
 

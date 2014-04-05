@@ -51,7 +51,7 @@
 - (void)seek:(double)inc;
 - (BOOL)supportsSeek;
 
-- (void)checkQueue;
+- (void)checkQue;
 - (double)masterClock;
 - (NSString*)subtitleString;
 

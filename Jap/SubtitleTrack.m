@@ -25,6 +25,10 @@
 {
 }
 
+- (void)checkQue
+{
+}
+
 - (NSString*)stringForTime:(double)t
 {
   return nil;

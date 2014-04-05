@@ -351,6 +351,7 @@ static OSStatus audioCallback(void *inRefCon,
     pkt = packet.packet;
 
     if ([packet isFlush]) {
+//      NSLog(@"audio flush");
       avcodec_flush_buffers(_stream->codec);
       _audio_buf_frames_pending = 0;
       _audio_frame_next_pts = AV_NOPTS_VALUE;

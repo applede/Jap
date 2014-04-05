@@ -24,11 +24,13 @@
 }
 
 - initSize:(int)size;
+- (NSUInteger)count;
 - (BOOL)isFull;
 - (BOOL)isEmpty;
 - front;
 - (void)add:(id<Time>)element;
 - get;
 - getBefore:(double)time;
+- (void)flush;
 
 @end

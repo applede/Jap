@@ -21,6 +21,11 @@
   return self;
 }
 
+- (NSUInteger)count
+{
+  return [_array count];
+}
+
 - (BOOL)isEmpty
 {
   BOOL r;
@@ -83,6 +88,13 @@
   }
   [_lock unlock];
   return r;
+}
+
+- (void)flush
+{
+  [_lock lock];
+  [_array removeAllObjects];
+  [_lock unlock];
 }
 
 @end

@@ -92,7 +92,7 @@ GLuint compileShader(GLenum type, const GLchar* src)
   return DBL_MAX;
 }
 
-- (void)decodeLoop
+- (void)decode
 {
 }
 
@@ -106,17 +106,26 @@ GLuint compileShader(GLenum type, const GLchar* src)
   dispatch_async(q, ^{
     while (!_quit) {
       @autoreleasepool {
-        [self decodeLoop];
-        [_decoder checkQueue];
-        dispatch_semaphore_wait(_sema, DISPATCH_TIME_FOREVER);        
+        while ([self canContinue]) {
+          [self decode];
+        }
+        [_decoder checkQue];
+        dispatch_semaphore_wait(_sema, DISPATCH_TIME_FOREVER);
       }
     }
   });
 }
 
-- (void)signal
+- (void)checkQue
 {
-  dispatch_semaphore_signal(_sema);
+  if ([self canContinue]) {
+    dispatch_semaphore_signal(_sema);
+  }
+}
+
+- (BOOL)canContinue
+{
+  return NO;
 }
 
 void makeOrtho(GLfloat width, GLfloat height, GLfloat* mat)
@@ -157,6 +166,10 @@ void makeOrtho(GLfloat width, GLfloat height, GLfloat* mat)
   GLfloat orthoMat[16];
   makeOrtho(width, height, orthoMat);
   glUniformMatrix4fv(ortho, 1, NO, orthoMat);
+}
+
+- (void)flush
+{
 }
 
 @end

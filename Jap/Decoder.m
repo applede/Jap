@@ -35,12 +35,12 @@
   _path = p;
   _quit = NO;
   [self readThread];
-  while ([_videoQue count] < 16) {  // 16 packets are enough?
-    usleep(100000);
-  }
-  while ([_audioQue count] < 16) {
-    usleep(100000);
-  }
+//  while ([_videoQue count] < 16) {  // 16 packets are enough?
+//    usleep(100000);
+//  }
+//  while ([_audioQue count] < 16) {
+//    usleep(100000);
+//  }
   [_videoTrack start];
   [_audioTrack play];
   [_subtitleTrack start];
@@ -69,7 +69,6 @@
 
 - (void)seek:(double)inc
 {
-
   double pos = [self masterClock];
   pos += inc;
 
@@ -79,6 +78,7 @@
   }
 
   if (!_seekReq) {
+//    NSLog(@"pos %f", pos);
     _seekPos = (int64_t)(pos * AV_TIME_BASE);
     _seekInc = (int64_t)(inc * AV_TIME_BASE);
     _seekReq = YES;
@@ -99,11 +99,18 @@
 
 - (void)readThread
 {
-  dispatch_async(_readQ, ^{
-    if (![self internalOpen:_path]) {
-      [self close];
-    }
-  });
+  if ([self internalOpen:_path]) {
+    dispatch_async(_readQ, ^{
+      while (!_quit) {
+        @autoreleasepool {
+          [self read];
+          dispatch_semaphore_wait(_readSema, DISPATCH_TIME_FOREVER);
+        }
+      }
+    });
+  } else {
+    [self close];
+  }
 }
 
 - (AVStream*)openStream:(int)i
@@ -178,39 +185,45 @@ NSString* smiPath(NSString* path)
     _subtitleTrack = [[SubtitleTrackEmbed alloc] initDecoder:self stream:[self openStream:_subtitleStream]];
   }
  
-  while (!_quit) {
-    if (_seekReq) {
-      int64_t seekTarget = _seekPos;
-      int64_t seekMin = _seekInc > 0 ? seekTarget - _seekInc + 2 : INT64_MIN;
-      int64_t seekMax = _seekInc < 0 ? seekTarget - _seekInc - 2 : INT64_MAX;
-      int ret = avformat_seek_file(_formatContext, -1, seekMin, seekTarget, seekMax, 0);
-      if (ret < 0) {
-        NSLog(@"avformat_seek_file %d", ret);
-      } else {
-        [_videoQue flush];
-        [_videoQue put:[Packet flushPacket]];
-        [_audioQue flush];
-        [_subtitleQue flush];
-      }
-      _seekReq = NO;
-    }
-    while (![_videoQue isFull] && ![_audioQue isFull]) {
-      Packet* packet = [[Packet alloc] init];
-      int ret = av_read_frame(_formatContext, packet.packet);
-      if (ret < 0) {
-        NSLog(@"av_read_frame %d", ret);
-      } else {
-        if (packet.streamIndex == _videoStream)
-          [_videoQue put:packet];
-        else if (packet.streamIndex == _audioStream)
-          [_audioQue put:packet];
-        else if (packet.streamIndex == _subtitleStream)
-          [_subtitleQue put:packet];
-      }
-    }
-    dispatch_semaphore_wait(_readSema, DISPATCH_TIME_FOREVER);
-  }
   return YES;
+}
+
+- (void)read
+{
+  if (_seekReq) {
+    int64_t seekTarget = _seekPos;
+    int64_t seekMin = _seekInc > 0 ? seekTarget - _seekInc + 2 : INT64_MIN;
+    int64_t seekMax = _seekInc < 0 ? seekTarget - _seekInc - 2 : INT64_MAX;
+    int ret = avformat_seek_file(_formatContext, -1, seekMin, seekTarget, seekMax, 0);
+    if (ret < 0) {
+      NSLog(@"avformat_seek_file %d", ret);
+    } else {
+      [_videoQue flush];
+      [_audioQue flush];
+      [_audioQue put:[Packet flushPacket]];
+      [_subtitleQue flush];
+      [_subtitleQue put:[Packet flushPacket]];
+      [_videoTrack flush];
+    }
+    _seekReq = NO;
+  }
+  while ([self canContinue]) {
+    Packet* packet = [[Packet alloc] init];
+    int ret = av_read_frame(_formatContext, packet.packet);
+    if (ret < 0) {
+      NSLog(@"av_read_frame %d", ret);
+    } else {
+      if (packet.streamIndex == _videoStream) {
+        [_videoQue put:packet];
+        [_videoTrack checkQue];
+      } else if (packet.streamIndex == _audioStream)
+        [_audioQue put:packet];
+      else if (packet.streamIndex == _subtitleStream) {
+        [_subtitleQue put:packet];
+        [_subtitleTrack checkQue];
+      }
+    }
+  }
 }
 
 - (void)close
@@ -221,13 +234,22 @@ NSString* smiPath(NSString* path)
   [_audioTrack close];
 }
 
-- (void)checkQueue
+- (void)checkQue
 {
-  if ([_videoQue count] < PACKET_Q_SIZE / 3 ||
-      [_audioQue count] < PACKET_Q_SIZE / 3 ||
-      [_subtitleQue count] < PACKET_Q_SIZE / 3) {
+//  if ([self canContinue]) {
+//    dispatch_semaphore_signal(_readSema);
+//  }
+
+  if ([_videoQue count] < PACKET_Q_SIZE / 2 &&
+      [_audioQue count] < PACKET_Q_SIZE / 2 &&
+      [_subtitleQue count] < PACKET_Q_SIZE / 2) {
     dispatch_semaphore_signal(_readSema);
   }
+}
+
+- (BOOL)canContinue
+{
+  return ![_videoQue isFull] && ![_audioQue isFull] && ![_subtitleQue isFull];
 }
 
 - (NSString *)subtitleString

@@ -12,6 +12,8 @@
 #import "FlexibleQueue.h"
 #import "Packet.h"
 
+#define Q_SIZE  8
+
 NSString* const kDisplayTimeKey = @"display_time";
 
 static void OnFrameReadyCallback(void *callback_data,
@@ -36,7 +38,7 @@ static void OnFrameReadyCallback(void *callback_data,
 {
   self = [super initDecoder:decoder stream:stream];
   if (self) {
-    _frameQue = [[FlexibleQueue alloc] initSize:8];
+    _frameQue = [[FlexibleQueue alloc] initSize:Q_SIZE];
     int sourceFormat = 'avc1';
     AVCodecContext* context = stream->codec;
     NSDictionary* config = @{(id)kVDADecoderConfiguration_Width:@(_width),
@@ -121,25 +123,30 @@ static void OnFrameReadyCallback(void *callback_data,
   return [[_frameQue front] time];
 }
 
-- (void)decodeLoop
+- (void)decode
 {
   AVRational tb = _stream->time_base;
  
-  while (!_quit && ![_decoder.videoQue isEmpty] && ![_frameQue isFull]) {
-    Packet* pkt = [_decoder.videoQue get];
-    if ([pkt isFlush]) {
-      continue;
-    }
-    assert(pkt.data);
-    
-    NSData* data = [NSData dataWithBytes:pkt.data length:pkt.size];
-    double pts = pkt.pts * av_q2d(tb);
-    NSDictionary* frame_info = @{kDisplayTimeKey:@(pts)};
-    OSStatus r = VDADecoderDecode(_vdaDecoder, 0, (__bridge CFDataRef)data,
-                                  (__bridge CFDictionaryRef)frame_info);
-    assert(r == 0);
-    av_free_packet(pkt.packet);
+  Packet* pkt = [_decoder.videoQue get];
+  if ([pkt isFlush]) {
+    NSLog(@"video flush");
+    [_frameQue flush];
+    return;
   }
+  assert(pkt.data);
+  
+  NSData* data = [NSData dataWithBytes:pkt.data length:pkt.size];
+  double pts = pkt.pts * av_q2d(tb);
+  NSDictionary* frame_info = @{kDisplayTimeKey:@(pts)};
+  OSStatus r = VDADecoderDecode(_vdaDecoder, 0, (__bridge CFDataRef)data,
+                                (__bridge CFDictionaryRef)frame_info);
+  assert(r == 0);
+  av_free_packet(pkt.packet);
+}
+
+- (BOOL)canContinue
+{
+  return !_quit && ![_decoder.videoQue isEmpty] && ![_frameQue isFull];
 }
 
 - (void)draw
@@ -164,7 +171,13 @@ static void OnFrameReadyCallback(void *callback_data,
   glBindTexture(GL_TEXTURE_RECTANGLE_ARB, _texture);
   glDrawArrays(GL_QUADS, 0, 4);
   
-  [self signal];
+  [self checkQue];
+}
+
+- (void)flush
+{
+  [_frameQue flush];
+  [self checkQue];
 }
 
 @end

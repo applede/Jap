@@ -58,6 +58,7 @@
             }
           }
         }
+//        usleep(1000000 / 30);
         dispatch_semaphore_wait(_sema, DISPATCH_TIME_FOREVER);
       }
     }

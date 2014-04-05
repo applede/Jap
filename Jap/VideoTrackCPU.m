@@ -176,22 +176,25 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
   glBindTexture(GL_TEXTURE_2D, v.textureV);
   glDrawArrays(GL_QUADS, 0, 4);
   
-  [self signal];
+  [self checkQue];
 }
 
-- (void)decodeLoop
+- (void)decode
 {
   double pts;
   AVRational tb = _stream->time_base;
   
-  while (!_quit && ![_decoder.videoQue isEmpty] && ![_frameQue isFull]) {
-    VideoFrameCPU* v = [_frameQue back];
-    if ([self getVideoFrame:v]) {
-      pts = (v.frame->pts == AV_NOPTS_VALUE) ? NAN : v.frame->pts * av_q2d(tb);
-      [self put:v time:pts pos:av_frame_get_pkt_pos(v.frame)];
+  VideoFrameCPU* v = [_frameQue back];
+  if ([self getVideoFrame:v]) {
+    pts = (v.frame->pts == AV_NOPTS_VALUE) ? NAN : v.frame->pts * av_q2d(tb);
+    [self put:v time:pts pos:av_frame_get_pkt_pos(v.frame)];
 //      av_frame_unref(frame);
-    }
   }
+}
+
+- (BOOL)canContinue
+{
+  return !_quit && ![_decoder.videoQue isEmpty] && ![_frameQue isFull];
 }
 
 - (BOOL)getVideoFrame:(VideoFrameCPU*)v
