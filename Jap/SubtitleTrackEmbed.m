@@ -37,10 +37,11 @@
     
     while (!_quit) {
       @autoreleasepool {
-        while (!_quit && ![_decoder.subtitleQue isEmpty] && ![_frameQue isFull]) {
+        while ([self canContinue]) {
           Packet* packet = [_decoder.subtitleQue get];
           if ([packet isFlush]) {
             avcodec_flush_buffers(_stream->codec);
+            [_frameQue flush];
             continue;
           }
           pts = 0;
@@ -58,11 +59,22 @@
             }
           }
         }
-//        usleep(1000000 / 30);
         dispatch_semaphore_wait(_sema, DISPATCH_TIME_FOREVER);
       }
     }
   });
+}
+
+- (BOOL)canContinue
+{
+  return !_quit && ![_decoder.subtitleQue isEmpty] && ![_frameQue isFull];
+}
+
+- (void)checkQue
+{
+  if ([self canContinue]) {
+    dispatch_semaphore_signal(_sema);
+  }
 }
 
 - (void)put:(SubtitleFrame*)s time:(double)time
@@ -119,11 +131,7 @@ static int convert(const char* src, char* dst)
   if (s) {
     if (s.endTime <= t) {
       ret = @"";
-      avsubtitle_free(s.sub);
       [_frameQue get];
-      if ([_frameQue count] < QSIZE / 3) {
-        dispatch_semaphore_signal(_sema);
-      }
     } else {
       char buf[2048];
       convert(findSub(s.ass), buf);

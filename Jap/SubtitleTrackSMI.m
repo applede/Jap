@@ -54,4 +54,9 @@
   return ret;
 }
 
+- (int)encoding
+{
+  return kCFStringEncodingDOSKorean;
+}
+
 @end

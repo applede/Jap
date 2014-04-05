@@ -22,6 +22,7 @@
 - (id)initDecoder:(Decoder*)decoder stream:(AVStream*)stream;
 - (void)start;
 - (void)checkQue;
+- (int)encoding;
 
 /// @return nil means no change needed
 - (NSString*)stringForTime:(double)t;

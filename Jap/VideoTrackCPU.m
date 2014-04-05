@@ -239,4 +239,10 @@ void loadTexture(GLuint texture, GLsizei width, GLsizei height, GLubyte* data, i
 //              data, linesize);
 }
 
+- (void)flush
+{
+  [_frameQue flush];
+  [self checkQue];
+}
+
 @end

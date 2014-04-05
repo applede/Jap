@@ -30,7 +30,6 @@
   int _subtitleStream;
   
   AudioTrack* _audioTrack;
-  SubtitleTrack* _subtitleTrack;
 
   int64_t _seekPos;
   int64_t _seekInc;
@@ -41,6 +40,7 @@
 @property (readonly) CircularQueue* audioQue;
 @property (readonly) CircularQueue* subtitleQue;
 @property (readonly) VideoTrack* videoTrack;
+@property (readonly) SubtitleTrack* subtitleTrack;
 
 - (void)open:(NSString*)path;
 

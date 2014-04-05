@@ -87,9 +87,11 @@ CALayer* setBlurFilters(CALayer* layer)
     CGFloat y = _glLayer.movieRect.origin.y / s;
     
     CGFloat fontSize = h * 0.08;
-    _subtitleFont = [NSFont fontWithName:@"Apple SD Gothic Neo Medium"
-                                    size:fontSize];
-    if (!_subtitleFont) {
+    if (_glLayer.decoder.subtitleTrack.encoding == kCFStringEncodingDOSKorean) {
+      _subtitleFont = [NSFont fontWithName:@"Apple SD Gothic Neo Medium"
+                                      size:fontSize];
+    }
+    if (!_subtitleFont || _glLayer.decoder.subtitleTrack.encoding != kCFStringEncodingDOSKorean) {
       _subtitleFont = [NSFont fontWithName:@"Helvetica Neue Medium"
                                       size:fontSize];
     }

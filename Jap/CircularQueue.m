@@ -103,11 +103,9 @@
 - (void)flush
 {
   [_lock lock];
-  while (_count > 0) {
-    _objs[_front] = nil;
-    _front = (_front + 1) % _size;
-    _count--;
-  }
+  // don't destroy _objs
+  _front = _back;
+  _count = 0;
   [_lock unlock];
 }
 

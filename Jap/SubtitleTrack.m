@@ -34,4 +34,9 @@
   return nil;
 }
 
+- (int)encoding
+{
+  return kCFStringEncodingUTF8;
+}
+
 @end

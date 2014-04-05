@@ -129,7 +129,6 @@ static void OnFrameReadyCallback(void *callback_data,
  
   Packet* pkt = [_decoder.videoQue get];
   if ([pkt isFlush]) {
-    NSLog(@"video flush");
     [_frameQue flush];
     return;
   }

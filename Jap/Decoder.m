@@ -35,12 +35,6 @@
   _path = p;
   _quit = NO;
   [self readThread];
-//  while ([_videoQue count] < 16) {  // 16 packets are enough?
-//    usleep(100000);
-//  }
-//  while ([_audioQue count] < 16) {
-//    usleep(100000);
-//  }
   [_videoTrack start];
   [_audioTrack play];
   [_subtitleTrack start];
@@ -78,7 +72,6 @@
   }
 
   if (!_seekReq) {
-//    NSLog(@"pos %f", pos);
     _seekPos = (int64_t)(pos * AV_TIME_BASE);
     _seekInc = (int64_t)(inc * AV_TIME_BASE);
     _seekReq = YES;
@@ -199,6 +192,7 @@ NSString* smiPath(NSString* path)
       NSLog(@"avformat_seek_file %d", ret);
     } else {
       [_videoQue flush];
+      [_videoQue put:[Packet flushPacket]];
       [_audioQue flush];
       [_audioQue put:[Packet flushPacket]];
       [_subtitleQue flush];
