@@ -9,25 +9,6 @@
 #import "MyView.h"
 #import "MyOpenGLLayer.h"
 
-CALayer* setBlurFilters(CALayer* layer)
-{
-  layer.masksToBounds = YES;
-  layer.backgroundColor = [[NSColor colorWithCalibratedWhite:0.6 alpha:0.7] CGColor];
-  layer.needsDisplayOnBoundsChange = YES;
-  CIFilter* saturationFilter = [CIFilter filterWithName:@"CIColorControls"];
-  [saturationFilter setDefaults];
-  [saturationFilter setValue:@2.0 forKey:@"inputSaturation"];
-  CIFilter* clampFilter = [CIFilter filterWithName:@"CIAffineClamp"];
-  [clampFilter setDefaults];
-  [clampFilter setValue:[NSValue valueWithBytes:&CGAffineTransformIdentity objCType:@encode(CGAffineTransform)] forKey:@"inputTransform"];
-  CIFilter* blurFilter = [CIFilter filterWithName:@"CIGaussianBlur"];
-  [blurFilter setDefaults];
-  [blurFilter setValue:@20.0 forKey:@"inputRadius"];
-  layer.backgroundFilters = @[saturationFilter, clampFilter, blurFilter];
-  [layer setNeedsDisplay];
-  return layer;
-}
-
 @implementation MyView
 
 - (id)initWithFrame:(NSRect)frame
@@ -64,10 +45,9 @@ CALayer* setBlurFilters(CALayer* layer)
   _subtitle.shadowOpacity = 1.0;
   _subtitle.shadowOffset = CGSizeMake(0.0, -1.0);
 
-  _mediaControl = (MediaControlLayer*)setBlurFilters([MediaControlLayer layer]);
+  _mediaControl = [MediaControlLayer layer];
   _mediaControl.view = self;
   _mediaControl.anchorPoint = CGPointMake(0, 0);
-
 
   self.layer.layoutManager = [CAConstraintLayoutManager layoutManager];
   [self.layer addSublayer:_subtitle];

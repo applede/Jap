@@ -41,6 +41,9 @@
 		1857550718ED9550008B8CC7 /* skip-to-start-128-white.png in Resources */ = {isa = PBXBuildFile; fileRef = 1857550518ED9550008B8CC7 /* skip-to-start-128-white.png */; };
 		1857550818ED9550008B8CC7 /* skip-to-start-128-black.png in Resources */ = {isa = PBXBuildFile; fileRef = 1857550618ED9550008B8CC7 /* skip-to-start-128-black.png */; };
 		1857550B18EDAF18008B8CC7 /* MediaControlLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1857550A18EDAF18008B8CC7 /* MediaControlLayer.m */; };
+		1857550E18F033ED008B8CC7 /* HomeView.m in Sources */ = {isa = PBXBuildFile; fileRef = 1857550D18F033ED008B8CC7 /* HomeView.m */; };
+		1857551118F03544008B8CC7 /* Section.m in Sources */ = {isa = PBXBuildFile; fileRef = 1857551018F03544008B8CC7 /* Section.m */; };
+		1857551518F03874008B8CC7 /* BlurLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1857551418F03874008B8CC7 /* BlurLayer.m */; };
 		18619F7218E81B3400781326 /* CircularQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F7118E81B3400781326 /* CircularQueue.m */; };
 		18619F7518E828C100781326 /* Packet.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F7418E828C100781326 /* Packet.m */; };
 		18619F7818E82BD800781326 /* VideoFrameCPU.m in Sources */ = {isa = PBXBuildFile; fileRef = 18619F7718E82BD800781326 /* VideoFrameCPU.m */; };
@@ -120,6 +123,12 @@
 		1857550618ED9550008B8CC7 /* skip-to-start-128-black.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "skip-to-start-128-black.png"; sourceTree = "<group>"; };
 		1857550918EDAF18008B8CC7 /* MediaControlLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaControlLayer.h; sourceTree = "<group>"; };
 		1857550A18EDAF18008B8CC7 /* MediaControlLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediaControlLayer.m; sourceTree = "<group>"; };
+		1857550C18F033ED008B8CC7 /* HomeView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HomeView.h; sourceTree = "<group>"; };
+		1857550D18F033ED008B8CC7 /* HomeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HomeView.m; sourceTree = "<group>"; };
+		1857550F18F03544008B8CC7 /* Section.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Section.h; sourceTree = "<group>"; };
+		1857551018F03544008B8CC7 /* Section.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Section.m; sourceTree = "<group>"; };
+		1857551318F03874008B8CC7 /* BlurLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BlurLayer.h; sourceTree = "<group>"; };
+		1857551418F03874008B8CC7 /* BlurLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BlurLayer.m; sourceTree = "<group>"; };
 		18619F7018E81B3400781326 /* CircularQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CircularQueue.h; sourceTree = "<group>"; };
 		18619F7118E81B3400781326 /* CircularQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CircularQueue.m; sourceTree = "<group>"; };
 		18619F7318E828C100781326 /* Packet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Packet.h; sourceTree = "<group>"; };
@@ -245,6 +254,7 @@
 			isa = PBXGroup;
 			children = (
 				1897644A18DE75FB00673BD3 /* Decoder */,
+				1857551218F03558008B8CC7 /* Model */,
 				1897644918DE75E500673BD3 /* View */,
 				1816DF8318D5D84200FCE287 /* AppDelegate.h */,
 				1816DF8418D5D84200FCE287 /* AppDelegate.m */,
@@ -307,6 +317,28 @@
 			path = Images;
 			sourceTree = "<group>";
 		};
+		1857551218F03558008B8CC7 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				1857550F18F03544008B8CC7 /* Section.h */,
+				1857551018F03544008B8CC7 /* Section.m */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
+		1857551618F03A2B008B8CC7 /* Layer */ = {
+			isa = PBXGroup;
+			children = (
+				1897644B18DE764900673BD3 /* MyOpenGLLayer.h */,
+				1897644C18DE764900673BD3 /* MyOpenGLLayer.m */,
+				1857551318F03874008B8CC7 /* BlurLayer.h */,
+				1857551418F03874008B8CC7 /* BlurLayer.m */,
+				1857550918EDAF18008B8CC7 /* MediaControlLayer.h */,
+				1857550A18EDAF18008B8CC7 /* MediaControlLayer.m */,
+			);
+			name = Layer;
+			sourceTree = "<group>";
+		};
 		18619F7C18E857AA00781326 /* Track */ = {
 			isa = PBXGroup;
 			children = (
@@ -358,12 +390,11 @@
 		1897644918DE75E500673BD3 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				1897644B18DE764900673BD3 /* MyOpenGLLayer.h */,
-				1897644C18DE764900673BD3 /* MyOpenGLLayer.m */,
+				1857551618F03A2B008B8CC7 /* Layer */,
 				1897644E18DE8DC800673BD3 /* MyView.h */,
 				1897644F18DE8DC800673BD3 /* MyView.m */,
-				1857550918EDAF18008B8CC7 /* MediaControlLayer.h */,
-				1857550A18EDAF18008B8CC7 /* MediaControlLayer.m */,
+				1857550C18F033ED008B8CC7 /* HomeView.h */,
+				1857550D18F033ED008B8CC7 /* HomeView.m */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -495,6 +526,7 @@
 				1816DF8518D5D84200FCE287 /* AppDelegate.m in Sources */,
 				18619F7B18E847DB00781326 /* SubtitleFrame.m in Sources */,
 				1816DFB318D6E7CA00FCE287 /* VideoTrack.m in Sources */,
+				1857550E18F033ED008B8CC7 /* HomeView.m in Sources */,
 				1897645018DE8DC800673BD3 /* MyView.m in Sources */,
 				18F420DD18E7B5A500B5F2F8 /* FlexibleQueue.m in Sources */,
 				18619F7818E82BD800781326 /* VideoFrameCPU.m in Sources */,
@@ -508,8 +540,10 @@
 				181DF7EE18DB164000FF7739 /* AudioTrack.m in Sources */,
 				18619F8418E9B31100781326 /* SubtitleTrackEmbed.m in Sources */,
 				18F420DA18E5BCD400B5F2F8 /* VideoTrackCPU.m in Sources */,
+				1857551518F03874008B8CC7 /* BlurLayer.m in Sources */,
 				18619F8118E9662600781326 /* SubtitleTrackSMI.m in Sources */,
 				18619F7218E81B3400781326 /* CircularQueue.m in Sources */,
+				1857551118F03544008B8CC7 /* Section.m in Sources */,
 				18F420D718E5BAE200B5F2F8 /* VideoTrackGPU.m in Sources */,
 				1816DFAA18D5EA0500FCE287 /* Decoder.m in Sources */,
 			);

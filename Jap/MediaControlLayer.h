@@ -7,6 +7,7 @@
 //
 
 #import <QuartzCore/QuartzCore.h>
+#import "BlurLayer.h"
 
 #define BUTTON_COUNT 6
 
@@ -23,7 +24,7 @@
 
 @end
 
-@interface MediaControlLayer : CALayer <KeyHandler>
+@interface MediaControlLayer : BlurLayer <KeyHandler>
 {
   int _current;
   CALayer* _buttons[BUTTON_COUNT];
