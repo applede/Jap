@@ -15,6 +15,7 @@
 {
   NSArray* _nodes;
   int _current;
+  double _lastTime;
 }
 
 - initDecoder:(Decoder*)decoder stream:(AVStream*)stream path:(NSString*)path;

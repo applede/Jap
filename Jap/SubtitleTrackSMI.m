@@ -25,21 +25,32 @@
   return nil;
 }
 
-- (NSString*)stringForTime:(double)t
+- (NSString*)stringForTime:(double)target
 {
   NSString* ret = nil;
   int i = _current;
-  while (YES) {
+  int dir = 1;
+  if (_lastTime > target) {
+    dir = -1;
+  }
+  _lastTime = target;
+  while (i >= 0 && i < [_nodes count]) {
     Node* node = [_nodes objectAtIndex:i];
-    double time = av_q2d(_stream->time_base) * [node time];
-    if (time <= t) {
+    double t = av_q2d(_stream->time_base) * [node time];
+    if ((dir > 0 && t <= target) || (dir < 0 && t >= target)) {
       ret = [node string];
-      i++;
+      i += dir;
     } else {
       break;
     }
   }
-  _current = i;
+  if (i < 0) {
+    ret = @"";
+    _current = 0;
+  } else if (i >= [_nodes count]) {
+  } else {
+    _current = i;
+  }
   return ret;
 }
 
